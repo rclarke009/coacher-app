@@ -190,6 +190,12 @@ struct PrepTonightSection: View {
         print("🔍 DEBUG: PrepTonightSection - After adding, local items: \(localCustomItems.count)")
         print("🔍 DEBUG: PrepTonightSection - Local items array: \(localCustomItems)")
         
+        // Refresh local state from UserSettings to ensure consistency
+        if let refreshedSettings = userSettings.first {
+            localCustomItems = refreshedSettings.customEveningPrepItems
+            print("🔍 DEBUG: PrepTonightSection - Refreshed local items from UserSettings: \(localCustomItems.count) items")
+        }
+        
         // Save to database with a slight delay to ensure proper tracking
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
             try? self.context.save()
