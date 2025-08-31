@@ -190,34 +190,20 @@ struct PrepTonightSection: View {
         print("🔍 DEBUG: PrepTonightSection - After adding, local items: \(localCustomItems.count)")
         print("🔍 DEBUG: PrepTonightSection - Local items array: \(localCustomItems)")
         
-        // Refresh local state from UserSettings to ensure consistency
+        // Save to database first to ensure persistence
+        try? context.save()
+        print("🔍 DEBUG: PrepTonightSection - Initial context save completed")
+        
+        // Now refresh local state from UserSettings to ensure consistency
         if let refreshedSettings = userSettings.first {
             localCustomItems = refreshedSettings.customEveningPrepItems
             print("🔍 DEBUG: PrepTonightSection - Refreshed local items from UserSettings: \(localCustomItems.count) items")
         }
         
-        // Save to database with a slight delay to ensure proper tracking
+        // Additional save to ensure everything is persisted
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
             try? self.context.save()
             print("🔍 DEBUG: PrepTonightSection - Delayed context save completed")
-            
-            // Force another save to ensure persistence
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                try? self.context.save()
-                print("🔍 DEBUG: PrepTonightSection - Second delayed context save completed")
-                
-                // Verify the object was saved by fetching again
-                let descriptor = FetchDescriptor<UserSettings>()
-                do {
-                    let results = try self.context.fetch(descriptor)
-                    print("🔍 DEBUG: PrepTonightSection - Verification fetch found \(results.count) UserSettings objects")
-                    if let first = results.first {
-                        print("🔍 DEBUG: PrepTonightSection - Verification: first object has \(first.customEveningPrepItems.count) items")
-                    }
-                } catch {
-                    print("🔍 DEBUG: PrepTonightSection - Verification fetch error: \(error)")
-                }
-            }
         }
         print("🔍 DEBUG: PrepTonightSection - Context save initiated")
         
