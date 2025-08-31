@@ -16,7 +16,6 @@ struct PrepTonightSection: View {
     @State private var newOtherItem = ""
     @State private var refreshTrigger = false // Force UI refresh
     @State private var localCustomItems: [String] = [] // Local state for custom items
-    @State private var checkedCustomItems: Set<String> = [] // Track which custom items are checked
     
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -88,8 +87,8 @@ struct PrepTonightSection: View {
                 List {
                     ForEach(localCustomItems, id: \.self) { item in
                         HStack {
-                            Image(systemName: checkedCustomItems.contains(item) ? "checkmark.square.fill" : "square")
-                                .foregroundStyle(checkedCustomItems.contains(item) ? .blue : .secondary)
+                            Image(systemName: entry.completedCustomPrepItems.contains(item) ? "checkmark.square.fill" : "square")
+                                .foregroundStyle(entry.completedCustomPrepItems.contains(item) ? .blue : .secondary)
                                 .onTapGesture {
                                     toggleCustomItem(item)
                                 }
@@ -246,12 +245,12 @@ struct PrepTonightSection: View {
     }
     
     private func toggleCustomItem(_ item: String) {
-        if checkedCustomItems.contains(item) {
-            checkedCustomItems.remove(item)
+        if entry.completedCustomPrepItems.contains(item) {
+            entry.completedCustomPrepItems.removeAll { $0 == item }
         } else {
-            checkedCustomItems.insert(item)
+            entry.completedCustomPrepItems.append(item)
         }
-        print("🔍 DEBUG: PrepTonightSection - Toggled custom item: \(item), now checked: \(checkedCustomItems.contains(item))")
+        print("🔍 DEBUG: PrepTonightSection - Toggled custom item: \(item), now checked: \(entry.completedCustomPrepItems.contains(item))")
     }
 }
 
