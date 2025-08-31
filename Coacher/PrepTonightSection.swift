@@ -198,6 +198,11 @@ struct PrepTonightSection: View {
         if let refreshedSettings = userSettings.first {
             localCustomItems = refreshedSettings.customEveningPrepItems
             print("🔍 DEBUG: PrepTonightSection - Refreshed local items from UserSettings: \(localCustomItems.count) items")
+        } else {
+            print("🔍 DEBUG: PrepTonightSection - WARNING: Still no UserSettings found after save")
+            // Fallback: use the currentSettings we just modified
+            localCustomItems = currentSettings.customEveningPrepItems
+            print("🔍 DEBUG: PrepTonightSection - Fallback: using currentSettings with \(localCustomItems.count) items")
         }
         
         // Additional save to ensure everything is persisted
@@ -210,6 +215,12 @@ struct PrepTonightSection: View {
         // Force UI refresh since SwiftData @Query isn't updating automatically
         refreshTrigger.toggle()
         print("🔍 DEBUG: PrepTonightSection - Refresh triggered: \(refreshTrigger)")
+        
+        // Force @Query to refresh by toggling a state variable
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            self.refreshTrigger.toggle()
+            print("🔍 DEBUG: PrepTonightSection - Second refresh triggered to force @Query update")
+        }
     }
     
     private func deleteCustomItems(at offsets: IndexSet) {
