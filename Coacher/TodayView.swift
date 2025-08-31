@@ -13,7 +13,7 @@ struct TodayView: View {
     @Query(sort: \DailyEntry.date, order: .reverse) private var entries: [DailyEntry]
     
     @State private var entry: DailyEntry = DailyEntry()
-    @State private var showingQuickCapture = false
+    @State private var showingNeedHelp = false
     @State private var hasUnsavedChanges = false
     
     var body: some View {
@@ -47,9 +47,9 @@ struct TodayView: View {
                         .onChange(of: entry.feelAboutIt) { _, _ in hasUnsavedChanges = true }
                         .onChange(of: entry.whatGotInTheWay) { _, _ in hasUnsavedChanges = true }
                     
-                    // Quick Capture Button
-                    Button(action: { showingQuickCapture = true }) {
-                        Label("I'm craving / I'm stressed", systemImage: "mic.circle.fill")
+                    // I Need Help Button
+                    Button(action: { showingNeedHelp = true }) {
+                        Label("I Need Help", systemImage: "hand.raised.fill")
                             .font(.title2)
                             .padding()
                             .frame(maxWidth: .infinity)
@@ -68,8 +68,8 @@ struct TodayView: View {
                     }
                 }
             }
-            .sheet(isPresented: $showingQuickCapture) {
-                QuickCaptureView()
+            .sheet(isPresented: $showingNeedHelp) {
+                NeedHelpView()
             }
             .scrollDismissesKeyboard(.immediately)
             .onTapGesture {

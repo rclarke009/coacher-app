@@ -36,6 +36,9 @@ final class DailyEntry {
     // Voice notes (file URLs in app sandbox)
     var voiceNotes: [URL]
     
+    // Craving notes for "I Need Help" flow
+    var cravingNotes: [CravingNote]
+    
     init() {
         self.id = UUID()
         self.date = Date()
@@ -54,6 +57,7 @@ final class DailyEntry {
         self.feelAboutIt = ""
         self.whatGotInTheWay = ""
         self.voiceNotes = []
+        self.cravingNotes = []
     }
     
     // Computed properties for convenience
