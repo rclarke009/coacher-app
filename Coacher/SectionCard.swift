@@ -8,12 +8,17 @@
 import SwiftUI
 
 struct SectionCard<Content: View>: View {
-    enum Accent { case blue, purple, teal, gray }
+    enum Accent {
+        case blue, purple, teal, gray
+    }
+    
     let title: String
     let icon: String?
     let accent: Accent
     @Binding var collapsed: Bool
     var dimmed: Bool = false
+    @Environment(\.colorScheme) private var colorScheme
+    
     @ViewBuilder var content: Content
 
     var body: some View {
@@ -70,7 +75,8 @@ struct SectionCard<Content: View>: View {
     private var headerForeground: Color {
         switch accent {
         case .blue:
-            return .brandBlue
+            // Use brighter blue for dark mode to make text pop
+            return colorScheme == .dark ? Color(hex: "4A90E2") : .brandBlue
         case .purple:
             return .brandBlue
         case .teal:
