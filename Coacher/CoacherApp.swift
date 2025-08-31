@@ -14,6 +14,6 @@ struct CoacherApp: App {
         WindowGroup {
             ContentView()
         }
-        .modelContainer(for: [DailyEntry.self, Achievement.self, LLMMessage.self, CravingNote.self])
+        .modelContainer(for: [DailyEntry.self, Achievement.self, LLMMessage.self, CravingNote.self, EveningPrepItem.self])
     }
 }
