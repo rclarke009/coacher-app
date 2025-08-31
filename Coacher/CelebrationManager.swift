@@ -1,21 +1,7 @@
 import SwiftUI
 import Foundation
 
-enum CelebrationStyle: String, CaseIterable, Identifiable {
-    case playful = "playful"
-    case calm = "calm"
-    case off = "off"
-    
-    var id: String { rawValue }
-    
-    var displayName: String {
-        switch self {
-        case .playful: return "🎉 Playful"
-        case .calm: return "✨ Calm"
-        case .off: return "🚫 Off"
-        }
-    }
-}
+// CelebrationStyle is now defined in CelebrationOverlay.swift
 
 class CelebrationManager: ObservableObject {
     @AppStorage("celebrationStyle") private var celebrationStyle: CelebrationStyle = .playful
@@ -54,6 +40,6 @@ class CelebrationManager: ObservableObject {
     }
     
     func shouldCelebrate() -> Bool {
-        return showCelebrations && celebrationStyle != .off
+        return showCelebrations
     }
 }

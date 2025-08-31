@@ -57,10 +57,12 @@ struct EndOfDaySection: View {
         .overlay(
             // Celebration overlay
             Group {
-                if showingCelebration && celebrationManager.currentStyle == .playful {
-                    PlayfulCelebrationView(
-                        encouragingPhrase: celebrationManager.randomEncouragingPhrase(),
-                        isVisible: $showingCelebration
+                if celebrationManager.currentStyle != .off {
+                    CelebrationOverlay(
+                        isPresented: $showingCelebration,
+                        style: celebrationManager.currentStyle,
+                        title: "Swap logged!",
+                        subtitle: celebrationManager.randomEncouragingPhrase()
                     )
                 }
             }
