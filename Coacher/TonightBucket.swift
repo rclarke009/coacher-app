@@ -18,6 +18,8 @@ struct TonightBucket: View {
     @State private var endOfDayCollapsed = false
     @State private var prepTonightCollapsed = false
     
+    @Environment(\.modelContext) private var context
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Tonight")
@@ -69,6 +71,7 @@ struct TonightBucket: View {
         } else {
             tomorrowEntry = DailyEntry()
             tomorrowEntry.date = startOfTomorrow
+            try? context.insert(tomorrowEntry)
         }
     }
 }
