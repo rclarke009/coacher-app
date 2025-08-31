@@ -145,10 +145,20 @@ struct PrepTonightSection: View {
     }
     
     private func removeCustomItem(_ item: String) {
+        print("🔍 DEBUG: PrepTonightSection - Removing custom item: '\(item)'")
+        print("🔍 DEBUG: PrepTonightSection - Current local items: \(localCustomItems.count)")
+        
+        // Remove from settings
         settings.removeCustomItem(item)
+        
+        // Update local state immediately for UI
+        localCustomItems.removeAll { $0 == item }
+        
+        print("🔍 DEBUG: PrepTonightSection - After removing, local items: \(localCustomItems.count)")
         
         // Save to database
         try? context.save()
+        print("🔍 DEBUG: PrepTonightSection - Context saved after removal")
     }
 }
 
