@@ -58,15 +58,74 @@ struct LastNightPrepReviewView: View {
                 }
             }
         } else {
-            VStack(spacing: 12) {
-                Image(systemName: "moon.slash")
-                    .font(.title2)
-                    .foregroundStyle(.secondary)
+            VStack(alignment: .leading, spacing: 16) {
+                // Encouraging message
+                HStack {
+                    Image(systemName: "info.circle")
+                        .foregroundStyle(.secondary)
+                    Text("No prep was done last night - this is where you'll see your evening prep!")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.leading)
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 8)
+                .background(Color(.systemGray6))
+                .clipShape(RoundedRectangle(cornerRadius: 8))
                 
-                Text("No prep was done last night")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.center)
+                // Read-only form structure preview
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Night Prep (5 minutes)")
+                        .font(.subheadline)
+                        .bold()
+                        .foregroundStyle(.secondary)
+                    
+                    VStack(alignment: .leading, spacing: 8) {
+                        HStack {
+                            Image(systemName: "circle")
+                                .foregroundStyle(.secondary)
+                            Text("Put sticky notes where I usually grab the less-healthy choice")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                        
+                        HStack {
+                            Image(systemName: "circle")
+                                .foregroundStyle(.secondary)
+                            Text("Wash/cut veggies or fruit and place them at eye level")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                        
+                        HStack {
+                            Image(systemName: "circle")
+                                .foregroundStyle(.secondary)
+                            Text("Put water bottle in fridge or by my bed")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                        
+                        HStack {
+                            Image(systemName: "circle")
+                                .foregroundStyle(.secondary)
+                            Text("Prep quick breakfast/snack")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                    
+                    Text("Other…")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 8)
+                        .background(Color(.systemGray6))
+                        .clipShape(RoundedRectangle(cornerRadius: 6))
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 8)
+                .background(Color(.systemGray6).opacity(0.5))
+                .clipShape(RoundedRectangle(cornerRadius: 8))
             }
         }
     }
