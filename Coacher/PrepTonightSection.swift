@@ -16,6 +16,7 @@ struct PrepTonightSection: View {
     @State private var newOtherItem = ""
     @State private var showingEveningPrepManager = false
     @State private var refreshTrigger = false // Force UI refresh
+    @State private var localCustomItems: [String] = [] // Local state for custom items
     
     private var settings: UserSettings {
         if let existing = userSettings.first {
@@ -53,8 +54,8 @@ struct PrepTonightSection: View {
             }
             
             // Custom prep items (no visual separation - equally important)
-            if !settings.customEveningPrepItems.isEmpty {
-                ForEach(settings.customEveningPrepItems, id: \.self) { item in
+            if !localCustomItems.isEmpty {
+                ForEach(localCustomItems, id: \.self) { item in
                     HStack {
                         Toggle(item, isOn: .constant(true)) // For now, always enabled
                             .toggleStyle(.button)
@@ -72,7 +73,7 @@ struct PrepTonightSection: View {
                     }
                 }
                 .onAppear {
-                    print("🔍 DEBUG: PrepTonightSection - Custom items displayed: \(settings.customEveningPrepItems.count) items")
+                    print("🔍 DEBUG: PrepTonightSection - Custom items displayed: \(localCustomItems.count) items")
                 }
             } else {
                 Text("No custom items yet")
@@ -99,6 +100,11 @@ struct PrepTonightSection: View {
             }
         }
         .id(refreshTrigger) // Force view refresh when refreshTrigger changes
+        .onAppear {
+            // Load custom items from settings into local state
+            localCustomItems = settings.customEveningPrepItems
+            print("🔍 DEBUG: PrepTonightSection - onAppear: loaded \(localCustomItems.count) custom items")
+        }
         .sheet(isPresented: $showingEveningPrepManager) {
             EveningPrepManager()
         }
@@ -109,13 +115,18 @@ struct PrepTonightSection: View {
         guard !trimmedItem.isEmpty else { return }
         
         print("🔍 DEBUG: PrepTonightSection - Adding custom item: '\(trimmedItem)'")
-        print("🔍 DEBUG: PrepTonightSection - Current settings has \(settings.customEveningPrepItems.count) items")
+        print("🔍 DEBUG: PrepTonightSection - Current local items: \(localCustomItems.count)")
         
+        // Add to settings
         settings.addCustomItem(trimmedItem)
+        
+        // Update local state immediately for UI
+        localCustomItems.append(trimmedItem)
+        
         newOtherItem = ""
         
-        print("🔍 DEBUG: PrepTonightSection - After adding, settings has \(settings.customEveningPrepItems.count) items")
-        print("🔍 DEBUG: PrepTonightSection - Items: \(settings.customEveningPrepItems)")
+        print("🔍 DEBUG: PrepTonightSection - After adding, local items: \(localCustomItems.count)")
+        print("🔍 DEBUG: PrepTonightSection - Local items array: \(localCustomItems)")
         
         // Save to database
         try? context.save()
