@@ -30,6 +30,10 @@ struct CoachView: View {
                     TextField("Type your message...", text: $newMessage, axis: .vertical)
                         .textFieldStyle(.roundedBorder)
                         .lineLimit(1...3)
+                        .submitLabel(.send)
+                        .onSubmit {
+                            sendMessage()
+                        }
                     
                     Button(action: sendMessage) {
                         Image(systemName: "arrow.up.circle.fill")
@@ -40,10 +44,15 @@ struct CoachView: View {
                 .padding()
             }
             .navigationTitle("Coach")
+            .navigationBarTitleDisplayMode(.large)
             .onAppear {
                 if messages.isEmpty {
                     addSystemMessage()
                 }
+            }
+            .scrollDismissesKeyboard(.immediately)
+            .onTapGesture {
+                hideKeyboard()
             }
         }
     }
@@ -65,22 +74,43 @@ struct CoachView: View {
         let userMessage = LLMMessage(role: .user, content: trimmedMessage)
         context.insert(userMessage)
         
-        // Clear input
+        // Clear input and hide keyboard
         newMessage = ""
+        hideKeyboard()
         
-        // Simulate coach response (TODO: Replace with real LLM)
+        // Generate varied coach response based on user input
         isLoading = true
         DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-            let coachResponse = LLMMessage(
-                role: .assistant,
-                content: "I hear you. Let's focus on one small, doable step. What feels manageable right now about your goal?"
-            )
-            context.insert(coachResponse)
+            let coachResponse = generateCoachResponse(to: trimmedMessage)
+            let message = LLMMessage(role: .assistant, content: coachResponse)
+            context.insert(message)
             try? context.save()
             isLoading = false
         }
         
         try? context.save()
+    }
+    
+    private func generateCoachResponse(to userMessage: String) -> String {
+        let responses = [
+            "I hear you. Let's focus on one small, doable step. What feels manageable right now about your goal?",
+            "That's a great observation. What's one tiny action you could take in the next 5 minutes to move toward your goal?",
+            "I understand this challenge. Let's break it down - what's the smallest possible step you could take today?",
+            "You're showing real awareness here. How can we make this easier? What would help you feel more supported?",
+            "This is exactly the kind of reflection that leads to change. What's one thing you could do differently next time?",
+            "I appreciate you sharing this. Let's focus on progress, not perfection. What's one small win you can celebrate?",
+            "That sounds challenging. What would your future self thank you for doing right now?",
+            "You're not alone in this struggle. What's one tiny habit that could make a big difference over time?"
+        ]
+        
+        // Use the user's message to seed a pseudo-random response
+        let hash = userMessage.hashValue
+        let index = abs(hash) % responses.count
+        return responses[index]
+    }
+    
+    private func hideKeyboard() {
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
     }
 }
 
