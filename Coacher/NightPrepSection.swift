@@ -11,20 +11,9 @@ import SwiftData
 struct NightPrepSection: View {
     @Binding var entry: DailyEntry
     @Environment(\.modelContext) private var context
-    @Query private var userSettings: [UserSettings]
     
     @State private var newOtherItem = ""
-    
-    private var settings: UserSettings {
-        if let existing = userSettings.first {
-            return existing
-        } else {
-            let newSettings = UserSettings()
-            context.insert(newSettings)
-            try? context.save()
-            return newSettings
-        }
-    }
+    @State private var refreshTrigger = false
     
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -36,96 +25,95 @@ struct NightPrepSection: View {
                 Spacer()
             }
             
-            // Default prep items
-            VStack(alignment: .leading, spacing: 8) {
+            // Default prep items (reordered as requested)
+            VStack(alignment: .leading, spacing: 12) {
+                // Water bottle first (everyone needs water)
                 HStack {
                     Image(systemName: entry.waterReady ? "checkmark.square.fill" : "square")
-                        .foregroundStyle(entry.waterReady ? .blue : .secondary)
+                        .foregroundStyle(.blue)
                         .onTapGesture {
                             entry.waterReady.toggle()
                         }
-                    Text("Put water bottle in fridge or by my bed")
+                    Text("Water bottle ready")
                         .onTapGesture {
                             entry.waterReady.toggle()
                         }
-                    Spacer()
                 }
                 
+                // Prep easy breakfast/snack second
                 HStack {
                     Image(systemName: entry.breakfastPrepped ? "checkmark.square.fill" : "square")
-                        .foregroundStyle(entry.breakfastPrepped ? .blue : .secondary)
+                        .foregroundStyle(.blue)
                         .onTapGesture {
                             entry.breakfastPrepped.toggle()
                         }
-                    Text("Prep quick breakfast/snack")
+                    Text("Prep easy breakfast/snack")
                         .onTapGesture {
                             entry.breakfastPrepped.toggle()
                         }
-                    Spacer()
                 }
                 
+                // Other default items
                 HStack {
                     Image(systemName: entry.stickyNotes ? "checkmark.square.fill" : "square")
-                        .foregroundStyle(entry.stickyNotes ? .blue : .secondary)
+                        .foregroundStyle(.blue)
                         .onTapGesture {
                             entry.stickyNotes.toggle()
                         }
-                    Text("Put sticky notes where I usually grab the less-healthy choice")
+                    Text("Sticky notes for tomorrow")
                         .onTapGesture {
                             entry.stickyNotes.toggle()
                         }
-                    Spacer()
                 }
                 
                 HStack {
                     Image(systemName: entry.preppedProduce ? "checkmark.square.fill" : "square")
-                        .foregroundStyle(entry.preppedProduce ? .blue : .secondary)
+                        .foregroundStyle(.blue)
                         .onTapGesture {
                             entry.preppedProduce.toggle()
                         }
-                    Text("Wash/cut veggies or fruit and place them at eye level")
+                    Text("Prepped produce")
                         .onTapGesture {
                             entry.preppedProduce.toggle()
                         }
-                    Spacer()
                 }
             }
             
-            // Custom prep items (no visual separation - equally important)
-            if !settings.customEveningPrepItems.isEmpty {
-                List {
-                    ForEach(settings.customEveningPrepItems, id: \.self) { item in
+            // Custom prep items
+            if !entry.completedCustomPrepItems.isEmpty {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Custom Items")
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                        .foregroundStyle(.secondary)
+                    
+                    ForEach(entry.completedCustomPrepItems, id: \.self) { item in
                         HStack {
-                            Image(systemName: "checkmark.square.fill")
+                            Image(systemName: entry.completedCustomPrepItems.contains(item) ? "checkmark.square.fill" : "square")
                                 .foregroundStyle(.blue)
                                 .onTapGesture {
-                                    // For now, always enabled - could add individual tracking later
+                                    toggleCustomItem(item)
                                 }
                             Text(item)
-                            Spacer()
+                                .onTapGesture {
+                                    toggleCustomItem(item)
+                                }
                         }
-                        .listRowInsets(EdgeInsets(top: 4, leading: 0, bottom: 4, trailing: 0))
-                        .listRowBackground(Color.clear)
                     }
                     .onDelete(perform: deleteCustomItems)
                 }
-                .listStyle(.plain)
-                .frame(minHeight: CGFloat(settings.customEveningPrepItems.count * 44)) // Adjust height based on content
             }
             
             // Add new custom item
             HStack {
-                TextField("Add custom prep item...", text: $newOtherItem, axis: .vertical)
+                TextField("Add custom prep item...", text: $newOtherItem)
                     .textFieldStyle(.roundedBorder)
-                    .lineLimit(2...4)
-                    .submitLabel(.done)
                 
                 Button(action: addCustomItem) {
                     Image(systemName: "plus.circle.fill")
                         .foregroundStyle(.blue)
                         .font(.title2)
                 }
-                .buttonStyle(.plain)
                 .disabled(newOtherItem.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
             }
         }
@@ -134,35 +122,65 @@ struct NightPrepSection: View {
             RoundedRectangle(cornerRadius: 16)
                 .fill(Color(.secondarySystemBackground))
         )
-
+        .id(refreshTrigger) // Force UI refresh when needed
     }
+    
+    // MARK: - Custom Item Management
     
     private func addCustomItem() {
         let trimmedItem = newOtherItem.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedItem.isEmpty else { return }
         
-        print("🔍 DEBUG: Adding custom item: '\(trimmedItem)'")
-        print("🔍 DEBUG: Current settings has \(settings.customEveningPrepItems.count) items")
+        print("🔍 DEBUG: NightPrepSection - Adding custom item: '\(trimmedItem)'")
+        print("🔍 DEBUG: NightPrepSection - Current custom items: \(entry.completedCustomPrepItems.count)")
         
-        settings.addCustomItem(trimmedItem)
+        // Add to DailyEntry's custom prep items
+        entry.completedCustomPrepItems.append(trimmedItem)
+        
+        // Clear the input
         newOtherItem = ""
         
-        print("🔍 DEBUG: After adding, settings has \(settings.customEveningPrepItems.count) items")
-        print("🔍 DEBUG: Items: \(settings.customEveningPrepItems)")
+        print("🔍 DEBUG: NightPrepSection - After adding, custom items: \(entry.completedCustomPrepItems.count)")
+        print("🔍 DEBUG: NightPrepSection - Custom items array: \(entry.completedCustomPrepItems)")
         
-        // Save to database
+        // Save the context
         try? context.save()
-        print("🔍 DEBUG: Context saved")
+        print("🔍 DEBUG: NightPrepSection - Context saved")
+        
+        // Force UI refresh
+        refreshTrigger.toggle()
+        print("🔍 DEBUG: NightPrepSection - Refresh triggered: \(refreshTrigger)")
+    }
+    
+    private func toggleCustomItem(_ item: String) {
+        if entry.completedCustomPrepItems.contains(item) {
+            entry.completedCustomPrepItems.removeAll { $0 == item }
+            print("🔍 DEBUG: NightPrepSection - Toggled custom item: \(item), now checked: false")
+        } else {
+            entry.completedCustomPrepItems.append(item)
+            print("🔍 DEBUG: NightPrepSection - Toggled custom item: \(item), now checked: true")
+        }
+        
+        // Save the context
+        try? context.save()
+        print("🔍 DEBUG: NightPrepSection - Context saved after toggle")
+        
+        // Force UI refresh
+        refreshTrigger.toggle()
     }
     
     private func deleteCustomItems(at offsets: IndexSet) {
-        for index in offsets {
-            let item = settings.customEveningPrepItems[index]
-            settings.removeCustomItem(item)
-        }
+        let itemsToDelete = offsets.map { entry.completedCustomPrepItems[$0] }
+        entry.completedCustomPrepItems.remove(atOffsets: offsets)
         
-        // Save to database
+        print("🔍 DEBUG: NightPrepSection - Deleted custom items: \(itemsToDelete)")
+        
+        // Save the context
         try? context.save()
+        print("🔍 DEBUG: NightPrepSection - Context saved after delete")
+        
+        // Force UI refresh
+        refreshTrigger.toggle()
     }
 }
 
