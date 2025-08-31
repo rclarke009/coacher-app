@@ -124,14 +124,21 @@ struct PrepTonightSection: View {
         print("🔍 DEBUG: PrepTonightSection - Adding custom item: '\(trimmedItem)'")
         print("🔍 DEBUG: PrepTonightSection - Current local items: \(localCustomItems.count)")
         
-        // Get the actual UserSettings object from the @Query
-        if let currentSettings = userSettings.first {
-            // Add to the actual UserSettings object
-            currentSettings.addCustomItem(trimmedItem)
-            print("🔍 DEBUG: PrepTonightSection - Added to UserSettings, now has \(currentSettings.customEveningPrepItems.count) items")
+        // Get or create UserSettings object
+        let currentSettings: UserSettings
+        if let existing = userSettings.first {
+            currentSettings = existing
+            print("🔍 DEBUG: PrepTonightSection - Using existing UserSettings")
         } else {
-            print("🔍 DEBUG: PrepTonightSection - ERROR: No UserSettings found to add item to")
+            // Create new UserSettings if none exist
+            currentSettings = UserSettings()
+            context.insert(currentSettings)
+            print("🔍 DEBUG: PrepTonightSection - Created new UserSettings")
         }
+        
+        // Add to the UserSettings object
+        currentSettings.addCustomItem(trimmedItem)
+        print("🔍 DEBUG: PrepTonightSection - Added to UserSettings, now has \(currentSettings.customEveningPrepItems.count) items")
         
         // Update local state immediately for UI
         localCustomItems.append(trimmedItem)
@@ -154,13 +161,13 @@ struct PrepTonightSection: View {
         print("🔍 DEBUG: PrepTonightSection - Removing custom item: '\(item)'")
         print("🔍 DEBUG: PrepTonightSection - Current local items: \(localCustomItems.count)")
         
-        // Get the actual UserSettings object from the @Query
+        // Get UserSettings object (should exist if we're removing items)
         if let currentSettings = userSettings.first {
-            // Remove from the actual UserSettings object
+            // Remove from the UserSettings object
             currentSettings.removeCustomItem(item)
             print("🔍 DEBUG: PrepTonightSection - Removed from UserSettings, now has \(currentSettings.customEveningPrepItems.count) items")
         } else {
-            print("🔍 DEBUG: PrepTonightSection - ERROR: No UserSettings found to remove item from")
+            print("🔍 DEBUG: PrepTonightSection - WARNING: No UserSettings found to remove item from")
         }
         
         // Update local state immediately for UI
