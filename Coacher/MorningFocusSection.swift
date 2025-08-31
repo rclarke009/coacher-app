@@ -23,17 +23,29 @@ struct MorningFocusSection: View {
             Text("Step 2 – Identify a Challenge (3 minutes)")
                 .font(.subheadline)
                 .bold()
-            Picker("Challenge", selection: $entry.challenge) {
-                Text("Select…").tag(Challenge.none)
-                    .foregroundColor(.leafYellow)
-                Text("Skipping meals").tag(Challenge.skippingMeals)
-                Text("Late-night snacking").tag(Challenge.lateNightSnacking)
-                Text("Sugary drinks").tag(Challenge.sugaryDrinks)
-                Text("Eating on the go / fast food").tag(Challenge.onTheGo)
-                Text("Emotional eating").tag(Challenge.emotionalEating)
-                Text("Other").tag(Challenge.other)
+            Menu {
+                Button("Skipping meals") { entry.challenge = .skippingMeals }
+                Button("Late-night snacking") { entry.challenge = .lateNightSnacking }
+                Button("Sugary drinks") { entry.challenge = .sugaryDrinks }
+                Button("Eating on the go / fast food") { entry.challenge = .onTheGo }
+                Button("Emotional eating") { entry.challenge = .emotionalEating }
+                Button("Other") { entry.challenge = .other }
+            } label: {
+                HStack {
+                    Text(entry.challenge == .none ? "Select…" : entry.challenge.displayName)
+                        .foregroundColor(entry.challenge == .none ? .leafYellow : .dynamicText)
+                    Spacer()
+                    Image(systemName: "chevron.down")
+                        .foregroundColor(.leafYellow)
+                        .font(.caption)
+                }
+                .padding()
+                .background(
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(Color.leafYellow, lineWidth: 2)
+                        .background(Color.dynamicCardBackground)
+                )
             }
-            .pickerStyle(.menu)
 
             if entry.challenge == .other {
                 TextField("Describe the challenge…", text: $entry.challengeOther)
