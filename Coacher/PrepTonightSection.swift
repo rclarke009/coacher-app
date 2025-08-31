@@ -70,6 +70,15 @@ struct PrepTonightSection: View {
                         .buttonStyle(.plain)
                     }
                 }
+                .onAppear {
+                    print("🔍 DEBUG: PrepTonightSection - Custom items displayed: \(settings.customEveningPrepItems.count) items")
+                }
+            } else {
+                Text("No custom items yet")
+                    .foregroundStyle(.secondary)
+                    .onAppear {
+                        print("🔍 DEBUG: PrepTonightSection - No custom items to display")
+                    }
             }
             
             // Add new custom item
@@ -97,11 +106,18 @@ struct PrepTonightSection: View {
         let trimmedItem = newOtherItem.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedItem.isEmpty else { return }
         
+        print("🔍 DEBUG: PrepTonightSection - Adding custom item: '\(trimmedItem)'")
+        print("🔍 DEBUG: PrepTonightSection - Current settings has \(settings.customEveningPrepItems.count) items")
+        
         settings.addCustomItem(trimmedItem)
         newOtherItem = ""
         
+        print("🔍 DEBUG: PrepTonightSection - After adding, settings has \(settings.customEveningPrepItems.count) items")
+        print("🔍 DEBUG: PrepTonightSection - Items: \(settings.customEveningPrepItems)")
+        
         // Save to database
         try? context.save()
+        print("🔍 DEBUG: PrepTonightSection - Context saved")
     }
     
     private func removeCustomItem(_ item: String) {
