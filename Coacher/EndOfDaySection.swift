@@ -17,7 +17,7 @@ struct EndOfDaySection: View {
             
             HStack {
                 Image(systemName: (entry.followedSwap ?? false) ? "checkmark.square.fill" : "square")
-                    .foregroundStyle(.blue)
+                    .foregroundColor(.leafGreen)
                     .onTapGesture {
                         entry.followedSwap?.toggle()
                         if entry.followedSwap == nil {

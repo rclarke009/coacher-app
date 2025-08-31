@@ -56,29 +56,44 @@ struct SectionCard<Content: View>: View {
     // MARK: - Colors
     private var headerBackground: some ShapeStyle {
         switch accent {
-        case .blue:   return Color.blue.opacity(0.15).gradient
-        case .purple: return Color.purple.opacity(0.16).gradient
-        case .teal:   return Color.teal.opacity(0.16).gradient
-        case .gray:   return Color.gray.opacity(0.14).gradient
+        case .blue:
+            return Color.brandBlue.opacity(0.15).gradient
+        case .purple:
+            return Color.brandBlue.opacity(0.12).gradient
+        case .teal:
+            return Color.leafGreen.opacity(0.15).gradient
+        case .gray:
+            return Color.dynamicSecondaryText.opacity(0.14).gradient
         }
     }
+    
     private var headerForeground: Color {
         switch accent {
-        case .blue:   return .blue
-        case .purple: return .purple
-        case .teal:   return .teal
-        case .gray:   return .secondary
+        case .blue:
+            return .brandBlue
+        case .purple:
+            return .brandBlue
+        case .teal:
+            return .leafGreen
+        case .gray:
+            return .dynamicSecondaryText
         }
     }
+    
     private var cardBackground: some ShapeStyle {
-        Color(.systemBackground)
+        Color.dynamicCardBackground
     }
+    
     private var borderColor: Color {
         switch accent {
-        case .blue:   return Color.blue.opacity(0.25)
-        case .purple: return Color.purple.opacity(0.25)
-        case .teal:   return Color.teal.opacity(0.25)
-        case .gray:   return Color.gray.opacity(0.22)
+        case .blue:
+            return Color.brandBlue.opacity(0.25)
+        case .purple:
+            return Color.brandBlue.opacity(0.20)
+        case .teal:
+            return Color.leafGreen.opacity(0.25)
+        case .gray:
+            return Color.dynamicSecondaryText.opacity(0.22)
         }
     }
 }

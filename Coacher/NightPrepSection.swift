@@ -30,7 +30,7 @@ struct NightPrepSection: View {
                 // Water bottle first (everyone needs water)
                 HStack {
                     Image(systemName: entry.waterReady ? "checkmark.square.fill" : "square")
-                        .foregroundStyle(.blue)
+                        .foregroundColor(.leafGreen)
                         .onTapGesture {
                             entry.waterReady.toggle()
                         }
@@ -43,7 +43,7 @@ struct NightPrepSection: View {
                 // Prep easy breakfast/snack second
                 HStack {
                     Image(systemName: entry.breakfastPrepped ? "checkmark.square.fill" : "square")
-                        .foregroundStyle(.blue)
+                        .foregroundColor(.leafGreen)
                         .onTapGesture {
                             entry.breakfastPrepped.toggle()
                         }
@@ -56,7 +56,7 @@ struct NightPrepSection: View {
                 // Other default items
                 HStack {
                     Image(systemName: entry.stickyNotes ? "checkmark.square.fill" : "square")
-                        .foregroundStyle(.blue)
+                        .foregroundColor(.leafGreen)
                         .onTapGesture {
                             entry.stickyNotes.toggle()
                         }
@@ -68,7 +68,7 @@ struct NightPrepSection: View {
                 
                 HStack {
                     Image(systemName: entry.preppedProduce ? "checkmark.square.fill" : "square")
-                        .foregroundStyle(.blue)
+                        .foregroundColor(.leafGreen)
                         .onTapGesture {
                             entry.preppedProduce.toggle()
                         }
@@ -90,7 +90,7 @@ struct NightPrepSection: View {
                     ForEach(entry.customPrepItems, id: \.self) { item in
                         HStack {
                             Image(systemName: entry.completedCustomPrepItems.contains(item) ? "checkmark.square.fill" : "square")
-                                .foregroundStyle(.blue)
+                                .foregroundColor(.leafGreen)
                                 .onTapGesture {
                                     toggleCustomItem(item)
                                 }
@@ -111,7 +111,7 @@ struct NightPrepSection: View {
                 
                 Button(action: addCustomItem) {
                     Image(systemName: "plus.circle.fill")
-                        .foregroundStyle(.blue)
+                        .foregroundColor(.brandBlue)
                         .font(.title2)
                 }
                 .disabled(newOtherItem.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
