@@ -45,6 +45,14 @@ struct DayBucket: View {
                 ) {
                     PastNightPrepPreview(offset: offset)
                 }
+                .onTapGesture {
+                    print("🔍 DEBUG: Past Last Night Prep tapped! offset: \(offset)")
+                    print("🔍 DEBUG: pastLastNightPrepCollapsed before: \(pastLastNightPrepCollapsed)")
+                    withAnimation(.snappy) {
+                        pastLastNightPrepCollapsed.toggle()
+                    }
+                    print("🔍 DEBUG: pastLastNightPrepCollapsed after: \(pastLastNightPrepCollapsed)")
+                }
                 
                 SectionCard(
                     title: "Morning Focus",
@@ -54,6 +62,14 @@ struct DayBucket: View {
                     dimmed: true
                 ) {
                     PastMorningFocusPreview(offset: offset)
+                }
+                .onTapGesture {
+                    print("🔍 DEBUG: Past Morning Focus tapped! offset: \(offset)")
+                    print("🔍 DEBUG: pastMorningFocusCollapsed before: \(pastMorningFocusCollapsed)")
+                    withAnimation(.snappy) {
+                        pastMorningFocusCollapsed.toggle()
+                    }
+                    print("🔍 DEBUG: pastMorningFocusCollapsed after: \(pastMorningFocusCollapsed)")
                 }
             } else {
                 // TODAY
@@ -93,14 +109,17 @@ struct DayBucket: View {
     }
     
     private func setDefaultCollapsedStates() {
+        print("🔍 DEBUG: setDefaultCollapsedStates called for offset: \(offset)")
         if offset == 0 {
             // Today: Morning Focus expanded by default
             morningFocusCollapsed = false
             lastNightPrepCollapsed = true
+            print("🔍 DEBUG: Today - morningFocusCollapsed: \(morningFocusCollapsed), lastNightPrepCollapsed: \(lastNightPrepCollapsed)")
         } else {
             // Past days: both collapsed by default
             pastMorningFocusCollapsed = true
             pastLastNightPrepCollapsed = true
+            print("🔍 DEBUG: Past day - pastMorningFocusCollapsed: \(pastMorningFocusCollapsed), pastLastNightPrepCollapsed: \(pastLastNightPrepCollapsed)")
         }
     }
     
