@@ -1,0 +1,115 @@
+//
+//  SettingsView.swift
+//  Coacher
+//
+//  Created by Rebecca Clarke on 8/30/25.
+//
+
+import SwiftUI
+import SwiftData
+
+struct SettingsView: View {
+    @Environment(\.modelContext) private var context
+    @Query private var achievements: [Achievement]
+    
+    @AppStorage("showCelebrations") private var showCelebrations = true
+    @AppStorage("showStreakWidgets") private var showStreakWidgets = true
+    @AppStorage("nightPrepReminder") private var nightPrepReminder = true
+    @AppStorage("morningFocusReminder") private var morningFocusReminder = true
+    @AppStorage("nightPrepTime") private var nightPrepTime = Calendar.current.date(from: DateComponents(hour: 21, minute: 0)) ?? Date()
+    @AppStorage("morningFocusTime") private var morningFocusTime = Calendar.current.date(from: DateComponents(hour: 8, minute: 0)) ?? Date()
+    
+    var body: some View {
+        NavigationView {
+            List {
+                Section("Reminders") {
+                    Toggle("Night Prep Reminder", isOn: $nightPrepReminder)
+                    if nightPrepReminder {
+                        DatePicker("Time", selection: $nightPrepTime, displayedComponents: .hourAndMinute)
+                    }
+                    
+                    Toggle("Morning Focus Reminder", isOn: $morningFocusReminder)
+                    if morningFocusReminder {
+                        DatePicker("Time", selection: $morningFocusTime, displayedComponents: .hourAndMinute)
+                    }
+                }
+                
+                Section("Gamification") {
+                    Toggle("Show celebrations", isOn: $showCelebrations)
+                    Toggle("Show streak widgets", isOn: $showStreakWidgets)
+                    
+                    if !achievements.isEmpty {
+                        HStack {
+                            Text("Achievements earned")
+                            Spacer()
+                            Text("\(achievements.count)")
+                                .foregroundStyle(.secondary)
+                        }
+                        
+                        Button("Reset achievements") {
+                            resetAchievements()
+                        }
+                        .foregroundStyle(.red)
+                    }
+                }
+                
+                Section("Data & Privacy") {
+                    Button("Export data") {
+                        exportData()
+                    }
+                    
+                    Button("Import data") {
+                        importData()
+                    }
+                    
+                    Button("Clear all data") {
+                        clearAllData()
+                    }
+                    .foregroundStyle(.red)
+                }
+                
+                Section("About") {
+                    HStack {
+                        Text("Version")
+                        Spacer()
+                        Text("1.0.0")
+                            .foregroundStyle(.secondary)
+                    }
+                    
+                    HStack {
+                        Text("Build")
+                        Spacer()
+                        Text("1")
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            }
+            .navigationTitle("Settings")
+        }
+    }
+    
+    private func resetAchievements() {
+        // TODO: Show confirmation dialog
+        for achievement in achievements {
+            context.delete(achievement)
+        }
+        try? context.save()
+    }
+    
+    private func exportData() {
+        // TODO: Implement data export
+    }
+    
+    private func importData() {
+        // TODO: Implement data import
+    }
+    
+    private func clearAllData() {
+        // TODO: Show confirmation dialog and implement data clearing
+    }
+}
+
+#Preview {
+    SettingsView()
+        .modelContainer(for: [DailyEntry.self, Achievement.self, LLMMessage.self], inMemory: true)
+}
