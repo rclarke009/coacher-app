@@ -102,11 +102,18 @@ struct NightPrepSection: View {
         let trimmedItem = newOtherItem.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedItem.isEmpty else { return }
         
+        print("🔍 DEBUG: Adding custom item: '\(trimmedItem)'")
+        print("🔍 DEBUG: Current settings has \(settings.customEveningPrepItems.count) items")
+        
         settings.addCustomItem(trimmedItem)
         newOtherItem = ""
         
+        print("🔍 DEBUG: After adding, settings has \(settings.customEveningPrepItems.count) items")
+        print("🔍 DEBUG: Items: \(settings.customEveningPrepItems)")
+        
         // Save to database
         try? context.save()
+        print("🔍 DEBUG: Context saved")
     }
     
     private func removeCustomItem(_ item: String) {
