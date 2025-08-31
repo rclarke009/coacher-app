@@ -134,6 +134,10 @@ struct PrepTonightSection: View {
             currentSettings = UserSettings()
             context.insert(currentSettings)
             print("🔍 DEBUG: PrepTonightSection - Created new UserSettings")
+            
+            // Force an immediate save to ensure the object is tracked
+            try? context.save()
+            print("🔍 DEBUG: PrepTonightSection - Initial context save after creating UserSettings")
         }
         
         // Add to the UserSettings object
@@ -148,9 +152,12 @@ struct PrepTonightSection: View {
         print("🔍 DEBUG: PrepTonightSection - After adding, local items: \(localCustomItems.count)")
         print("🔍 DEBUG: PrepTonightSection - Local items array: \(localCustomItems)")
         
-        // Save to database
-        try? context.save()
-        print("🔍 DEBUG: PrepTonightSection - Context saved")
+        // Save to database with a slight delay to ensure proper tracking
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            try? self.context.save()
+            print("🔍 DEBUG: PrepTonightSection - Delayed context save completed")
+        }
+        print("🔍 DEBUG: PrepTonightSection - Context save initiated")
         
         // Force UI refresh since SwiftData @Query isn't updating automatically
         refreshTrigger.toggle()
