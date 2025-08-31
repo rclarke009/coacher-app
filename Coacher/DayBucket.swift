@@ -18,6 +18,10 @@ struct DayBucket: View {
     @State private var lastNightPrepCollapsed = true
     @State private var morningFocusCollapsed = false
     
+    // Separate state for past days to allow expansion
+    @State private var pastLastNightPrepCollapsed = true
+    @State private var pastMorningFocusCollapsed = true
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             // Header label
@@ -36,7 +40,7 @@ struct DayBucket: View {
                     title: "Last Night's Prep",
                     icon: "moon.stars.fill",
                     accent: .purple,
-                    collapsed: $lastNightPrepCollapsed,
+                    collapsed: $pastLastNightPrepCollapsed,
                     dimmed: true
                 ) {
                     PastNightPrepPreview(offset: offset)
@@ -46,7 +50,7 @@ struct DayBucket: View {
                     title: "Morning Focus",
                     icon: "sun.max.fill",
                     accent: .blue,
-                    collapsed: $morningFocusCollapsed,
+                    collapsed: $pastMorningFocusCollapsed,
                     dimmed: true
                 ) {
                     PastMorningFocusPreview(offset: offset)
@@ -95,8 +99,8 @@ struct DayBucket: View {
             lastNightPrepCollapsed = true
         } else {
             // Past days: both collapsed by default
-            morningFocusCollapsed = true
-            lastNightPrepCollapsed = true
+            pastMorningFocusCollapsed = true
+            pastLastNightPrepCollapsed = true
         }
     }
     
