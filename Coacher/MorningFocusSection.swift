@@ -45,6 +45,7 @@ struct MorningFocusSection: View {
                     TextField("Describe the challenge…", text: $entry.challengeOther, axis: .vertical)
                         .textFieldStyle(.roundedBorder)
                         .lineLimit(2...4)
+                        .submitLabel(.done)
                 }
             }
             
@@ -55,6 +56,7 @@ struct MorningFocusSection: View {
                 TextField("What healthier choice will I do instead?", text: $entry.chosenSwap, axis: .vertical)
                     .textFieldStyle(.roundedBorder)
                     .lineLimit(2...4)
+                    .submitLabel(.done)
             }
             
             // Step 4 – Commit
@@ -69,6 +71,7 @@ struct MorningFocusSection: View {
                     TextField("do this…", text: $entry.commitTo, axis: .vertical)
                         .textFieldStyle(.roundedBorder)
                         .lineLimit(1...2)
+                        .submitLabel(.done)
                     
                     Text("instead of")
                         .font(.caption)
@@ -77,6 +80,7 @@ struct MorningFocusSection: View {
                     TextField("not this…", text: $entry.commitFrom, axis: .vertical)
                         .textFieldStyle(.roundedBorder)
                         .lineLimit(1...2)
+                        .submitLabel(.done)
                 }
             }
         }

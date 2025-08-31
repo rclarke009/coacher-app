@@ -27,6 +27,7 @@ struct NightPrepSection: View {
             TextField("Other…", text: $entry.nightOther, axis: .vertical)
                 .textFieldStyle(.roundedBorder)
                 .lineLimit(2...4)
+                .submitLabel(.done)
         }
         .padding()
         .background(

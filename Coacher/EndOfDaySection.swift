@@ -25,10 +25,12 @@ struct EndOfDaySection: View {
                 TextField("If yes, how do I feel about it?", text: $entry.feelAboutIt, axis: .vertical)
                     .textFieldStyle(.roundedBorder)
                     .lineLimit(2...4)
+                    .submitLabel(.done)
             } else if entry.followedSwap == false {
                 TextField("If no, what got in the way?", text: $entry.whatGotInTheWay, axis: .vertical)
                     .textFieldStyle(.roundedBorder)
                     .lineLimit(2...4)
+                    .submitLabel(.done)
             }
         }
         .padding()
