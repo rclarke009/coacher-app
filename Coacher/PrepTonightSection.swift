@@ -152,6 +152,24 @@ struct PrepTonightSection: View {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
             try? self.context.save()
             print("🔍 DEBUG: PrepTonightSection - Delayed context save completed")
+            
+            // Force another save to ensure persistence
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                try? self.context.save()
+                print("🔍 DEBUG: PrepTonightSection - Second delayed context save completed")
+                
+                // Verify the object was saved by fetching again
+                let descriptor = FetchDescriptor<UserSettings>()
+                do {
+                    let results = try self.context.fetch(descriptor)
+                    print("🔍 DEBUG: PrepTonightSection - Verification fetch found \(results.count) UserSettings objects")
+                    if let first = results.first {
+                        print("🔍 DEBUG: PrepTonightSection - Verification: first object has \(first.customEveningPrepItems.count) items")
+                    }
+                } catch {
+                    print("🔍 DEBUG: PrepTonightSection - Verification fetch error: \(error)")
+                }
+            }
         }
         print("🔍 DEBUG: PrepTonightSection - Context save initiated")
         
