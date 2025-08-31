@@ -14,7 +14,6 @@ struct PrepTonightSection: View {
     @Query private var userSettings: [UserSettings]
     
     @State private var newOtherItem = ""
-    @State private var showingEveningPrepManager = false
     @State private var refreshTrigger = false // Force UI refresh
     @State private var localCustomItems: [String] = [] // Local state for custom items
     
@@ -26,12 +25,6 @@ struct PrepTonightSection: View {
                     .bold()
                 
                 Spacer()
-                
-                Button(action: { showingEveningPrepManager = true }) {
-                    Image(systemName: "gear")
-                        .foregroundStyle(.blue)
-                }
-                .buttonStyle(.plain)
             }
             
             // Default prep items
@@ -44,23 +37,22 @@ struct PrepTonightSection: View {
             
             // Custom prep items (no visual separation - equally important)
             if !localCustomItems.isEmpty {
-                ForEach(localCustomItems, id: \.self) { item in
-                    HStack {
-                        Toggle(item, isOn: .constant(true)) // For now, always enabled
-                            .toggleStyle(.button)
-                            .buttonStyle(.plain)
-                        
-                        Spacer()
-                        
-                        Button(action: {
-                            removeCustomItem(item)
-                        }) {
-                            Image(systemName: "trash")
-                                .foregroundStyle(.red)
+                List {
+                    ForEach(localCustomItems, id: \.self) { item in
+                        HStack {
+                            Toggle(item, isOn: .constant(true)) // For now, always enabled
+                                .toggleStyle(.button)
+                                .buttonStyle(.plain)
+                            
+                            Spacer()
                         }
-                        .buttonStyle(.plain)
+                        .listRowInsets(EdgeInsets(top: 4, leading: 0, bottom: 4, trailing: 0))
+                        .listRowBackground(Color.clear)
                     }
+                    .onDelete(perform: deleteCustomItems)
                 }
+                .listStyle(.plain)
+                .frame(minHeight: CGFloat(localCustomItems.count * 44)) // Adjust height based on content
                 .onAppear {
                     print("🔍 DEBUG: PrepTonightSection - Custom items displayed: \(localCustomItems.count) items")
                 }
@@ -108,9 +100,7 @@ struct PrepTonightSection: View {
                 localCustomItems = []
             }
         }
-        .sheet(isPresented: $showingEveningPrepManager) {
-            EveningPrepManager()
-        }
+
     }
     
     private func addCustomItem() {
@@ -178,27 +168,28 @@ struct PrepTonightSection: View {
         print("🔍 DEBUG: PrepTonightSection - Refresh triggered: \(refreshTrigger)")
     }
     
-    private func removeCustomItem(_ item: String) {
-        print("🔍 DEBUG: PrepTonightSection - Removing custom item: '\(item)'")
+    private func deleteCustomItems(at offsets: IndexSet) {
+        print("🔍 DEBUG: PrepTonightSection - Deleting custom items at offsets: \(offsets)")
         print("🔍 DEBUG: PrepTonightSection - Current local items: \(localCustomItems.count)")
         
-        // Get UserSettings object (should exist if we're removing items)
+        // Get UserSettings object (should exist if we're deleting items)
         if let currentSettings = userSettings.first {
             // Remove from the UserSettings object
-            currentSettings.removeCustomItem(item)
+            let itemsToRemove = offsets.map { localCustomItems[$0] }
+            currentSettings.removeCustomItems(itemsToRemove)
             print("🔍 DEBUG: PrepTonightSection - Removed from UserSettings, now has \(currentSettings.customEveningPrepItems.count) items")
         } else {
-            print("🔍 DEBUG: PrepTonightSection - WARNING: No UserSettings found to remove item from")
+            print("🔍 DEBUG: PrepTonightSection - WARNING: No UserSettings found to remove items from")
         }
         
         // Update local state immediately for UI
-        localCustomItems.removeAll { $0 == item }
+        localCustomItems.remove(atOffsets: offsets)
         
-        print("🔍 DEBUG: PrepTonightSection - After removing, local items: \(localCustomItems.count)")
+        print("🔍 DEBUG: PrepTonightSection - After deleting, local items: \(localCustomItems.count)")
         
         // Save to database
         try? context.save()
-        print("🔍 DEBUG: PrepTonightSection - Context saved after removal")
+        print("🔍 DEBUG: PrepTonightSection - Context saved after deletion")
     }
 }
 

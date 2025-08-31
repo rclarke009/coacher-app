@@ -46,4 +46,15 @@ final class UserSettings {
         print("🔍 DEBUG: UserSettings - After removing: \(customEveningPrepItems.count) items")
         print("🔍 DEBUG: UserSettings - Items array: \(customEveningPrepItems)")
     }
+    
+    func removeCustomItems(_ items: [String]) {
+        print("🔍 DEBUG: UserSettings.removeCustomItems called with: \(items)")
+        print("🔍 DEBUG: UserSettings - Before removing: \(customEveningPrepItems.count) items")
+        
+        customEveningPrepItems.removeAll { items.contains($0) }
+        lastModified = Date()
+        
+        print("🔍 DEBUG: UserSettings - After removing: \(customEveningPrepItems.count) items")
+        print("🔍 DEBUG: UserSettings - Items array: \(customEveningPrepItems)")
+    }
 }
