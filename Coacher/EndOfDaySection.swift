@@ -15,10 +15,23 @@ struct EndOfDaySection: View {
                 .font(.subheadline)
                 .bold()
             
-            Toggle("I followed my swap", isOn: Binding(
-                get: { entry.followedSwap ?? false },
-                set: { entry.followedSwap = $0 }
-            ))
+            HStack {
+                Image(systemName: (entry.followedSwap ?? false) ? "checkmark.square.fill" : "square")
+                    .foregroundStyle(.blue)
+                    .onTapGesture {
+                        entry.followedSwap?.toggle()
+                        if entry.followedSwap == nil {
+                            entry.followedSwap = true
+                        }
+                    }
+                Text("I followed my swap")
+                    .onTapGesture {
+                        entry.followedSwap?.toggle()
+                        if entry.followedSwap == nil {
+                            entry.followedSwap = true
+                        }
+                    }
+            }
             
             TextField("If yes, how do I feel about it?", text: $entry.feelAboutIt)
                 .textFieldStyle(.roundedBorder)
