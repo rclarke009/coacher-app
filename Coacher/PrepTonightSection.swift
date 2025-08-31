@@ -16,6 +16,7 @@ struct PrepTonightSection: View {
     @State private var newOtherItem = ""
     @State private var refreshTrigger = false // Force UI refresh
     @State private var localCustomItems: [String] = [] // Local state for custom items
+    @State private var checkedCustomItems: Set<String> = [] // Track which custom items are checked
     
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -239,6 +240,15 @@ struct PrepTonightSection: View {
         // Save to database
         try? context.save()
         print("🔍 DEBUG: PrepTonightSection - Context saved after deletion")
+    }
+    
+    private func toggleCustomItem(_ item: String) {
+        if checkedCustomItems.contains(item) {
+            checkedCustomItems.remove(item)
+        } else {
+            checkedCustomItems.insert(item)
+        }
+        print("🔍 DEBUG: PrepTonightSection - Toggled custom item: \(item), now checked: \(checkedCustomItems.contains(item))")
     }
 }
 
