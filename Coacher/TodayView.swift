@@ -49,7 +49,7 @@ struct TodayView: View {
                     
                     // Quick Capture Button
                     Button(action: { showingQuickCapture = true }) {
-                        Label("Quick Capture", systemImage: "mic.circle.fill")
+                        Label("I'm craving / I'm stressed", systemImage: "mic.circle.fill")
                             .font(.title2)
                             .padding()
                             .frame(maxWidth: .infinity)

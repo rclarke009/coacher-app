@@ -14,6 +14,8 @@ struct QuickCaptureView: View {
     @State private var textInput = ""
     @State private var isRecording = false
     @State private var audioRecorder: AVAudioRecorder?
+    @State private var recordingTime: TimeInterval = 0
+    @State private var recordingTimer: Timer?
     
     enum CaptureType: String, CaseIterable, Identifiable {
         case voice = "Voice"
@@ -31,6 +33,19 @@ struct QuickCaptureView: View {
     var body: some View {
         NavigationView {
             VStack(spacing: 24) {
+                // Header with purpose
+                VStack(spacing: 12) {
+                    Text("Quick Support")
+                        .font(.title2)
+                        .bold()
+                    
+                    Text("Capture what's happening and get help choosing a healthier swap")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                }
+                .padding(.top)
+                
                 // Capture Type Selector
                 Picker("Capture Type", selection: $captureType) {
                     ForEach(CaptureType.allCases) { type in
@@ -43,7 +58,12 @@ struct QuickCaptureView: View {
                 
                 // Capture Interface
                 if captureType == .voice {
-                    VoiceCaptureView(isRecording: $isRecording, audioRecorder: $audioRecorder)
+                    VoiceCaptureView(
+                        isRecording: $isRecording,
+                        audioRecorder: $audioRecorder,
+                        recordingTime: $recordingTime,
+                        recordingTimer: $recordingTimer
+                    )
                 } else {
                     TextCaptureView(textInput: $textInput)
                 }
@@ -66,7 +86,7 @@ struct QuickCaptureView: View {
                 }
                 .padding(.horizontal)
             }
-            .navigationTitle("Quick Capture")
+            .navigationTitle("Quick Support")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -86,6 +106,8 @@ struct QuickCaptureView: View {
 struct VoiceCaptureView: View {
     @Binding var isRecording: Bool
     @Binding var audioRecorder: AVAudioRecorder?
+    @Binding var recordingTime: TimeInterval
+    @Binding var recordingTimer: Timer?
     
     var body: some View {
         VStack(spacing: 20) {
@@ -93,9 +115,23 @@ struct VoiceCaptureView: View {
                 .font(.system(size: 80))
                 .foregroundStyle(isRecording ? .red : .blue)
             
-            Text(isRecording ? "Recording..." : "Tap to start recording")
-                .font(.title2)
-                .foregroundStyle(isRecording ? .red : .primary)
+            if isRecording {
+                Text("Recording... \(Int(recordingTime))s")
+                    .font(.title2)
+                    .foregroundStyle(.red)
+                
+                Text("Keep it under 20 seconds")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            } else {
+                Text("Tap to start recording")
+                    .font(.title2)
+                    .foregroundStyle(.primary)
+                
+                Text("20-second limit for quick capture")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
             
             Button(action: toggleRecording) {
                 Text(isRecording ? "Stop Recording" : "Start Recording")
@@ -109,6 +145,9 @@ struct VoiceCaptureView: View {
         }
         .onAppear {
             requestMicrophonePermission()
+        }
+        .onDisappear {
+            stopRecording()
         }
     }
     
@@ -129,11 +168,23 @@ struct VoiceCaptureView: View {
     private func startRecording() {
         // TODO: Implement audio recording
         isRecording = true
+        recordingTime = 0
+        
+        // Start timer for 20-second limit
+        recordingTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
+            recordingTime += 1
+            if recordingTime >= 20 {
+                stopRecording()
+            }
+        }
     }
     
     private func stopRecording() {
         // TODO: Stop recording and save
         isRecording = false
+        recordingTimer?.invalidate()
+        recordingTimer = nil
+        recordingTime = 0
     }
 }
 
