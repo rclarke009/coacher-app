@@ -29,10 +29,57 @@ struct PrepTonightSection: View {
             
             // Default prep items
             VStack(alignment: .leading, spacing: 8) {
-                Toggle("Put water bottle in fridge or by my bed", isOn: $entry.waterReady)
-                Toggle("Prep quick breakfast/snack", isOn: $entry.breakfastPrepped)
-                Toggle("Put sticky notes where I usually grab the less-healthy choice", isOn: $entry.stickyNotes)
-                Toggle("Wash/cut veggies or fruit and place them at eye level", isOn: $entry.preppedProduce)
+                HStack {
+                    Image(systemName: entry.waterReady ? "checkmark.square.fill" : "square")
+                        .foregroundStyle(entry.waterReady ? .blue : .secondary)
+                        .onTapGesture {
+                            entry.waterReady.toggle()
+                        }
+                    Text("Put water bottle in fridge or by my bed")
+                        .onTapGesture {
+                            entry.waterReady.toggle()
+                        }
+                    Spacer()
+                }
+                
+                HStack {
+                    Image(systemName: entry.breakfastPrepped ? "checkmark.square.fill" : "square")
+                        .foregroundStyle(entry.breakfastPrepped ? .blue : .secondary)
+                        .onTapGesture {
+                            entry.breakfastPrepped.toggle()
+                        }
+                    Text("Prep quick breakfast/snack")
+                        .onTapGesture {
+                            entry.breakfastPrepped.toggle()
+                        }
+                    Spacer()
+                }
+                
+                HStack {
+                    Image(systemName: entry.stickyNotes ? "checkmark.square.fill" : "square")
+                        .foregroundStyle(entry.stickyNotes ? .blue : .secondary)
+                        .onTapGesture {
+                            entry.stickyNotes.toggle()
+                        }
+                    Text("Put sticky notes where I usually grab the less-healthy choice")
+                        .onTapGesture {
+                            entry.stickyNotes.toggle()
+                        }
+                    Spacer()
+                }
+                
+                HStack {
+                    Image(systemName: entry.preppedProduce ? "checkmark.square.fill" : "square")
+                        .foregroundStyle(entry.preppedProduce ? .blue : .secondary)
+                        .onTapGesture {
+                            entry.preppedProduce.toggle()
+                        }
+                    Text("Wash/cut veggies or fruit and place them at eye level")
+                        .onTapGesture {
+                            entry.preppedProduce.toggle()
+                        }
+                    Spacer()
+                }
             }
             
             // Custom prep items (no visual separation - equally important)
@@ -40,10 +87,12 @@ struct PrepTonightSection: View {
                 List {
                     ForEach(localCustomItems, id: \.self) { item in
                         HStack {
-                            Toggle(item, isOn: .constant(true)) // For now, always enabled
-                                .toggleStyle(.button)
-                                .buttonStyle(.plain)
-                            
+                            Image(systemName: "checkmark.square.fill")
+                                .foregroundStyle(.blue)
+                                .onTapGesture {
+                                    // For now, always enabled - could add individual tracking later
+                                }
+                            Text(item)
                             Spacer()
                         }
                         .listRowInsets(EdgeInsets(top: 4, leading: 0, bottom: 4, trailing: 0))
