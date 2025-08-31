@@ -57,11 +57,6 @@ struct LastNightPrepReviewView: View {
                     .padding(.top, 4)
                 }
             }
-            .padding()
-            .background(
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(Color(.secondarySystemBackground))
-            )
         } else {
             VStack(spacing: 12) {
                 Image(systemName: "moon.slash")
@@ -73,11 +68,6 @@ struct LastNightPrepReviewView: View {
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
             }
-            .padding()
-            .background(
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(Color(.secondarySystemBackground))
-            )
         }
     }
 }

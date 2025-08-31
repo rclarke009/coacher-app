@@ -27,42 +27,28 @@ struct TodayView: View {
     var body: some View {
         NavigationView {
             ScrollView {
-                VStack(spacing: 20) {
+                VStack(spacing: 14) {
                     // Last Night's Prep (for Today) - Day Phase only
                     if timeManager.isDayPhase {
-                        CollapsibleSection(
-                            title: "Last Night's Prep",
-                            isExpanded: lastNightPrepExpanded,
-                            isDimmed: true
+                        SectionCard(
+                            title: "Last Night's Prep (for Today)",
+                            icon: "moon.stars.fill",
+                            accent: .purple,
+                            collapsed: $lastNightPrepExpanded,
+                            dimmed: true
                         ) {
-                            HStack {
-                                Image(systemName: "moon.fill")
-                                    .foregroundStyle(.purple)
-                                Text("Last Night's Prep (for Today)")
-                                    .font(.headline)
-                                    .foregroundStyle(.secondary)
-                            }
-                        } content: {
                             LastNightPrepReviewView(entry: getLastNightEntry())
-                        } onToggle: {
-                            lastNightPrepExpanded.toggle()
                         }
                     }
                     
                     // Morning Focus (Today) - Primary in Day Phase
-                    CollapsibleSection(
-                        title: "Morning Focus",
-                        isExpanded: morningFocusExpanded,
-                        isDimmed: timeManager.isEveningPhase
+                    SectionCard(
+                        title: "Morning Focus (Today)",
+                        icon: "sun.max.fill",
+                        accent: .blue,
+                        collapsed: $morningFocusExpanded,
+                        dimmed: timeManager.isEveningPhase
                     ) {
-                        HStack {
-                            Image(systemName: "sun.max.fill")
-                                .foregroundStyle(timeManager.isDayPhase ? .blue : .secondary)
-                            Text("Morning Focus (Today)")
-                                .font(.headline)
-                                .foregroundStyle(timeManager.isDayPhase ? .primary : .secondary)
-                        }
-                    } content: {
                         MorningFocusSection(entry: $entry)
                             .onChange(of: entry.myWhy) { _, _ in hasUnsavedChanges = true }
                             .onChange(of: entry.challenge) { _, _ in hasUnsavedChanges = true }
@@ -70,55 +56,37 @@ struct TodayView: View {
                             .onChange(of: entry.chosenSwap) { _, _ in hasUnsavedChanges = true }
                             .onChange(of: entry.commitFrom) { _, _ in hasUnsavedChanges = true }
                             .onChange(of: entry.commitTo) { _, _ in hasUnsavedChanges = true }
-                    } onToggle: {
-                        morningFocusExpanded.toggle()
                     }
                     
                     // End-of-Day Check-In - Primary in Evening Phase
-                    CollapsibleSection(
+                    SectionCard(
                         title: "End-of-Day Check-In",
-                        isExpanded: endOfDayExpanded,
-                        isDimmed: timeManager.isDayPhase
+                        icon: "clock.fill",
+                        accent: .teal,
+                        collapsed: $endOfDayExpanded,
+                        dimmed: timeManager.isDayPhase
                     ) {
-                        HStack {
-                            Image(systemName: "clock.fill")
-                                .foregroundStyle(timeManager.isEveningPhase ? .blue : .secondary)
-                            Text("End-of-Day Check-In")
-                                .font(.headline)
-                                .foregroundStyle(timeManager.isEveningPhase ? .primary : .secondary)
-                        }
-                    } content: {
                         EndOfDaySection(entry: $entry)
                             .onChange(of: entry.followedSwap) { _, _ in hasUnsavedChanges = true }
                             .onChange(of: entry.feelAboutIt) { _, _ in hasUnsavedChanges = true }
                             .onChange(of: entry.whatGotInTheWay) { _, _ in hasUnsavedChanges = true }
-                    } onToggle: {
-                        endOfDayExpanded.toggle()
                     }
                     
                     // Prep Tonight (for Tomorrow) - Evening Phase only
                     if timeManager.isEveningPhase {
-                        CollapsibleSection(
-                            title: "Prep Tonight",
-                            isExpanded: prepTonightExpanded,
-                            isDimmed: false
+                        SectionCard(
+                            title: "Prep Tonight (for Tomorrow)",
+                            icon: "moon.stars.fill",
+                            accent: .blue,
+                            collapsed: $prepTonightExpanded,
+                            dimmed: false
                         ) {
-                            HStack {
-                                Image(systemName: "moon.stars.fill")
-                                    .foregroundStyle(.blue)
-                                Text("Prep Tonight (for Tomorrow)")
-                                    .font(.headline)
-                                    .foregroundStyle(.primary)
-                            }
-                        } content: {
                             PrepTonightSection(entry: $tomorrowEntry)
                                 .onChange(of: tomorrowEntry.stickyNotes) { _, _ in hasUnsavedChanges = true }
                                 .onChange(of: tomorrowEntry.preppedProduce) { _, _ in hasUnsavedChanges = true }
                                 .onChange(of: tomorrowEntry.waterReady) { _, _ in hasUnsavedChanges = true }
                                 .onChange(of: tomorrowEntry.breakfastPrepped) { _, _ in hasUnsavedChanges = true }
                                 .onChange(of: tomorrowEntry.nightOther) { _, _ in hasUnsavedChanges = true }
-                        } onToggle: {
-                            prepTonightExpanded.toggle()
                         }
                     }
                     
@@ -132,7 +100,8 @@ struct TodayView: View {
                     .buttonStyle(.borderedProminent)
                     .padding(.top)
                 }
-                .padding()
+                .padding(.horizontal)
+                .padding(.top, 8)
             }
             .navigationTitle("Today")
             .onAppear { 

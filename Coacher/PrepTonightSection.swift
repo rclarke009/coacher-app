@@ -13,9 +13,8 @@ struct PrepTonightSection: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Prep Tonight (5 minutes)")
-                .font(.title3)
+                .font(.subheadline)
                 .bold()
-                .foregroundStyle(.primary)
             
             Toggle("Put sticky notes where I usually grab the less-healthy choice", isOn: $entry.stickyNotes)
             Toggle("Wash/cut veggies or fruit and place them at eye level", isOn: $entry.preppedProduce)
@@ -25,11 +24,6 @@ struct PrepTonightSection: View {
             TextField("Other…", text: $entry.nightOther)
                 .textFieldStyle(.roundedBorder)
         }
-        .padding()
-        .background(
-            RoundedRectangle(cornerRadius: 16)
-                .fill(Color(.secondarySystemBackground))
-        )
     }
 }
 
