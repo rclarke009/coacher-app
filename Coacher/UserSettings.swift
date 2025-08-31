@@ -23,14 +23,27 @@ final class UserSettings {
     }
     
     func addCustomItem(_ item: String) {
+        print("🔍 DEBUG: UserSettings.addCustomItem called with: '\(item)'")
+        print("🔍 DEBUG: UserSettings - Before adding: \(customEveningPrepItems.count) items")
+        
         if !customEveningPrepItems.contains(item) {
             customEveningPrepItems.append(item)
             lastModified = Date()
+            print("🔍 DEBUG: UserSettings - After adding: \(customEveningPrepItems.count) items")
+            print("🔍 DEBUG: UserSettings - Items array: \(customEveningPrepItems)")
+        } else {
+            print("🔍 DEBUG: UserSettings - Item already exists, not adding")
         }
     }
     
     func removeCustomItem(_ item: String) {
+        print("🔍 DEBUG: UserSettings.removeCustomItem called with: '\(item)'")
+        print("🔍 DEBUG: UserSettings - Before removing: \(customEveningPrepItems.count) items")
+        
         customEveningPrepItems.removeAll { $0 == item }
         lastModified = Date()
+        
+        print("🔍 DEBUG: UserSettings - After removing: \(customEveningPrepItems.count) items")
+        print("🔍 DEBUG: UserSettings - Items array: \(customEveningPrepItems)")
     }
 }
