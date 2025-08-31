@@ -22,6 +22,7 @@ final class DailyEntry {
     
     // New flexible evening prep system
     var eveningPrepItems: [EveningPrepItem]
+    var customPrepItems: [String] // All custom prep items (regardless of completion status)
     var completedCustomPrepItems: [String] // Track which custom prep items were completed today
     
     // Morning Focus
@@ -52,6 +53,7 @@ final class DailyEntry {
         self.breakfastPrepped = false
         self.nightOther = ""
         self.eveningPrepItems = []
+        self.customPrepItems = []
         self.completedCustomPrepItems = []
         self.myWhy = ""
         self.challenge = Challenge.none

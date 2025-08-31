@@ -72,14 +72,14 @@ struct PrepTonightSection: View {
             }
             
             // Custom prep items
-            if !entry.completedCustomPrepItems.isEmpty {
+            if !entry.customPrepItems.isEmpty {
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Custom Items")
                         .font(.subheadline)
                         .fontWeight(.medium)
                         .foregroundStyle(.secondary)
                     
-                    ForEach(entry.completedCustomPrepItems, id: \.self) { item in
+                    ForEach(entry.customPrepItems, id: \.self) { item in
                         HStack {
                             Image(systemName: entry.completedCustomPrepItems.contains(item) ? "checkmark.square.fill" : "square")
                                 .foregroundStyle(.blue)
@@ -119,16 +119,19 @@ struct PrepTonightSection: View {
         guard !trimmedItem.isEmpty else { return }
         
         print("🔍 DEBUG: PrepTonightSection - Adding custom item: '\(trimmedItem)'")
-        print("🔍 DEBUG: PrepTonightSection - Current custom items: \(entry.completedCustomPrepItems.count)")
+        print("🔍 DEBUG: PrepTonightSection - Current custom items: \(entry.customPrepItems.count)")
         
-        // Add to DailyEntry's custom prep items
+        // Add to DailyEntry's custom prep items (so it stays visible)
+        entry.customPrepItems.append(trimmedItem)
+        
+        // Also mark it as completed initially
         entry.completedCustomPrepItems.append(trimmedItem)
         
         // Clear the input
         newOtherItem = ""
         
-        print("🔍 DEBUG: PrepTonightSection - After adding, custom items: \(entry.completedCustomPrepItems.count)")
-        print("🔍 DEBUG: PrepTonightSection - Custom items array: \(entry.completedCustomPrepItems)")
+        print("🔍 DEBUG: PrepTonightSection - After adding, custom items: \(entry.customPrepItems.count)")
+        print("🔍 DEBUG: PrepTonightSection - Custom items array: \(entry.customPrepItems)")
         
         // Save the context
         try? context.save()
@@ -157,8 +160,13 @@ struct PrepTonightSection: View {
     }
     
     private func deleteCustomItems(offsets: IndexSet) {
-        let itemsToDelete = offsets.map { entry.completedCustomPrepItems[$0] }
-        entry.completedCustomPrepItems.remove(atOffsets: offsets)
+        let itemsToDelete = offsets.map { entry.customPrepItems[$0] }
+        
+        // Remove from both arrays
+        entry.customPrepItems.remove(atOffsets: offsets)
+        for item in itemsToDelete {
+            entry.completedCustomPrepItems.removeAll { $0 == item }
+        }
         
         print("🔍 DEBUG: PrepTonightSection - Deleted custom items: \(itemsToDelete)")
         
