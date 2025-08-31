@@ -39,12 +39,6 @@ struct MorningFocusSection: View {
                         .foregroundColor(.leafYellow)
                         .font(.caption)
                 }
-                .padding()
-                .background(
-                    RoundedRectangle(cornerRadius: 8)
-                        .stroke(Color.leafYellow, lineWidth: 2)
-                        .background(Color.dynamicCardBackground)
-                )
             }
 
             if entry.challenge == .other {
