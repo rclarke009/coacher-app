@@ -15,6 +15,8 @@ struct TonightBucket: View {
     
     @StateObject private var timeManager = TimeManager()
     @State private var tomorrowEntry: DailyEntry = DailyEntry()
+    @State private var endOfDayCollapsed = false
+    @State private var prepTonightCollapsed = false
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -25,7 +27,7 @@ struct TonightBucket: View {
                 title: "End-of-Day Check-In",
                 icon: "checkmark.seal.fill",
                 accent: .teal,
-                collapsed: .constant(false)
+                collapsed: $endOfDayCollapsed
             ) {
                 EndOfDaySection(entry: $entryToday)
                     .onChange(of: entryToday.followedSwap) { _, _ in hasUnsavedChanges = true }
@@ -37,7 +39,7 @@ struct TonightBucket: View {
                 title: "Prep Tonight (for Tomorrow)",
                 icon: "calendar.badge.clock",
                 accent: .purple,
-                collapsed: .constant(false)
+                collapsed: $prepTonightCollapsed
             ) {
                 PrepTonightSection(entry: $tomorrowEntry)
                     .onChange(of: tomorrowEntry.stickyNotes) { _, _ in hasUnsavedChanges = true }
@@ -50,7 +52,14 @@ struct TonightBucket: View {
         .padding(.bottom, 24)
         .onAppear {
             loadOrCreateTomorrow()
+            setDefaultCollapsedStates()
         }
+    }
+    
+    private func setDefaultCollapsedStates() {
+        // Tonight: both sections expanded by default
+        endOfDayCollapsed = false
+        prepTonightCollapsed = false
     }
     
     private func loadOrCreateTomorrow() {

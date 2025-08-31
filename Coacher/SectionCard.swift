@@ -18,7 +18,7 @@ struct SectionCard<Content: View>: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // Header strip
+            // Header with integrated title and chevron
             HStack(spacing: 8) {
                 if let icon { Image(systemName: icon) }
                 Text(title).font(.headline)
@@ -34,7 +34,7 @@ struct SectionCard<Content: View>: View {
             .contentShape(Rectangle())
             .onTapGesture { withAnimation(.snappy) { collapsed.toggle() } }
 
-            // Content (connected to header via same background)
+            // Content integrated into the same card
             if !collapsed {
                 VStack(alignment: .leading, spacing: 12) {
                     content
@@ -42,13 +42,8 @@ struct SectionCard<Content: View>: View {
                 .padding(14)
                 .background(headerBackground) // Same background as header
                 .clipShape(.rect(cornerRadius: 16, style: .continuous))
-                .overlay( // soft shadow below only
-                    RoundedRectangle(cornerRadius: 16)
-                        .fill(.black.opacity(0.04))
-                        .blur(radius: 0.5)
-                        .offset(y: 1)
-                        .allowsHitTesting(false)
-                )
+                .offset(y: -8) // Overlap to create seamless connection
+                .zIndex(-1) // Ensure header appears above content
             }
         }
         .overlay( // dim whole card if "past"

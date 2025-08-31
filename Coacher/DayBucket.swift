@@ -15,6 +15,8 @@ struct DayBucket: View {
     var hasUnsavedChanges: Binding<Bool>? = nil
     
     @StateObject private var timeManager = TimeManager()
+    @State private var lastNightPrepCollapsed = true
+    @State private var morningFocusCollapsed = false
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -34,7 +36,7 @@ struct DayBucket: View {
                     title: "Last Night's Prep",
                     icon: "moon.stars.fill",
                     accent: .purple,
-                    collapsed: .constant(true),
+                    collapsed: $lastNightPrepCollapsed,
                     dimmed: true
                 ) {
                     // Empty block; no preview per spec
@@ -44,7 +46,7 @@ struct DayBucket: View {
                     title: "Morning Focus",
                     icon: "sun.max.fill",
                     accent: .blue,
-                    collapsed: .constant(true),
+                    collapsed: $morningFocusCollapsed,
                     dimmed: true
                 ) {
                     // Empty block; no preview per spec
@@ -55,7 +57,7 @@ struct DayBucket: View {
                     title: "Last Night's Prep (for Today)",
                     icon: "moon.stars.fill",
                     accent: .purple,
-                    collapsed: .constant(true),
+                    collapsed: $lastNightPrepCollapsed,
                     dimmed: true
                 ) {
                     LastNightPrepReviewView(entry: getLastNightEntry())
@@ -65,7 +67,7 @@ struct DayBucket: View {
                     title: "Morning Focus (Today)",
                     icon: "sun.max.fill",
                     accent: .blue,
-                    collapsed: .constant(false)
+                    collapsed: $morningFocusCollapsed
                 ) {
                     if let entryToday = entryToday, let hasUnsavedChanges = hasUnsavedChanges {
                         MorningFocusSection(entry: entryToday)
@@ -80,6 +82,21 @@ struct DayBucket: View {
                     }
                 }
             }
+        }
+        .onAppear {
+            setDefaultCollapsedStates()
+        }
+    }
+    
+    private func setDefaultCollapsedStates() {
+        if offset == 0 {
+            // Today: Morning Focus expanded by default
+            morningFocusCollapsed = false
+            lastNightPrepCollapsed = true
+        } else {
+            // Past days: both collapsed by default
+            morningFocusCollapsed = true
+            lastNightPrepCollapsed = true
         }
     }
     
