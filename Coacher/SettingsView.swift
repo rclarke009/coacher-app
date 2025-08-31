@@ -10,9 +10,9 @@ import SwiftData
 
 struct SettingsView: View {
     @Environment(\.modelContext) private var context
+    @EnvironmentObject private var celebrationManager: CelebrationManager
     @Query private var achievements: [Achievement]
     
-    @AppStorage("showCelebrations") private var showCelebrations = true
     @AppStorage("showStreakWidgets") private var showStreakWidgets = true
     @AppStorage("nightPrepReminder") private var nightPrepReminder = true
     @AppStorage("morningFocusReminder") private var morningFocusReminder = true
@@ -35,7 +35,17 @@ struct SettingsView: View {
                 }
                 
                 Section("Gamification") {
-                    Toggle("Show celebrations", isOn: $showCelebrations)
+                    Toggle("Show celebrations", isOn: $celebrationManager.celebrationsEnabled)
+                    
+                    if celebrationManager.celebrationsEnabled {
+                        Picker("Celebration Style", selection: $celebrationManager.currentStyle) {
+                            ForEach(CelebrationStyle.allCases, id: \.self) { style in
+                                Text(style.displayName).tag(style)
+                            }
+                        }
+                        .pickerStyle(.segmented)
+                    }
+                    
                     Toggle("Show streak widgets", isOn: $showStreakWidgets)
                     
                     if !achievements.isEmpty {

@@ -9,6 +9,9 @@ import SwiftUI
 
 struct EndOfDaySection: View {
     @Binding var entry: DailyEntry
+    @EnvironmentObject private var celebrationManager: CelebrationManager
+    @State private var showingCelebration = false
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("End-of-Day Check-In (Optional)")
@@ -19,16 +22,28 @@ struct EndOfDaySection: View {
                 Image(systemName: (entry.followedSwap ?? false) ? "checkmark.square.fill" : "square")
                     .foregroundColor(.leafGreen)
                     .onTapGesture {
+                        let wasUnchecked = entry.followedSwap != true
                         entry.followedSwap?.toggle()
                         if entry.followedSwap == nil {
                             entry.followedSwap = true
                         }
+                        
+                        // Trigger celebration if checking the box and celebrations are enabled
+                        if wasUnchecked && entry.followedSwap == true && celebrationManager.shouldCelebrate() {
+                            showingCelebration = true
+                        }
                     }
                 Text("I followed my swap")
                     .onTapGesture {
+                        let wasUnchecked = entry.followedSwap != true
                         entry.followedSwap?.toggle()
                         if entry.followedSwap == nil {
                             entry.followedSwap = true
+                        }
+                        
+                        // Trigger celebration if checking the box and celebrations are enabled
+                        if wasUnchecked && entry.followedSwap == true && celebrationManager.shouldCelebrate() {
+                            showingCelebration = true
                         }
                     }
             }
@@ -39,6 +54,17 @@ struct EndOfDaySection: View {
             TextField("If no, what got in the way?", text: $entry.whatGotInTheWay)
                 .textFieldStyle(.roundedBorder)
         }
+        .overlay(
+            // Celebration overlay
+            Group {
+                if showingCelebration && celebrationManager.currentStyle == .playful {
+                    PlayfulCelebrationView(
+                        encouragingPhrase: celebrationManager.randomEncouragingPhrase(),
+                        isVisible: $showingCelebration
+                    )
+                }
+            }
+        )
     }
 }
 
