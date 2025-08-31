@@ -15,6 +15,7 @@ struct PrepTonightSection: View {
     
     @State private var newOtherItem = ""
     @State private var showingEveningPrepManager = false
+    @State private var refreshTrigger = false // Force UI refresh
     
     private var settings: UserSettings {
         if let existing = userSettings.first {
@@ -97,6 +98,7 @@ struct PrepTonightSection: View {
                 .disabled(newOtherItem.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
             }
         }
+        .id(refreshTrigger) // Force view refresh when refreshTrigger changes
         .sheet(isPresented: $showingEveningPrepManager) {
             EveningPrepManager()
         }
@@ -118,6 +120,10 @@ struct PrepTonightSection: View {
         // Save to database
         try? context.save()
         print("🔍 DEBUG: PrepTonightSection - Context saved")
+        
+        // Force UI refresh since SwiftData @Query isn't updating automatically
+        refreshTrigger.toggle()
+        print("🔍 DEBUG: PrepTonightSection - Refresh triggered: \(refreshTrigger)")
     }
     
     private func removeCustomItem(_ item: String) {
