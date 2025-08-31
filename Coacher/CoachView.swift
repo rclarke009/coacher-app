@@ -115,19 +115,22 @@ struct CoachView: View {
 }
 
 struct EmptyChatView: View {
+    @Environment(\.colorScheme) private var colorScheme
+    
     var body: some View {
         VStack(spacing: 20) {
             Image(systemName: "message.circle.fill")
                 .font(.system(size: 80))
-                .foregroundStyle(.blue)
+                .foregroundColor(.brandBlue)
             
             Text("Start a conversation with your coach")
                 .font(.title2)
                 .bold()
+                .foregroundColor(.dynamicText)
             
             Text("Share your thoughts, challenges, or ask for guidance. Your coach is here to help you make the next healthy choice.")
                 .multilineTextAlignment(.center)
-                .foregroundStyle(.secondary)
+                .foregroundColor(.dynamicSecondaryText)
                 .padding(.horizontal)
         }
         .padding()
@@ -154,6 +157,7 @@ struct ChatMessagesView: View {
 
 struct MessageBubble: View {
     let message: LLMMessage
+    @Environment(\.colorScheme) private var colorScheme
     
     var body: some View {
         HStack {
@@ -166,13 +170,13 @@ struct MessageBubble: View {
                     .padding()
                     .background(
                         RoundedRectangle(cornerRadius: 16)
-                            .fill(message.role == .user ? Color.blue : Color(.secondarySystemBackground))
+                            .fill(message.role == .user ? Color.brandBlue : Color.dynamicCardBackground)
                     )
-                    .foregroundStyle(message.role == .user ? .white : .primary)
+                    .foregroundColor(message.role == .user ? .white : .dynamicText)
                 
                 Text(message.timestamp, style: .time)
                     .font(.caption2)
-                    .foregroundStyle(.secondary)
+                    .foregroundColor(.dynamicSecondaryText)
             }
             
             if message.role == .assistant {
