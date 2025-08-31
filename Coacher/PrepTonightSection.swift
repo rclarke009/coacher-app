@@ -11,9 +11,21 @@ import SwiftData
 struct PrepTonightSection: View {
     @Binding var entry: DailyEntry
     @Environment(\.modelContext) private var context
+    @Query private var userSettings: [UserSettings]
     
     @State private var newOtherItem = ""
     @State private var showingEveningPrepManager = false
+    
+    private var settings: UserSettings {
+        if let existing = userSettings.first {
+            return existing
+        } else {
+            let newSettings = UserSettings()
+            context.insert(newSettings)
+            try? context.save()
+            return newSettings
+        }
+    }
     
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -33,36 +45,29 @@ struct PrepTonightSection: View {
             
             // Default prep items
             VStack(alignment: .leading, spacing: 8) {
-                Toggle("Put sticky notes where I usually grab the less-healthy choice", isOn: $entry.stickyNotes)
-                Toggle("Wash/cut veggies or fruit and place them at eye level", isOn: $entry.preppedProduce)
                 Toggle("Put water bottle in fridge or by my bed", isOn: $entry.waterReady)
                 Toggle("Prep quick breakfast/snack", isOn: $entry.breakfastPrepped)
+                Toggle("Put sticky notes where I usually grab the less-healthy choice", isOn: $entry.stickyNotes)
+                Toggle("Wash/cut veggies or fruit and place them at eye level", isOn: $entry.preppedProduce)
             }
             
-            // Custom prep items
-            if !entry.customEveningPrepItems.isEmpty {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Custom Items:")
-                        .font(.subheadline)
-                        .bold()
-                        .foregroundStyle(.secondary)
-                    
-                    ForEach(entry.customEveningPrepItems, id: \.self) { item in
-                        HStack {
-                            Toggle(item, isOn: .constant(true)) // For now, always enabled
-                                .toggleStyle(.button)
-                                .buttonStyle(.plain)
-                            
-                            Spacer()
-                            
-                            Button(action: {
-                                removeCustomItem(item)
-                            }) {
-                                Image(systemName: "trash")
-                                    .foregroundStyle(.red)
-                            }
+            // Custom prep items (no visual separation - equally important)
+            if !settings.customEveningPrepItems.isEmpty {
+                ForEach(settings.customEveningPrepItems, id: \.self) { item in
+                    HStack {
+                        Toggle(item, isOn: .constant(true)) // For now, always enabled
+                            .toggleStyle(.button)
                             .buttonStyle(.plain)
+                        
+                        Spacer()
+                        
+                        Button(action: {
+                            removeCustomItem(item)
+                        }) {
+                            Image(systemName: "trash")
+                                .foregroundStyle(.red)
                         }
+                        .buttonStyle(.plain)
                     }
                 }
             }
@@ -92,17 +97,15 @@ struct PrepTonightSection: View {
         let trimmedItem = newOtherItem.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedItem.isEmpty else { return }
         
-        if !entry.customEveningPrepItems.contains(trimmedItem) {
-            entry.customEveningPrepItems.append(trimmedItem)
-            newOtherItem = ""
-            
-            // Save to database
-            try? context.save()
-        }
+        settings.addCustomItem(trimmedItem)
+        newOtherItem = ""
+        
+        // Save to database
+        try? context.save()
     }
     
     private func removeCustomItem(_ item: String) {
-        entry.customEveningPrepItems.removeAll { $0 == item }
+        settings.removeCustomItem(item)
         
         // Save to database
         try? context.save()
