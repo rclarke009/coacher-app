@@ -102,8 +102,15 @@ struct PrepTonightSection: View {
         .id(refreshTrigger) // Force view refresh when refreshTrigger changes
         .onAppear {
             // Load custom items from settings into local state
-            localCustomItems = settings.customEveningPrepItems
-            print("🔍 DEBUG: PrepTonightSection - onAppear: loaded \(localCustomItems.count) custom items")
+            // Force a fresh fetch from the database
+            if let currentSettings = userSettings.first {
+                localCustomItems = currentSettings.customEveningPrepItems
+                print("🔍 DEBUG: PrepTonightSection - onAppear: loaded \(localCustomItems.count) custom items from database")
+                print("🔍 DEBUG: PrepTonightSection - onAppear: items: \(localCustomItems)")
+            } else {
+                print("🔍 DEBUG: PrepTonightSection - onAppear: no UserSettings found")
+                localCustomItems = []
+            }
         }
         .sheet(isPresented: $showingEveningPrepManager) {
             EveningPrepManager()
