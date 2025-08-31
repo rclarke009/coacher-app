@@ -57,10 +57,12 @@ struct SettingsView: View {
                     Button("Export data") {
                         exportData()
                     }
+                    .foregroundColor(.leafGreen)
                     
                     Button("Import data") {
                         importData()
                     }
+                    .foregroundColor(.leafYellow)
                     
                     Button("Clear all data") {
                         clearAllData()

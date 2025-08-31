@@ -25,6 +25,7 @@ struct MorningFocusSection: View {
                 .bold()
             Picker("Challenge", selection: $entry.challenge) {
                 Text("Select…").tag(Challenge.none)
+                    .foregroundColor(.leafYellow)
                 Text("Skipping meals").tag(Challenge.skippingMeals)
                 Text("Late-night snacking").tag(Challenge.lateNightSnacking)
                 Text("Sugary drinks").tag(Challenge.sugaryDrinks)
