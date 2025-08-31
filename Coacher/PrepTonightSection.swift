@@ -88,12 +88,15 @@ struct PrepTonightSection: View {
                 List {
                     ForEach(localCustomItems, id: \.self) { item in
                         HStack {
-                            Image(systemName: "checkmark.square.fill")
-                                .foregroundStyle(.blue)
+                            Image(systemName: checkedCustomItems.contains(item) ? "checkmark.square.fill" : "square")
+                                .foregroundStyle(checkedCustomItems.contains(item) ? .blue : .secondary)
                                 .onTapGesture {
-                                    // For now, always enabled - could add individual tracking later
+                                    toggleCustomItem(item)
                                 }
                             Text(item)
+                                .onTapGesture {
+                                    toggleCustomItem(item)
+                                }
                             Spacer()
                         }
                         .listRowInsets(EdgeInsets(top: 4, leading: 0, bottom: 4, trailing: 0))
