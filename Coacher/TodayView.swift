@@ -12,40 +12,115 @@ struct TodayView: View {
     @Environment(\.modelContext) private var context
     @Query(sort: \DailyEntry.date, order: .reverse) private var entries: [DailyEntry]
     
+    @StateObject private var timeManager = TimeManager()
     @State private var entry: DailyEntry = DailyEntry()
+    @State private var tomorrowEntry: DailyEntry = DailyEntry()
     @State private var showingNeedHelp = false
     @State private var hasUnsavedChanges = false
+    
+    // Section expansion states
+    @State private var lastNightPrepExpanded = false
+    @State private var morningFocusExpanded = true
+    @State private var endOfDayExpanded = false
+    @State private var prepTonightExpanded = true
     
     var body: some View {
         NavigationView {
             ScrollView {
                 VStack(spacing: 20) {
-                    // Night Prep Section
-                    NightPrepSection(entry: $entry)
-                        .onChange(of: entry.stickyNotes) { _, _ in hasUnsavedChanges = true }
-                        .onChange(of: entry.preppedProduce) { _, _ in hasUnsavedChanges = true }
-                        .onChange(of: entry.waterReady) { _, _ in hasUnsavedChanges = true }
-                        .onChange(of: entry.breakfastPrepped) { _, _ in hasUnsavedChanges = true }
-                        .onChange(of: entry.nightOther) { _, _ in hasUnsavedChanges = true }
+                    // Last Night's Prep (for Today) - Day Phase only
+                    if timeManager.isDayPhase {
+                        CollapsibleSection(
+                            title: "Last Night's Prep",
+                            isExpanded: lastNightPrepExpanded,
+                            isDimmed: true
+                        ) {
+                            HStack {
+                                Image(systemName: "moon.fill")
+                                    .foregroundStyle(.purple)
+                                Text("Last Night's Prep (for Today)")
+                                    .font(.headline)
+                                    .foregroundStyle(.secondary)
+                            }
+                        } content: {
+                            LastNightPrepReviewView(entry: getLastNightEntry())
+                        } onToggle: {
+                            lastNightPrepExpanded.toggle()
+                        }
+                    }
                     
-                    Divider()
+                    // Morning Focus (Today) - Primary in Day Phase
+                    CollapsibleSection(
+                        title: "Morning Focus",
+                        isExpanded: morningFocusExpanded,
+                        isDimmed: timeManager.isEveningPhase
+                    ) {
+                        HStack {
+                            Image(systemName: "sun.max.fill")
+                                .foregroundStyle(timeManager.isDayPhase ? .blue : .secondary)
+                            Text("Morning Focus (Today)")
+                                .font(.headline)
+                                .foregroundStyle(timeManager.isDayPhase ? .primary : .secondary)
+                        }
+                    } content: {
+                        MorningFocusSection(entry: $entry)
+                            .onChange(of: entry.myWhy) { _, _ in hasUnsavedChanges = true }
+                            .onChange(of: entry.challenge) { _, _ in hasUnsavedChanges = true }
+                            .onChange(of: entry.challengeOther) { _, _ in hasUnsavedChanges = true }
+                            .onChange(of: entry.chosenSwap) { _, _ in hasUnsavedChanges = true }
+                            .onChange(of: entry.commitFrom) { _, _ in hasUnsavedChanges = true }
+                            .onChange(of: entry.commitTo) { _, _ in hasUnsavedChanges = true }
+                    } onToggle: {
+                        morningFocusExpanded.toggle()
+                    }
                     
-                    // Morning Focus Section
-                    MorningFocusSection(entry: $entry)
-                        .onChange(of: entry.myWhy) { _, _ in hasUnsavedChanges = true }
-                        .onChange(of: entry.challenge) { _, _ in hasUnsavedChanges = true }
-                        .onChange(of: entry.challengeOther) { _, _ in hasUnsavedChanges = true }
-                        .onChange(of: entry.chosenSwap) { _, _ in hasUnsavedChanges = true }
-                        .onChange(of: entry.commitFrom) { _, _ in hasUnsavedChanges = true }
-                        .onChange(of: entry.commitTo) { _, _ in hasUnsavedChanges = true }
+                    // End-of-Day Check-In - Primary in Evening Phase
+                    CollapsibleSection(
+                        title: "End-of-Day Check-In",
+                        isExpanded: endOfDayExpanded,
+                        isDimmed: timeManager.isDayPhase
+                    ) {
+                        HStack {
+                            Image(systemName: "clock.fill")
+                                .foregroundStyle(timeManager.isEveningPhase ? .blue : .secondary)
+                            Text("End-of-Day Check-In")
+                                .font(.headline)
+                                .foregroundStyle(timeManager.isEveningPhase ? .primary : .secondary)
+                        }
+                    } content: {
+                        EndOfDaySection(entry: $entry)
+                            .onChange(of: entry.followedSwap) { _, _ in hasUnsavedChanges = true }
+                            .onChange(of: entry.feelAboutIt) { _, _ in hasUnsavedChanges = true }
+                            .onChange(of: entry.whatGotInTheWay) { _, _ in hasUnsavedChanges = true }
+                    } onToggle: {
+                        endOfDayExpanded.toggle()
+                    }
                     
-                    Divider()
-                    
-                    // End of Day Section
-                    EndOfDaySection(entry: $entry)
-                        .onChange(of: entry.followedSwap) { _, _ in hasUnsavedChanges = true }
-                        .onChange(of: entry.feelAboutIt) { _, _ in hasUnsavedChanges = true }
-                        .onChange(of: entry.whatGotInTheWay) { _, _ in hasUnsavedChanges = true }
+                    // Prep Tonight (for Tomorrow) - Evening Phase only
+                    if timeManager.isEveningPhase {
+                        CollapsibleSection(
+                            title: "Prep Tonight",
+                            isExpanded: prepTonightExpanded,
+                            isDimmed: false
+                        ) {
+                            HStack {
+                                Image(systemName: "moon.stars.fill")
+                                    .foregroundStyle(.blue)
+                                Text("Prep Tonight (for Tomorrow)")
+                                    .font(.headline)
+                                    .foregroundStyle(.primary)
+                            }
+                        } content: {
+                            PrepTonightSection(entry: $tomorrowEntry)
+                                .onChange(of: tomorrowEntry.stickyNotes) { _, _ in hasUnsavedChanges = true }
+                                .onChange(of: tomorrowEntry.preppedProduce) { _, _ in hasUnsavedChanges = true }
+                                .onChange(of: tomorrowEntry.waterReady) { _, _ in hasUnsavedChanges = true }
+                                .onChange(of: tomorrowEntry.breakfastPrepped) { _, _ in hasUnsavedChanges = true }
+                                .onChange(of: tomorrowEntry.nightOther) { _, _ in hasUnsavedChanges = true }
+                        } onToggle: {
+                            prepTonightExpanded.toggle()
+                        }
+                    }
                     
                     // I Need Help Button
                     Button(action: { showingNeedHelp = true }) {
@@ -60,7 +135,11 @@ struct TodayView: View {
                 .padding()
             }
             .navigationTitle("Today")
-            .onAppear { loadOrCreateToday() }
+            .onAppear { 
+                loadOrCreateToday()
+                loadOrCreateTomorrow()
+                setDefaultExpansionStates()
+            }
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     SaveButton(entry: entry, hasUnsavedChanges: hasUnsavedChanges) {
@@ -73,36 +152,57 @@ struct TodayView: View {
             }
             .scrollDismissesKeyboard(.immediately)
             .onTapGesture {
-                // Dismiss keyboard when tapping outside text fields
                 hideKeyboard()
             }
         }
     }
     
     private func loadOrCreateToday() {
-        let startOfDay = Calendar.current.startOfDay(for: Date())
+        let startOfDay = timeManager.todayDate
         if let existing = entries.first(where: { Calendar.current.isDate($0.date, inSameDayAs: startOfDay) }) {
             entry = existing
-            hasUnsavedChanges = false
         } else {
             entry = DailyEntry()
             entry.date = startOfDay
             context.insert(entry)
             try? context.save()
-            hasUnsavedChanges = false
+        }
+    }
+    
+    private func loadOrCreateTomorrow() {
+        let startOfTomorrow = timeManager.tomorrowDate
+        if let existing = entries.first(where: { Calendar.current.isDate($0.date, inSameDayAs: startOfTomorrow) }) {
+            tomorrowEntry = existing
+        } else {
+            tomorrowEntry = DailyEntry()
+            tomorrowEntry.date = startOfTomorrow
+            context.insert(tomorrowEntry)
+            try? context.save()
+        }
+    }
+    
+    private func getLastNightEntry() -> DailyEntry? {
+        let startOfLastNight = timeManager.lastNightDate
+        return entries.first(where: { Calendar.current.isDate($0.date, inSameDayAs: startOfLastNight) })
+    }
+    
+    private func setDefaultExpansionStates() {
+        if timeManager.isDayPhase {
+            morningFocusExpanded = true
+            endOfDayExpanded = false
+            lastNightPrepExpanded = false
+        } else {
+            morningFocusExpanded = false
+            endOfDayExpanded = true
+            prepTonightExpanded = true
         }
     }
     
     private func saveEntry() {
-        // Force a save to ensure all changes are persisted
         try? context.save()
         hasUnsavedChanges = false
-        
-        // Provide haptic feedback
         let impactFeedback = UIImpactFeedbackGenerator(style: .light)
         impactFeedback.impactOccurred()
-        
-        // Dismiss keyboard after saving
         hideKeyboard()
     }
     
