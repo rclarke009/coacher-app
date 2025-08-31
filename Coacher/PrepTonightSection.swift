@@ -90,6 +90,13 @@ struct PrepTonightSection: View {
         }
         .id(refreshTrigger) // Force view refresh when refreshTrigger changes
         .onAppear {
+            // Debug @Query state
+            print("🔍 DEBUG: PrepTonightSection - onAppear: @Query has \(userSettings.count) UserSettings objects")
+            if !userSettings.isEmpty {
+                print("🔍 DEBUG: PrepTonightSection - onAppear: First UserSettings has \(userSettings[0].customEveningPrepItems.count) items")
+                print("🔍 DEBUG: PrepTonightSection - onAppear: First UserSettings ID: \(userSettings[0].id)")
+            }
+            
             // Load custom items from settings into local state
             // Force a fresh fetch from the database
             if let currentSettings = userSettings.first {
