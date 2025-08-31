@@ -36,6 +36,17 @@ struct TimelineScreen: View {
                         
                         // TONIGHT ONLY (no future placeholders)
                         TonightBucket(entries: entries, entryToday: $entryToday, hasUnsavedChanges: $hasUnsavedChanges)
+                        
+                        // I Need Help Button
+                        Button(action: { showingNeedHelp = true }) {
+                            Label("I Need Help", systemImage: "hand.raised.fill")
+                                .font(.title2)
+                                .padding()
+                                .frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .padding(.top, 16)
+                        .padding(.bottom, 24)
                     }
                     .padding(.horizontal)
                     .padding(.top, 8)
