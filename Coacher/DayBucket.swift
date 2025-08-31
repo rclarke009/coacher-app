@@ -82,6 +82,14 @@ struct DayBucket: View {
                 ) {
                     LastNightPrepReviewView(entry: getLastNightEntry())
                 }
+                .onTapGesture {
+                    print("🔍 DEBUG: Today Last Night Prep tapped!")
+                    print("🔍 DEBUG: lastNightPrepCollapsed before: \(lastNightPrepCollapsed)")
+                    withAnimation(.snappy) {
+                        lastNightPrepCollapsed.toggle()
+                    }
+                    print("🔍 DEBUG: lastNightPrepCollapsed after: \(lastNightPrepCollapsed)")
+                }
                 
                 SectionCard(
                     title: "Morning Focus (Today)",
@@ -100,6 +108,14 @@ struct DayBucket: View {
                     } else {
                         MorningFocusSection(entry: .constant(DailyEntry()))
                     }
+                }
+                .onTapGesture {
+                    print("🔍 DEBUG: Today Morning Focus tapped!")
+                    print("🔍 DEBUG: morningFocusCollapsed before: \(morningFocusCollapsed)")
+                    withAnimation(.snappy) {
+                        morningFocusCollapsed.toggle()
+                    }
+                    print("🔍 DEBUG: morningFocusCollapsed after: \(morningFocusCollapsed)")
                 }
             }
         }
