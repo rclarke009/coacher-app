@@ -31,7 +31,7 @@ struct DayBucket: View {
             }
             
             if offset < 0 {
-                // PAST: collapsed + dimmed (no preview line)
+                // PAST: collapsed + dimmed, but expandable to show journey
                 SectionCard(
                     title: "Last Night's Prep",
                     icon: "moon.stars.fill",
@@ -39,7 +39,7 @@ struct DayBucket: View {
                     collapsed: $lastNightPrepCollapsed,
                     dimmed: true
                 ) {
-                    // Empty block; no preview per spec
+                    PastNightPrepPreview(offset: offset)
                 }
                 
                 SectionCard(
@@ -49,7 +49,7 @@ struct DayBucket: View {
                     collapsed: $morningFocusCollapsed,
                     dimmed: true
                 ) {
-                    // Empty block; no preview per spec
+                    PastMorningFocusPreview(offset: offset)
                 }
             } else {
                 // TODAY
