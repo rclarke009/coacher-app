@@ -18,17 +18,6 @@ struct PrepTonightSection: View {
     @State private var refreshTrigger = false // Force UI refresh
     @State private var localCustomItems: [String] = [] // Local state for custom items
     
-    private var settings: UserSettings {
-        if let existing = userSettings.first {
-            return existing
-        } else {
-            let newSettings = UserSettings()
-            context.insert(newSettings)
-            try? context.save()
-            return newSettings
-        }
-    }
-    
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack {
@@ -128,7 +117,7 @@ struct PrepTonightSection: View {
         let currentSettings: UserSettings
         if let existing = userSettings.first {
             currentSettings = existing
-            print("🔍 DEBUG: PrepTonightSection - Using existing UserSettings")
+            print("🔍 DEBUG: PrepTonightSection - Using existing UserSettings with \(existing.customEveningPrepItems.count) items")
         } else {
             // Create new UserSettings if none exist
             currentSettings = UserSettings()
