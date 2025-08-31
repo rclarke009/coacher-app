@@ -22,7 +22,6 @@ final class DailyEntry {
     
     // New flexible evening prep system
     var eveningPrepItems: [EveningPrepItem]
-    var customEveningPrepItems: [String] // For user's custom items
     
     // Morning Focus
     var myWhy: String
@@ -52,7 +51,6 @@ final class DailyEntry {
         self.breakfastPrepped = false
         self.nightOther = ""
         self.eveningPrepItems = []
-        self.customEveningPrepItems = []
         self.myWhy = ""
         self.challenge = Challenge.none
         self.challengeOther = ""
