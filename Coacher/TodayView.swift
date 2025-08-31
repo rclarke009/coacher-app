@@ -18,26 +18,37 @@ struct TodayView: View {
     @State private var showingNeedHelp = false
     @State private var hasUnsavedChanges = false
     
-    // Section expansion states - simplified to two main cards
-    @State private var morningCollapsed = false
-    @State private var eveningCollapsed = true
+    // Section expansion states
+    @State private var lastNightPrepExpanded = false
+    @State private var morningFocusExpanded = true
+    @State private var endOfDayExpanded = false
+    @State private var prepTonightExpanded = true
     
     var body: some View {
         NavigationView {
             ScrollView {
-                VStack(spacing: 16) {
-                    // MORNING CARD (BLUE)
+                VStack(spacing: 14) {
+                    // Last Night's Prep (for Today) - Day Phase only
+                    if timeManager.isDayPhase {
+                        SectionCard(
+                            title: "Last Night's Prep (for Today)",
+                            icon: "moon.stars.fill",
+                            accent: .purple,
+                            collapsed: $lastNightPrepExpanded,
+                            dimmed: true
+                        ) {
+                            LastNightPrepReviewView(entry: getLastNightEntry())
+                        }
+                    }
+                    
+                    // Morning Focus (Today) - Primary in Day Phase
                     SectionCard(
                         title: "Morning Focus (Today)",
                         icon: "sun.max.fill",
                         accent: .blue,
-                        collapsed: $morningCollapsed,
+                        collapsed: $morningFocusExpanded,
                         dimmed: timeManager.isEveningPhase
                     ) {
-                        // Optional: show last-night summary chip at top
-                        MorningSummaryBanner(prepItems: lastNightSummaryItems())
-                            .padding(.bottom, 4)
-                        
                         MorningFocusSection(entry: $entry)
                             .onChange(of: entry.myWhy) { _, _ in hasUnsavedChanges = true }
                             .onChange(of: entry.challenge) { _, _ in hasUnsavedChanges = true }
@@ -47,36 +58,36 @@ struct TodayView: View {
                             .onChange(of: entry.commitTo) { _, _ in hasUnsavedChanges = true }
                     }
                     
-                    // EVENING CARD (PURPLE)
+                    // End-of-Day Check-In - Primary in Evening Phase
                     SectionCard(
-                        title: "Evening Routine",
-                        icon: "moon.stars.fill",
-                        accent: .purple,
-                        collapsed: $eveningCollapsed,
+                        title: "End-of-Day Check-In",
+                        icon: "clock.fill",
+                        accent: .teal,
+                        collapsed: $endOfDayExpanded,
                         dimmed: timeManager.isDayPhase
                     ) {
-                        // Subsection A: End-of-Day
-                        Text("End-of-Day Check-In")
-                            .font(.subheadline.weight(.semibold))
-                            .padding(.top, 4)
-                        
                         EndOfDaySection(entry: $entry)
                             .onChange(of: entry.followedSwap) { _, _ in hasUnsavedChanges = true }
                             .onChange(of: entry.feelAboutIt) { _, _ in hasUnsavedChanges = true }
                             .onChange(of: entry.whatGotInTheWay) { _, _ in hasUnsavedChanges = true }
-                        
-                        Divider().padding(.vertical, 6)
-                        
-                        // Subsection B: Prep Tonight
-                        Text("Prep Tonight (for Tomorrow)")
-                            .font(.subheadline.weight(.semibold))
-                        
-                        PrepTonightSection(entry: $tomorrowEntry)
-                            .onChange(of: tomorrowEntry.stickyNotes) { _, _ in hasUnsavedChanges = true }
-                            .onChange(of: tomorrowEntry.preppedProduce) { _, _ in hasUnsavedChanges = true }
-                            .onChange(of: tomorrowEntry.waterReady) { _, _ in hasUnsavedChanges = true }
-                            .onChange(of: tomorrowEntry.breakfastPrepped) { _, _ in hasUnsavedChanges = true }
-                            .onChange(of: tomorrowEntry.nightOther) { _, _ in hasUnsavedChanges = true }
+                    }
+                    
+                    // Prep Tonight (for Tomorrow) - Evening Phase only
+                    if timeManager.isEveningPhase {
+                        SectionCard(
+                            title: "Prep Tonight (for Tomorrow)",
+                            icon: "moon.stars.fill",
+                            accent: .blue,
+                            collapsed: $prepTonightExpanded,
+                            dimmed: false
+                        ) {
+                            PrepTonightSection(entry: $tomorrowEntry)
+                                .onChange(of: tomorrowEntry.stickyNotes) { _, _ in hasUnsavedChanges = true }
+                                .onChange(of: tomorrowEntry.preppedProduce) { _, _ in hasUnsavedChanges = true }
+                                .onChange(of: tomorrowEntry.waterReady) { _, _ in hasUnsavedChanges = true }
+                                .onChange(of: tomorrowEntry.breakfastPrepped) { _, _ in hasUnsavedChanges = true }
+                                .onChange(of: tomorrowEntry.nightOther) { _, _ in hasUnsavedChanges = true }
+                        }
                     }
                     
                     // I Need Help Button
@@ -96,7 +107,7 @@ struct TodayView: View {
             .onAppear { 
                 loadOrCreateToday()
                 loadOrCreateTomorrow()
-                configureDefaultCollapsedStates()
+                setDefaultExpansionStates()
             }
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -139,32 +150,22 @@ struct TodayView: View {
         }
     }
     
-    private func lastNightSummaryItems() -> [String] {
-        let lastNightEntry = getLastNightEntry()
-        var items: [String] = []
-        
-        if let entry = lastNightEntry {
-            if entry.stickyNotes { items.append("Sticky notes placed") }
-            if entry.preppedProduce { items.append("Veggies prepped") }
-            if entry.waterReady { items.append("Water ready") }
-            if entry.breakfastPrepped { items.append("Breakfast planned") }
-        }
-        
-        return items
-    }
+
     
     private func getLastNightEntry() -> DailyEntry? {
         let startOfLastNight = timeManager.lastNightDate
         return entries.first(where: { Calendar.current.isDate($0.date, inSameDayAs: startOfLastNight) })
     }
     
-    private func configureDefaultCollapsedStates() {
+    private func setDefaultExpansionStates() {
         if timeManager.isDayPhase {
-            morningCollapsed = false      // Day: expand morning
-            eveningCollapsed = true       // Day: collapse evening
+            morningFocusExpanded = true
+            endOfDayExpanded = false
+            lastNightPrepExpanded = false
         } else {
-            morningCollapsed = true       // Evening: collapse morning
-            eveningCollapsed = false      // Evening: expand evening
+            morningFocusExpanded = false
+            endOfDayExpanded = true
+            prepTonightExpanded = true
         }
     }
     
