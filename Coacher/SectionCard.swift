@@ -34,17 +34,13 @@ struct SectionCard<Content: View>: View {
             .contentShape(Rectangle())
             .onTapGesture { withAnimation(.snappy) { collapsed.toggle() } }
 
-            // Content (connected to header via a subtle border + same card)
+            // Content (connected to header via same background)
             if !collapsed {
                 VStack(alignment: .leading, spacing: 12) {
                     content
                 }
                 .padding(14)
-                .background(cardBackground)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 16)
-                        .strokeBorder(borderColor, lineWidth: 1)
-                )
+                .background(headerBackground) // Same background as header
                 .clipShape(.rect(cornerRadius: 16, style: .continuous))
                 .overlay( // soft shadow below only
                     RoundedRectangle(cornerRadius: 16)

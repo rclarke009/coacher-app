@@ -11,25 +11,14 @@ import SwiftData
 struct ContentView: View {
     var body: some View {
         TabView {
-            TodayView()
-                .tabItem {
-                    Label("Today", systemImage: "calendar")
-                }
-            
+            TimelineScreen()
+                .tabItem { Label("Today", systemImage: "calendar") }
             CoachView()
-                .tabItem {
-                    Label("Coach", systemImage: "message")
-                }
-            
+                .tabItem { Label("Coach", systemImage: "message") }
             HistoryView()
-                .tabItem {
-                    Label("History", systemImage: "clock")
-                }
-            
+                .tabItem { Label("History", systemImage: "clock") }
             SettingsView()
-                .tabItem {
-                    Label("Settings", systemImage: "gear")
-                }
+                .tabItem { Label("Settings", systemImage: "gear") }
         }
     }
 }
