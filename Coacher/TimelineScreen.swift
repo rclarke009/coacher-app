@@ -84,6 +84,14 @@ struct TimelineScreen: View {
                         subtitle: celebrationSubtitle
                     )
                 )
+                .overlay(
+                    // Milestone celebration overlay
+                    MilestoneCelebrationOverlay(
+                        isPresented: $celebrationManager.showingMilestoneCelebration,
+                        streakCount: celebrationManager.milestoneStreakCount,
+                        message: celebrationManager.milestoneMessage
+                    )
+                )
             }
         }
     }

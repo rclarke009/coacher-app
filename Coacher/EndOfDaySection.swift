@@ -30,6 +30,10 @@ struct EndOfDaySection: View {
                         
                         // Trigger celebration if checking the box and celebrations are enabled
                         if wasUnchecked && entry.followedSwap == true && celebrationManager.shouldCelebrate() {
+                            // Record activity for streak tracking
+                            celebrationManager.recordActivity()
+                            
+                            // Show regular celebration
                             onCelebrationTrigger(
                                 "Swap logged!",
                                 celebrationManager.randomEncouragingPhrase(),
@@ -47,6 +51,10 @@ struct EndOfDaySection: View {
                         
                         // Trigger celebration if checking the box and celebrations are enabled
                         if wasUnchecked && entry.followedSwap == true && celebrationManager.shouldCelebrate() {
+                            // Record activity for streak tracking
+                            celebrationManager.recordActivity()
+                            
+                            // Show regular celebration
                             onCelebrationTrigger(
                                 "Swap logged!",
                                 celebrationManager.randomEncouragingPhrase(),

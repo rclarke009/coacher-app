@@ -7,7 +7,13 @@ class CelebrationManager: ObservableObject {
     @AppStorage("celebrationStyle") private var celebrationStyle: CelebrationStyle = .playful
     @AppStorage("showCelebrations") private var showCelebrations: Bool = true
     
-    // Encouraging phrases for celebrations
+    @Published var showingMilestoneCelebration = false
+    @Published var milestoneStreakCount = 0
+    @Published var milestoneMessage = ""
+    
+    private let streakManager = StreakManager()
+    
+    // Encouraging phrases for regular celebrations
     private let encouragingPhrases = [
         "One healthier choice, done.",
         "That swap makes you stronger.",
@@ -52,11 +58,41 @@ class CelebrationManager: ObservableObject {
         }
     }
     
+    // Get the streak manager for external access
+    var streakManager: StreakManager {
+        return self.streakManager
+    }
+    
     func randomEncouragingPhrase() -> String {
         encouragingPhrases.randomElement() ?? encouragingPhrases[0]
     }
     
     func shouldCelebrate() -> Bool {
         return showCelebrations
+    }
+    
+    // Check for milestone celebrations
+    func checkForMilestoneCelebration() {
+        guard showCelebrations else { return }
+        
+        if streakManager.shouldCelebrateMilestone() {
+            milestoneStreakCount = streakManager.streak
+            milestoneMessage = streakManager.milestoneQuote() ?? "Amazing achievement!"
+            showingMilestoneCelebration = true
+            
+            // Mark milestone as celebrated
+            streakManager.markMilestoneCelebrated()
+        }
+    }
+    
+    // Record activity and check for milestones
+    func recordActivity() {
+        streakManager.recordActivity()
+        checkForMilestoneCelebration()
+    }
+    
+    // Dismiss milestone celebration
+    func dismissMilestoneCelebration() {
+        showingMilestoneCelebration = false
     }
 }

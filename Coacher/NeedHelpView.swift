@@ -11,6 +11,7 @@ import SwiftData
 struct NeedHelpView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var context
+    @EnvironmentObject private var celebrationManager: CelebrationManager
     @State private var selectedType: CravingType? {
         didSet {
             print("🔍 DEBUG: selectedType changed to: \(selectedType)")
