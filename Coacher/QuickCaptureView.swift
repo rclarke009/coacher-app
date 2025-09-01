@@ -12,6 +12,7 @@ import SwiftData
 struct QuickCaptureView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
+    @EnvironmentObject private var celebrationManager: CelebrationManager
     @State private var captureType: CaptureType = .voice
     @State private var textInput = ""
     @State private var isRecording = false
@@ -101,27 +102,30 @@ struct QuickCaptureView: View {
     }
     
     private func saveCapture() {
-                    if captureType == .voice, let audioURL = savedAudioURL {
-                // Save audio recording to database
-                let transcription = "Quick voice capture - \(Date().formatted(date: .abbreviated, time: .shortened))"
-                let recording = AudioRecording(
-                    transcription: transcription,
-                    duration: recordingTime
-                )
+        if captureType == .voice, let audioURL = savedAudioURL {
+            // Save audio recording to database
+            let transcription = "Quick voice capture - \(Date().formatted(date: .abbreviated, time: .shortened))"
+            let recording = AudioRecording(
+                transcription: transcription,
+                duration: recordingTime
+            )
 
-                modelContext.insert(recording)
+            modelContext.insert(recording)
 
-                do {
-                    try modelContext.save()
-                    print("🔍 DEBUG: Saved audio recording to database")
-                    
-                    // Clean up the audio file after successful transcription
-                    try FileManager.default.removeItem(at: audioURL)
-                    print("🔍 DEBUG: Cleaned up audio file: \(audioURL.lastPathComponent)")
-                } catch {
-                    print("🔍 DEBUG: Failed to save audio recording: \(error)")
-                }
+            do {
+                try modelContext.save()
+                print("🔍 DEBUG: Saved audio recording to database")
+                
+                // Clean up the audio file after successful transcription
+                try FileManager.default.removeItem(at: audioURL)
+                print("🔍 DEBUG: Cleaned up audio file: \(audioURL.lastPathComponent)")
+            } catch {
+                print("🔍 DEBUG: Failed to save audio recording: \(error)")
             }
+        }
+        
+        // Record activity for milestone tracking (both voice and text)
+        celebrationManager.recordActivity()
         
         dismiss()
     }

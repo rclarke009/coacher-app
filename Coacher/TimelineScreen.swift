@@ -112,6 +112,10 @@ struct TimelineScreen: View {
     private func saveEntry() {
         try? context.save()
         hasUnsavedChanges = false
+        
+        // Record activity for milestone tracking
+        celebrationManager.recordActivity()
+        
         let impactFeedback = UIImpactFeedbackGenerator(style: .light)
         impactFeedback.impactOccurred()
     }

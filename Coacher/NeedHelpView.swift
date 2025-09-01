@@ -76,6 +76,9 @@ struct NeedHelpView: View {
         // TODO: Get current day's entry and add the craving note
         context.insert(note)
         try? context.save()
+        
+        // Record activity for milestone tracking
+        celebrationManager.recordActivity()
     }
 }
 
