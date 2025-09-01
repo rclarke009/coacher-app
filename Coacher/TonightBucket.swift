@@ -12,6 +12,7 @@ struct TonightBucket: View {
     let entries: [DailyEntry]
     @Binding var entryToday: DailyEntry
     @Binding var hasUnsavedChanges: Bool
+    let onCelebrationTrigger: (String, String, CelebrationStyle) -> Void
     
     @StateObject private var timeManager = TimeManager()
     @State private var tomorrowEntry: DailyEntry = DailyEntry()
@@ -31,7 +32,7 @@ struct TonightBucket: View {
                 accent: .teal,
                 collapsed: $endOfDayCollapsed
             ) {
-                EndOfDaySection(entry: $entryToday)
+                EndOfDaySection(entry: $entryToday, onCelebrationTrigger: onCelebrationTrigger)
                     .onChange(of: entryToday.followedSwap) { _, _ in hasUnsavedChanges = true }
                     .onChange(of: entryToday.feelAboutIt) { _, _ in hasUnsavedChanges = true }
                     .onChange(of: entryToday.whatGotInTheWay) { _, _ in hasUnsavedChanges = true }
@@ -80,7 +81,8 @@ struct TonightBucket: View {
     TonightBucket(
         entries: [],
         entryToday: .constant(DailyEntry()),
-        hasUnsavedChanges: .constant(false)
+        hasUnsavedChanges: .constant(false),
+        onCelebrationTrigger: { _, _, _ in }
     )
     .padding()
 }

@@ -43,9 +43,18 @@ struct CelebrationOverlay: View {
     @State private var cardOpacity: Double = 0.0
     @State private var textOpacity: Double = 0.0
     
+    // Reset animation state when overlay appears
+    private func resetAnimationState() {
+        sparkleProgress = 0.0
+        cardScale = 0.8
+        cardOpacity = 0.0
+        textOpacity = 0.0
+    }
+    
     var body: some View {
         if isPresented {
-            ZStack {
+            GeometryReader { geometry in
+                ZStack {
                 // Full-screen dim background
                 Color.black.opacity(0.4)
                     .ignoresSafeArea()
@@ -54,22 +63,22 @@ struct CelebrationOverlay: View {
                     }
                 
                 // Success card
-                VStack(spacing: 16) {
+                VStack(spacing: 12) {
                     Image(systemName: "checkmark.circle.fill")
-                        .font(.system(size: 48))
+                        .font(.system(size: 36))
                         .foregroundColor(style.primaryColor)
                     
                     Text(title)
-                        .font(.title2)
+                        .font(.title3)
                         .fontWeight(.semibold)
                         .foregroundColor(.primary)
                     
                     Text(subtitle)
-                        .font(.body)
+                        .font(.callout)
                         .foregroundColor(.secondary)
                         .multilineTextAlignment(.center)
                 }
-                .padding(32)
+                .padding(20)
                 .background(
                     RoundedRectangle(cornerRadius: 20)
                         .fill(.ultraThinMaterial)
@@ -81,34 +90,34 @@ struct CelebrationOverlay: View {
                                     lineWidth: 2
                                 )
                                 .overlay(
-                                    // Traveling sparkle
+                                    // Traveling sparkle (more visible)
                                     Circle()
                                         .fill(
                                             RadialGradient(
                                                 colors: [style.secondaryColor, style.primaryColor],
                                                 center: .center,
                                                 startRadius: 0,
-                                                endRadius: 8
+                                                endRadius: 12
                                             )
                                         )
-                                        .frame(width: 16, height: 16)
-                                        .blur(radius: 2)
+                                        .frame(width: 24, height: 24)
+                                        .blur(radius: 1)
                                         .offset(
-                                            x: cos(sparkleProgress * 2 * .pi) * 120,
-                                            y: sin(sparkleProgress * 2 * .pi) * 80
+                                            x: calculateSparkleX(progress: sparkleProgress),
+                                            y: calculateSparkleY(progress: sparkleProgress)
                                         )
                                         .overlay(
-                                            // Sparkle trail
-                                            ForEach(0..<5, id: \.self) { index in
+                                            // Sparkle trail (more visible)
+                                            ForEach(0..<6, id: \.self) { index in
                                                 Circle()
-                                                    .fill(style.secondaryColor.opacity(0.8))
-                                                    .frame(width: 4, height: 4)
-                                                    .blur(radius: 1)
+                                                    .fill(style.secondaryColor.opacity(0.9))
+                                                    .frame(width: 6, height: 6)
+                                                    .blur(radius: 0.5)
                                                     .offset(
-                                                        x: cos((sparkleProgress - Double(index) * 0.1) * 2 * .pi) * 120,
-                                                        y: sin((sparkleProgress - Double(index) * 0.1) * 2 * .pi) * 80
+                                                        x: calculateSparkleX(progress: sparkleProgress - Double(index) * 0.08),
+                                                        y: calculateSparkleY(progress: sparkleProgress - Double(index) * 0.08)
                                                     )
-                                                    .opacity(1.0 - Double(index) * 0.2)
+                                                    .opacity(1.0 - Double(index) * 0.15)
                                             }
                                         )
                                 )
@@ -116,27 +125,14 @@ struct CelebrationOverlay: View {
                 )
                 .scaleEffect(cardScale)
                 .opacity(cardOpacity)
-                .overlay(
-                    // Text overlay
-                    VStack(spacing: 16) {
-                        Image(systemName: "checkmark.circle.fill")
-                            .font(.system(size: 48))
-                            .foregroundColor(style.primaryColor)
-                        
-                        Text(title)
-                            .font(.title2)
-                            .fontWeight(.semibold)
-                            .foregroundColor(.primary)
-                        
-                        Text(subtitle)
-                            .font(.body)
-                            .foregroundColor(.secondary)
-                            .multilineTextAlignment(.center)
-                    }
-                    .opacity(textOpacity)
+                .position(
+                    x: geometry.size.width / 2,
+                    y: geometry.size.height / 2
                 )
+                }
             }
             .onAppear {
+                resetAnimationState()
                 startCelebration()
             }
         }
@@ -158,13 +154,16 @@ struct CelebrationOverlay: View {
             textOpacity = 1.0
         }
         
-        // Perimeter sparkle animation
-        withAnimation(.easeInOut(duration: 2.0).delay(0.5)) {
+        // Perimeter sparkle animation (more visible)
+        withAnimation(.easeInOut(duration: 3.0).delay(0.5)) {
             sparkleProgress = 1.0
         }
         
-        // Auto-dismiss after animation
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2.2) {
+        // Debug: Print animation progress
+        print("Celebration started - sparkleProgress will animate from 0.0 to 1.0 over 3 seconds")
+        
+        // Auto-dismiss after animation (extended time)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 4.4) {
             dismissCelebration()
         }
     }
@@ -178,6 +177,60 @@ struct CelebrationOverlay: View {
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
             isPresented = false
+        }
+    }
+    
+    // MARK: - Sparkle Path Calculations
+    
+    /// Calculates X position for sparkle traveling around rectangular border
+    /// Sparkle starts from center (0,0) and travels around the frame edge
+    private func calculateSparkleX(progress: CGFloat) -> CGFloat {
+        let cardWidth: CGFloat = 240  // Approximate card width
+        let cardHeight: CGFloat = 160 // Approximate card height
+        let perimeter = 2 * (cardWidth + cardHeight)
+        let distance = progress * perimeter
+        
+        // Top edge (0 to cardWidth) - start from center, go to top-right
+        if distance < cardWidth {
+            return distance - cardWidth/2
+        }
+        // Right edge (cardWidth to cardWidth + cardHeight) - go down right side
+        else if distance < cardWidth + cardHeight {
+            return cardWidth/2
+        }
+        // Bottom edge (cardWidth + cardHeight to 2*cardWidth + cardHeight) - go left along bottom
+        else if distance < 2*cardWidth + cardHeight {
+            return (2*cardWidth + cardHeight - distance) - cardWidth/2
+        }
+        // Left edge (2*cardWidth + cardHeight to perimeter) - go up left side
+        else {
+            return -cardWidth/2
+        }
+    }
+    
+    /// Calculates Y position for sparkle traveling around rectangular border
+    /// Sparkle starts from center (0,0) and travels around the frame edge
+    private func calculateSparkleY(progress: CGFloat) -> CGFloat {
+        let cardWidth: CGFloat = 240  // Approximate card width
+        let cardHeight: CGFloat = 160 // Approximate card height
+        let perimeter = 2 * (cardWidth + cardHeight)
+        let distance = progress * perimeter
+        
+        // Top edge (0 to cardWidth) - start from center, go to top-right
+        if distance < cardWidth {
+            return -cardHeight/2
+        }
+        // Right edge (cardWidth to cardWidth + cardHeight) - go down right side
+        else if distance < cardWidth + cardHeight {
+            return (distance - cardWidth) - cardHeight/2
+        }
+        // Bottom edge (cardWidth + cardHeight to 2*cardWidth + cardHeight) - go left along bottom
+        else if distance < 2*cardWidth + cardHeight {
+            return cardHeight/2
+        }
+        // Left edge (2*cardWidth + cardHeight to perimeter) - go up left side back to center
+        else {
+            return (perimeter - distance) - cardHeight/2
         }
     }
 }

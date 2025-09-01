@@ -9,14 +9,14 @@ class CelebrationManager: ObservableObject {
     
     // Encouraging phrases for celebrations
     private let encouragingPhrases = [
-        "🌱 One healthier choice, done.",
-        "🌟 That swap makes you stronger.",
-        "🎈 Small steps, big wins.",
-        "💪 You're building momentum!",
-        "✨ Every choice counts!",
-        "🌿 Growing healthier habits!",
-        "🎯 Great job staying on track!",
-        "🚀 You're making progress!"
+        "One healthier choice, done.",
+        "That swap makes you stronger.",
+        "Small steps, big wins.",
+        "You're building momentum!",
+        "Every choice counts!",
+        "Growing healthier habits!",
+        "Great job staying on track!",
+        "You're making progress!"
     ]
     
     var currentStyle: CelebrationStyle {

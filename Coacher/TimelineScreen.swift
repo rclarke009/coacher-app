@@ -18,6 +18,10 @@ struct TimelineScreen: View {
     @State private var entryToday = DailyEntry()
     @State private var showingNeedHelp = false
     @State private var hasUnsavedChanges = false
+    @State private var showingCelebration = false
+    @State private var celebrationTitle = ""
+    @State private var celebrationSubtitle = ""
+    @State private var celebrationStyle: CelebrationStyle = .playful
     
     var body: some View {
         NavigationView {
@@ -35,7 +39,12 @@ struct TimelineScreen: View {
                             .id(DayKey.day(0))
                         
                         // TONIGHT ONLY (no future placeholders)
-                        TonightBucket(entries: entries, entryToday: $entryToday, hasUnsavedChanges: $hasUnsavedChanges)
+                        TonightBucket(
+                            entries: entries, 
+                            entryToday: $entryToday, 
+                            hasUnsavedChanges: $hasUnsavedChanges,
+                            onCelebrationTrigger: triggerCelebration
+                        )
                         
                         // I Need Help Button
                         Button(action: { showingNeedHelp = true }) {
@@ -66,6 +75,15 @@ struct TimelineScreen: View {
                 .sheet(isPresented: $showingNeedHelp) {
                     NeedHelpView()
                 }
+                .overlay(
+                    // Global celebration overlay - truly full screen
+                    CelebrationOverlay(
+                        isPresented: $showingCelebration,
+                        style: celebrationStyle,
+                        title: celebrationTitle,
+                        subtitle: celebrationSubtitle
+                    )
+                )
             }
         }
     }
@@ -87,6 +105,13 @@ struct TimelineScreen: View {
         hasUnsavedChanges = false
         let impactFeedback = UIImpactFeedbackGenerator(style: .light)
         impactFeedback.impactOccurred()
+    }
+    
+    private func triggerCelebration(title: String, subtitle: String, style: CelebrationStyle) {
+        celebrationTitle = title
+        celebrationSubtitle = subtitle
+        celebrationStyle = style
+        showingCelebration = true
     }
 }
 

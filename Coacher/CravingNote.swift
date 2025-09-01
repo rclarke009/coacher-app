@@ -29,7 +29,6 @@ final class CravingNote {
 }
 
 enum CravingType: String, Codable, CaseIterable, Identifiable {
-    case stress = "stress"
     case habit = "habit"
     case physical = "physical"
     case other = "other"
@@ -38,7 +37,6 @@ enum CravingType: String, Codable, CaseIterable, Identifiable {
     
     var displayName: String {
         switch self {
-        case .stress: return "Stress / Emotional"
         case .habit: return "Habit / Automatic"
         case .physical: return "Physical / Biological"
         case .other: return "Other / Not Sure"
@@ -47,7 +45,6 @@ enum CravingType: String, Codable, CaseIterable, Identifiable {
     
     var description: String {
         switch self {
-        case .stress: return "Feeling overwhelmed, anxious, or emotionally triggered"
         case .habit: return "Automatic behavior, time/place triggers, or routine"
         case .physical: return "Hunger, thirst, tiredness, or physical need"
         case .other: return "Not sure what's causing this craving"
@@ -56,7 +53,6 @@ enum CravingType: String, Codable, CaseIterable, Identifiable {
     
     var icon: String {
         switch self {
-        case .stress: return "brain.head.profile"
         case .habit: return "repeat.circle"
         case .physical: return "heart.fill"
         case .other: return "questionmark.circle"
@@ -65,7 +61,6 @@ enum CravingType: String, Codable, CaseIterable, Identifiable {
     
     var color: Color {
         switch self {
-        case .stress: return .orange
         case .habit: return .blue
         case .physical: return .green
         case .other: return .gray

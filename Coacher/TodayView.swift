@@ -66,7 +66,10 @@ struct TodayView: View {
                         collapsed: $endOfDayExpanded,
                         dimmed: timeManager.isDayPhase
                     ) {
-                        EndOfDaySection(entry: $entry)
+                        EndOfDaySection(
+                            entry: $entry,
+                            onCelebrationTrigger: { _, _, _ in }
+                        )
                             .onChange(of: entry.followedSwap) { _, _ in hasUnsavedChanges = true }
                             .onChange(of: entry.feelAboutIt) { _, _ in hasUnsavedChanges = true }
                             .onChange(of: entry.whatGotInTheWay) { _, _ in hasUnsavedChanges = true }

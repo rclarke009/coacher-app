@@ -12,6 +12,7 @@ struct SettingsView: View {
     @Environment(\.modelContext) private var context
     @EnvironmentObject private var celebrationManager: CelebrationManager
     @Query private var achievements: [Achievement]
+    @StateObject private var mlcManager = SimplifiedMLCManager()
     
     @AppStorage("showStreakWidgets") private var showStreakWidgets = true
     @AppStorage("nightPrepReminder") private var nightPrepReminder = true
@@ -60,6 +61,46 @@ struct SettingsView: View {
                             resetAchievements()
                         }
                         .foregroundStyle(.red)
+                    }
+                }
+                
+                Section("AI Coach") {
+                    HStack {
+                        Text("Model Status")
+                        Spacer()
+                        Text(mlcManager.modelStatus)
+                            .foregroundStyle(.secondary)
+                    }
+                    
+                    if mlcManager.isModelLoaded {
+                        HStack {
+                            Text("Model")
+                            Spacer()
+                            Text("Llama-2-7B")
+                                .foregroundStyle(.secondary)
+                        }
+                        
+                        HStack {
+                            Text("Quantization")
+                            Spacer()
+                            Text("Q4F16")
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                    
+                    if !mlcManager.isModelLoaded && !mlcManager.isLoading {
+                        Button("Load Model") {
+                            Task {
+                                await mlcManager.loadModel()
+                            }
+                        }
+                        .foregroundColor(.brandBlue)
+                    }
+                    
+                    if mlcManager.errorMessage != nil {
+                        Text(mlcManager.errorMessage ?? "")
+                            .foregroundStyle(.red)
+                            .font(.caption)
                     }
                 }
                 

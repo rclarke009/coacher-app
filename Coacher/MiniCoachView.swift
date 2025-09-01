@@ -30,13 +30,6 @@ struct MiniCoachView: View {
     var body: some View {
         NavigationView {
             VStack(spacing: 20) {
-                // Debug header
-                Text("DEBUG: MiniCoachView for \(type.displayName)")
-                    .font(.title)
-                    .foregroundColor(.red)
-                    .background(Color.yellow)
-                    .padding()
-                
                 // Progress indicator
                 ProgressView(value: Double(currentStep.rawValue), total: Double(MiniCoachStep.allCases.count - 1))
                     .padding(.horizontal)
@@ -114,13 +107,6 @@ struct IntroductionStep: View {
     
     var body: some View {
         VStack(spacing: 24) {
-            // Debug text
-            Text("DEBUG: IntroductionStep for \(type.displayName)")
-                .font(.headline)
-                .foregroundColor(.blue)
-                .background(Color.green)
-                .padding()
-            
             Image(systemName: type.icon)
                 .font(.system(size: 80))
                 .foregroundStyle(type.color)
@@ -145,8 +131,6 @@ struct IntroductionStep: View {
     
     private var introductionText: String {
         switch type {
-        case .stress:
-            return "Stress and emotional triggers can create powerful cravings. Let's take a moment to understand what's happening and find a healthier way forward."
         case .habit:
             return "Habitual behaviors often happen automatically. Let's identify the triggers and create a plan to break the pattern."
         case .physical:
@@ -198,12 +182,6 @@ struct ActionStep: View {
     
     private var actionItems: [String] {
         switch type {
-        case .stress:
-            return [
-                "Take 3 deep breaths",
-                "Drink a glass of water",
-                "Set a 5-minute timer before deciding"
-            ]
         case .habit:
             return [
                 "Identify the trigger (time/place)",

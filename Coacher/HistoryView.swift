@@ -103,7 +103,10 @@ struct EntryDetailView: View {
                 Divider()
                 MorningFocusSection(entry: .constant(entry))
                 Divider()
-                EndOfDaySection(entry: .constant(entry))
+                EndOfDaySection(
+                    entry: .constant(entry),
+                    onCelebrationTrigger: { _, _, _ in }
+                )
             }
             .padding()
         }

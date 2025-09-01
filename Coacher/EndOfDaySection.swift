@@ -10,7 +10,7 @@ import SwiftUI
 struct EndOfDaySection: View {
     @Binding var entry: DailyEntry
     @EnvironmentObject private var celebrationManager: CelebrationManager
-    @State private var showingCelebration = false
+    let onCelebrationTrigger: (String, String, CelebrationStyle) -> Void
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -30,7 +30,11 @@ struct EndOfDaySection: View {
                         
                         // Trigger celebration if checking the box and celebrations are enabled
                         if wasUnchecked && entry.followedSwap == true && celebrationManager.shouldCelebrate() {
-                            showingCelebration = true
+                            onCelebrationTrigger(
+                                "Swap logged!",
+                                celebrationManager.randomEncouragingPhrase(),
+                                celebrationManager.currentStyle
+                            )
                         }
                     }
                 Text("I followed my swap")
@@ -43,7 +47,11 @@ struct EndOfDaySection: View {
                         
                         // Trigger celebration if checking the box and celebrations are enabled
                         if wasUnchecked && entry.followedSwap == true && celebrationManager.shouldCelebrate() {
-                            showingCelebration = true
+                            onCelebrationTrigger(
+                                "Swap logged!",
+                                celebrationManager.randomEncouragingPhrase(),
+                                celebrationManager.currentStyle
+                            )
                         }
                     }
             }
@@ -54,22 +62,12 @@ struct EndOfDaySection: View {
             TextField("If no, what got in the way?", text: $entry.whatGotInTheWay)
                 .textFieldStyle(.roundedBorder)
         }
-        .overlay(
-            // Celebration overlay
-            Group {
-                if celebrationManager.currentStyle != .off {
-                    CelebrationOverlay(
-                        isPresented: $showingCelebration,
-                        style: celebrationManager.currentStyle,
-                        title: "Swap logged!",
-                        subtitle: celebrationManager.randomEncouragingPhrase()
-                    )
-                }
-            }
-        )
     }
 }
 
 #Preview {
-    EndOfDaySection(entry: .constant(DailyEntry()))
+    EndOfDaySection(
+        entry: .constant(DailyEntry()),
+        onCelebrationTrigger: { _, _, _ in }
+    )
 }

@@ -89,30 +89,33 @@ struct CategoryButton: View {
     var body: some View {
         Button(action: action) {
             HStack(spacing: 16) {
-                // Show the raw type value and displayName
-                VStack(alignment: .leading) {
-                    Text("TYPE: \(type.rawValue)")
-                        .font(.caption)
-                        .foregroundColor(.purple)
-                        .background(Color.white)
-                    
-                    Text("NAME: \(type.displayName)")
+                Image(systemName: type.icon)
+                    .font(.title2)
+                    .foregroundColor(type.color)
+                    .frame(width: 30)
+                
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(type.displayName)
                         .font(.headline)
-                        .foregroundColor(.red)
-                        .background(Color.yellow)
+                        .foregroundColor(.primary)
+                    
+                    Text(type.description)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.leading)
                 }
                 
                 Spacer()
                 
-                Text("→")
-                    .font(.title)
-                    .foregroundColor(.blue)
+                Image(systemName: "chevron.right")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
             }
             .padding()
-            .background(Color.gray.opacity(0.2))
-            .onAppear {
-                print("🔍 DEBUG: CategoryButton - type: \(type), rawValue: '\(type.rawValue)', displayName: '\(type.displayName)'")
-            }
+            .background(
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(Color(.secondarySystemBackground))
+            )
         }
         .buttonStyle(.plain)
     }
