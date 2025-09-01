@@ -24,6 +24,10 @@ struct HistoryView: View {
                     WeeklyCompletionRing(entries: entries)
                         .padding(.horizontal)
                     
+                    // Audio Recordings Section
+                    AudioRecordingsSection()
+                        .padding(.horizontal)
+                    
                     // Entries List
                     LazyVStack(spacing: 12) {
                         ForEach(entries) { entry in
@@ -170,7 +174,72 @@ struct WeeklyCompletionRing: View {
     }
 }
 
+struct AudioRecordingsSection: View {
+    @Environment(\.modelContext) private var modelContext
+    @Query(sort: \AudioRecording.date, order: .reverse) private var audioRecordings: [AudioRecording]
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            HStack {
+                Image(systemName: "mic.fill")
+                    .foregroundStyle(.blue)
+                Text("Voice Recordings")
+                    .font(.headline)
+                Spacer()
+                Text("\(audioRecordings.count)")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(Color(.tertiarySystemBackground))
+                    )
+            }
+            
+            if audioRecordings.isEmpty {
+                VStack(spacing: 12) {
+                    Image(systemName: "mic.slash")
+                        .font(.system(size: 40))
+                        .foregroundStyle(.secondary)
+                    Text("No voice recordings yet")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 24)
+                .background(
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(Color(.tertiarySystemBackground))
+                )
+            } else {
+                LazyVStack(spacing: 8) {
+                    ForEach(audioRecordings.prefix(5)) { recording in
+                        AudioRecordingRow(recording: recording)
+                    }
+                    
+                    if audioRecordings.count > 5 {
+                        Button("View All \(audioRecordings.count) Recordings") {
+                            // TODO: Navigate to full audio recordings list
+                        }
+                        .font(.caption)
+                        .foregroundStyle(.blue)
+                        .padding(.top, 8)
+                    }
+                }
+            }
+        }
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color(.secondarySystemBackground))
+        )
+    }
+}
+
+
+
 #Preview {
     HistoryView()
-        .modelContainer(for: [DailyEntry.self, Achievement.self, LLMMessage.self], inMemory: true)
+        .modelContainer(for: [DailyEntry.self, Achievement.self, LLMMessage.self, AudioRecording.self], inMemory: true)
 }

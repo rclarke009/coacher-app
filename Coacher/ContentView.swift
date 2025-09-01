@@ -17,8 +17,6 @@ struct ContentView: View {
                 .tabItem { Label("Coach", systemImage: "message") }
             HistoryView()
                 .tabItem { Label("History", systemImage: "clock") }
-            AudioHistoryView()
-                .tabItem { Label("Voice", systemImage: "mic") }
             SettingsView()
                 .tabItem { Label("Settings", systemImage: "gear") }
         }
