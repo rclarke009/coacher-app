@@ -17,6 +17,8 @@ struct ContentView: View {
                 .tabItem { Label("Coach", systemImage: "message") }
             HistoryView()
                 .tabItem { Label("History", systemImage: "clock") }
+            AudioHistoryView()
+                .tabItem { Label("Voice", systemImage: "mic") }
             SettingsView()
                 .tabItem { Label("Settings", systemImage: "gear") }
         }
@@ -25,5 +27,5 @@ struct ContentView: View {
 
 #Preview {
     ContentView()
-        .modelContainer(for: [DailyEntry.self, Achievement.self, LLMMessage.self], inMemory: true)
+        .modelContainer(for: [DailyEntry.self, Achievement.self, LLMMessage.self, CravingNote.self, EveningPrepItem.self, UserSettings.self, AudioRecording.self], inMemory: true)
 }

@@ -17,6 +17,6 @@ struct CoacherApp: App {
             ContentView()
                 .environmentObject(celebrationManager)
         }
-        .modelContainer(for: [DailyEntry.self, Achievement.self, LLMMessage.self, CravingNote.self, EveningPrepItem.self, UserSettings.self])
+        .modelContainer(for: [DailyEntry.self, Achievement.self, LLMMessage.self, CravingNote.self, EveningPrepItem.self, UserSettings.self, AudioRecording.self])
     }
 }

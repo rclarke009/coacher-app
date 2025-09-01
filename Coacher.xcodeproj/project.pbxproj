@@ -410,8 +410,8 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = Lighter;
-				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Coacher needs access to your microphone to record voice notes for quick reflections and coaching sessions.";
-				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Coacher uses speech recognition to transcribe your voice notes, helping you capture thoughts quickly and accurately.";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Lighter Tomorrow needs access to your microphone to record voice notes for quick reflections and coaching sessions.";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Lighter Tomorrow uses speech recognition to transcribe your voice notes, helping you capture thoughts quickly and accurately.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -441,8 +441,8 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = Lighter;
-				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Coacher needs access to your microphone to record voice notes for quick reflections and coaching sessions.";
-				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Coacher uses speech recognition to transcribe your voice notes, helping you capture thoughts quickly and accurately.";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Lighter Tomorrow needs access to your microphone to record voice notes for quick reflections and coaching sessions.";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Lighter Tomorrow uses speech recognition to transcribe your voice notes, helping you capture thoughts quickly and accurately.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

@@ -7,15 +7,18 @@
 
 import SwiftUI
 import AVFoundation
+import SwiftData
 
 struct QuickCaptureView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext) private var modelContext
     @State private var captureType: CaptureType = .voice
     @State private var textInput = ""
     @State private var isRecording = false
     @State private var audioRecorder: AVAudioRecorder?
     @State private var recordingTime: TimeInterval = 0
     @State private var recordingTimer: Timer?
+    @State private var savedAudioURL: URL?
     
     enum CaptureType: String, CaseIterable, Identifiable {
         case voice = "Voice"
@@ -62,7 +65,8 @@ struct QuickCaptureView: View {
                         isRecording: $isRecording,
                         audioRecorder: $audioRecorder,
                         recordingTime: $recordingTime,
-                        recordingTimer: $recordingTimer
+                        recordingTimer: $recordingTimer,
+                        savedAudioURL: $savedAudioURL
                     )
                 } else {
                     TextCaptureView(textInput: $textInput)
@@ -97,8 +101,25 @@ struct QuickCaptureView: View {
     }
     
     private func saveCapture() {
-        // TODO: Save the capture to the current day's entry
-        // For now, just dismiss
+        if captureType == .voice, let audioURL = savedAudioURL {
+            // Save audio recording to database
+            let transcription = "Quick voice capture - \(Date().formatted(date: .abbreviated, time: .shortened))"
+            let recording = AudioRecording(
+                audioURL: audioURL,
+                transcription: transcription,
+                duration: recordingTime
+            )
+            
+            modelContext.insert(recording)
+            
+            do {
+                try modelContext.save()
+                print("🔍 DEBUG: Saved audio recording to database")
+            } catch {
+                print("🔍 DEBUG: Failed to save audio recording: \(error)")
+            }
+        }
+        
         dismiss()
     }
 }
@@ -108,6 +129,7 @@ struct VoiceCaptureView: View {
     @Binding var audioRecorder: AVAudioRecorder?
     @Binding var recordingTime: TimeInterval
     @Binding var recordingTimer: Timer?
+    @Binding var savedAudioURL: URL?
     
     var body: some View {
         VStack(spacing: 20) {
@@ -161,31 +183,68 @@ struct VoiceCaptureView: View {
     
     private func requestMicrophonePermission() {
         AVAudioSession.sharedInstance().requestRecordPermission { granted in
-            // Handle permission result
-        }
-    }
-    
-    private func startRecording() {
-        // TODO: Implement audio recording
-        isRecording = true
-        recordingTime = 0
-        
-        // Start timer for 20-second limit
-        recordingTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
-            recordingTime += 1
-            if recordingTime >= 20 {
-                stopRecording()
+            DispatchQueue.main.async {
+                if granted {
+                    print("🔍 DEBUG: Microphone permission granted")
+                } else {
+                    print("🔍 DEBUG: Microphone permission denied")
+                }
             }
         }
     }
     
+    private func startRecording() {
+        let audioSession = AVAudioSession.sharedInstance()
+        
+        do {
+            try audioSession.setCategory(.playAndRecord, mode: .default)
+            try audioSession.setActive(true)
+            
+            let documentsPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+            let audioFilename = documentsPath.appendingPathComponent("\(UUID().uuidString).m4a")
+            
+            let settings: [String: Any] = [
+                AVFormatIDKey: Int(kAudioFormatMPEG4AAC),
+                AVSampleRateKey: 44100,
+                AVNumberOfChannelsKey: 1,
+                AVEncoderAudioQualityKey: AVAudioQuality.high.rawValue
+            ]
+            
+            audioRecorder = try AVAudioRecorder(url: audioFilename, settings: settings)
+            audioRecorder?.record()
+            
+            isRecording = true
+            recordingTime = 0
+            
+            // Start timer for 20-second limit
+            recordingTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
+                recordingTime += 1
+                if recordingTime >= 20 {
+                    stopRecording()
+                }
+            }
+            
+            print("🔍 DEBUG: Started recording to \(audioFilename)")
+        } catch {
+            print("🔍 DEBUG: Failed to start recording: \(error)")
+        }
+    }
+    
     private func stopRecording() {
-        // TODO: Stop recording and save
+        if let recorder = audioRecorder {
+            savedAudioURL = recorder.url
+            recorder.stop()
+        }
+        
         isRecording = false
         recordingTimer?.invalidate()
         recordingTimer = nil
         recordingTime = 0
+        
+        print("🔍 DEBUG: Stopped recording, saved URL: \(savedAudioURL?.absoluteString ?? "nil")")
     }
+    
+
 }
 
 struct TextCaptureView: View {

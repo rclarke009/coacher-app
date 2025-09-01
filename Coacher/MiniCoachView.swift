@@ -8,6 +8,7 @@
 import SwiftUI
 import AVFoundation
 import Speech
+import SwiftData
 
 struct MiniCoachView: View {
     let type: CravingType
@@ -311,39 +312,69 @@ struct CaptureStep: View {
     
     private func requestMicrophonePermission() {
         AVAudioSession.sharedInstance().requestRecordPermission { granted in
-            // Handle permission result
+            DispatchQueue.main.async {
+                if granted {
+                    print("🔍 DEBUG: Microphone permission granted")
+                } else {
+                    print("🔍 DEBUG: Microphone permission denied")
+                }
+            }
         }
     }
     
     private func startRecording() {
-        // TODO: Implement actual audio recording
-        isRecording = true
-        recordingTime = 0
+        let audioSession = AVAudioSession.sharedInstance()
         
-        // Start timer for 20-second limit
-        recordingTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
-            recordingTime += 1
-            if recordingTime >= 20 {
-                stopRecording()
+        do {
+            try audioSession.setCategory(.playAndRecord, mode: .default)
+            try audioSession.setActive(true)
+            
+            let documentsPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+            let audioFilename = documentsPath.appendingPathComponent("\(UUID().uuidString).m4a")
+            
+            let settings: [String: Any] = [
+                AVFormatIDKey: Int(kAudioFormatMPEG4AAC),
+                AVSampleRateKey: 44100,
+                AVNumberOfChannelsKey: 1,
+                AVEncoderAudioQualityKey: AVAudioQuality.high.rawValue
+            ]
+            
+            audioRecorder = try AVAudioRecorder(url: audioFilename, settings: settings)
+            audioRecorder?.record()
+            
+            isRecording = true
+            recordingTime = 0
+            
+            // Start timer for 20-second limit
+            recordingTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
+                recordingTime += 1
+                if recordingTime >= 20 {
+                    stopRecording()
+                }
             }
-        }
-        
-        // Simulate recording for now
-        DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
-            stopRecording()
+            
+            print("🔍 DEBUG: Started recording to \(audioFilename)")
+        } catch {
+            print("🔍 DEBUG: Failed to start recording: \(error)")
         }
     }
     
     private func stopRecording() {
+        audioRecorder?.stop()
         isRecording = false
         recordingTimer?.invalidate()
         recordingTimer = nil
+        recordingTime = 0
         
-        // Simulate transcription for now
+        // For now, use placeholder text until we implement real transcription
         if voiceText.isEmpty {
-            voiceText = "I was feeling \(type.displayName.lowercased()) and needed support. This is a simulated transcription of what I would have said."
+            voiceText = "I was feeling \(type.displayName.lowercased()) and needed support. This is a placeholder transcription - real audio was recorded."
         }
+        
+        print("🔍 DEBUG: Stopped recording")
     }
+    
+
 }
 
 struct SaveStep: View {
