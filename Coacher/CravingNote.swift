@@ -65,7 +65,7 @@ enum CravingType: String, Codable, CaseIterable, Identifiable {
     
     var color: Color {
         switch self {
-        case .stress: return .stressOrange
+        case .stress: return .orange
         case .habit: return .blue
         case .physical: return .green
         case .other: return .gray
