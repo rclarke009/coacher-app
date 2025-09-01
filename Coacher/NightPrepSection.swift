@@ -80,16 +80,16 @@ struct NightPrepSection: View {
             }
             
             // Custom prep items
-            if !entry.customPrepItems.isEmpty {
+            if !entry.safeCustomPrepItems.isEmpty {
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Custom Items")
                         .font(.subheadline)
                         .fontWeight(.medium)
                         .foregroundStyle(.secondary)
                     
-                    ForEach(entry.customPrepItems, id: \.self) { item in
+                    ForEach(entry.safeCustomPrepItems, id: \.self) { item in
                         HStack {
-                            Image(systemName: entry.completedCustomPrepItems.contains(item) ? "checkmark.square.fill" : "square")
+                            Image(systemName: entry.safeCompletedCustomPrepItems.contains(item) ? "checkmark.square.fill" : "square")
                                 .foregroundColor(.leafGreen)
                                 .onTapGesture {
                                     toggleCustomItem(item)
@@ -132,19 +132,25 @@ struct NightPrepSection: View {
         guard !trimmedItem.isEmpty else { return }
         
         print("🔍 DEBUG: NightPrepSection - Adding custom item: '\(trimmedItem)'")
-        print("🔍 DEBUG: NightPrepSection - Current custom items: \(entry.customPrepItems.count)")
+                    print("🔍 DEBUG: NightPrepSection - Current custom items: \(entry.safeCustomPrepItems.count)")
         
         // Add to DailyEntry's custom prep items (so it stays visible)
-        entry.customPrepItems.append(trimmedItem)
+        if entry.customPrepItems == nil {
+            entry.customPrepItems = []
+        }
+        entry.customPrepItems?.append(trimmedItem)
         
         // Also mark it as completed initially
-        entry.completedCustomPrepItems.append(trimmedItem)
+        if entry.completedCustomPrepItems == nil {
+            entry.completedCustomPrepItems = []
+        }
+        entry.completedCustomPrepItems?.append(trimmedItem)
         
         // Clear the input
         newOtherItem = ""
         
-        print("🔍 DEBUG: NightPrepSection - After adding, custom items: \(entry.customPrepItems.count)")
-        print("🔍 DEBUG: NightPrepSection - Custom items array: \(entry.customPrepItems)")
+        print("🔍 DEBUG: NightPrepSection - After adding, custom items: \(entry.safeCustomPrepItems.count)")
+        print("🔍 DEBUG: NightPrepSection - Custom items array: \(entry.safeCustomPrepItems)")
         
         // Save the context
         try? context.save()
@@ -156,11 +162,14 @@ struct NightPrepSection: View {
     }
     
     private func toggleCustomItem(_ item: String) {
-        if entry.completedCustomPrepItems.contains(item) {
-            entry.completedCustomPrepItems.removeAll { $0 == item }
+        if entry.safeCompletedCustomPrepItems.contains(item) {
+            entry.completedCustomPrepItems?.removeAll { $0 == item }
             print("🔍 DEBUG: NightPrepSection - Toggled custom item: \(item), now checked: false")
         } else {
-            entry.completedCustomPrepItems.append(item)
+            if entry.completedCustomPrepItems == nil {
+                entry.completedCustomPrepItems = []
+            }
+            entry.completedCustomPrepItems?.append(item)
             print("🔍 DEBUG: NightPrepSection - Toggled custom item: \(item), now checked: true")
         }
         
@@ -173,12 +182,12 @@ struct NightPrepSection: View {
     }
     
     private func deleteCustomItems(at offsets: IndexSet) {
-        let itemsToDelete = offsets.map { entry.customPrepItems[$0] }
+        let itemsToDelete = offsets.map { entry.safeCustomPrepItems[$0] }
         
         // Remove from both arrays
-        entry.customPrepItems.remove(atOffsets: offsets)
+        entry.customPrepItems?.remove(atOffsets: offsets)
         for item in itemsToDelete {
-            entry.completedCustomPrepItems.removeAll { $0 == item }
+            entry.completedCustomPrepItems?.removeAll { $0 == item }
         }
         
         print("🔍 DEBUG: NightPrepSection - Deleted custom items: \(itemsToDelete)")

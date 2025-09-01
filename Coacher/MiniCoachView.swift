@@ -77,14 +77,22 @@ struct MiniCoachView: View {
                                 duration: recordingTime
                             )
                             
+                            print("🔍 DEBUG: Creating AudioRecording with transcription: '\(transcription)'")
+                            print("🔍 DEBUG: AudioRecording type: \(type.displayName)")
+                            print("🔍 DEBUG: AudioRecording duration: \(recordingTime)")
+                            
                             modelContext.insert(recording)
                             
                             do {
                                 try modelContext.save()
-                                print("🔍 DEBUG: Saved audio recording to database")
+                                print("🔍 DEBUG: Successfully saved audio recording to database")
+                                print("🔍 DEBUG: Recording ID: \(recording.id)")
+                                print("🔍 DEBUG: Recording date: \(recording.date)")
                             } catch {
                                 print("🔍 DEBUG: Failed to save audio recording: \(error)")
                             }
+                        } else {
+                            print("🔍 DEBUG: No savedAudioURL to save")
                         }
                         
                         let note = CravingNote(

@@ -21,9 +21,9 @@ final class DailyEntry {
     var nightOther: String
     
     // New flexible evening prep system
-    var eveningPrepItems: [EveningPrepItem]
-    var customPrepItems: [String] // All custom prep items (regardless of completion status)
-    var completedCustomPrepItems: [String] // Track which custom prep items were completed today
+    var eveningPrepItems: [EveningPrepItem]?
+    var customPrepItems: [String]? // All custom prep items (regardless of completion status)
+    var completedCustomPrepItems: [String]? // Track which custom prep items were completed today
     
     // Morning Focus
     var myWhy: String
@@ -39,10 +39,10 @@ final class DailyEntry {
     var whatGotInTheWay: String
     
     // Voice notes (file URLs in app sandbox)
-    var voiceNotes: [URL]
+    var voiceNotes: [URL]?
     
     // Craving notes for "I Need Help" flow
-    var cravingNotes: [CravingNote]
+    var cravingNotes: [CravingNote]?
     
     init() {
         self.id = UUID()
@@ -83,6 +83,27 @@ final class DailyEntry {
     
     var hasAnyAction: Bool {
         hasAnyNightPrep || hasAnyMorningFocus || hasAnyEndOfDay
+    }
+    
+    // Helper computed properties for optional arrays
+    var safeEveningPrepItems: [EveningPrepItem] {
+        eveningPrepItems ?? []
+    }
+    
+    var safeCustomPrepItems: [String] {
+        customPrepItems ?? []
+    }
+    
+    var safeCompletedCustomPrepItems: [String] {
+        completedCustomPrepItems ?? []
+    }
+    
+    var safeVoiceNotes: [URL] {
+        voiceNotes ?? []
+    }
+    
+    var safeCravingNotes: [CravingNote] {
+        cravingNotes ?? []
     }
 }
 

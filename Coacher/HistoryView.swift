@@ -13,6 +13,8 @@ struct HistoryView: View {
     @Query(sort: \DailyEntry.date, order: .reverse) private var entries: [DailyEntry]
     
     var body: some View {
+        let _ = print("🔍 DEBUG: HistoryView - ModelContext: \(context)")
+        let _ = print("🔍 DEBUG: HistoryView - Found \(entries.count) daily entries")
         NavigationView {
             ScrollView {
                 VStack(spacing: 24) {
@@ -176,9 +178,14 @@ struct WeeklyCompletionRing: View {
 
 struct AudioRecordingsSection: View {
     @Environment(\.modelContext) private var modelContext
-    @Query(sort: \AudioRecording.date, order: .reverse) private var audioRecordings: [AudioRecording]
+    @State private var audioRecordings: [AudioRecording] = []
     
     var body: some View {
+        let _ = print("🔍 DEBUG: AudioRecordingsSection - Found \(audioRecordings.count) recordings")
+        let _ = print("🔍 DEBUG: AudioRecordingsSection - ModelContext: \(modelContext)")
+        let _ = audioRecordings.forEach { recording in
+            print("🔍 DEBUG: AudioRecordingsSection - Recording: \(recording.transcription) at \(recording.date)")
+        }
         VStack(alignment: .leading, spacing: 16) {
             HStack {
                 Image(systemName: "mic.fill")
@@ -234,6 +241,23 @@ struct AudioRecordingsSection: View {
             RoundedRectangle(cornerRadius: 16)
                 .fill(Color(.secondarySystemBackground))
         )
+        .onAppear {
+            fetchAudioRecordings()
+        }
+    }
+    
+    private func fetchAudioRecordings() {
+        do {
+            let descriptor = FetchDescriptor<AudioRecording>(sortBy: [SortDescriptor(\.date, order: .reverse)])
+            let recordings = try modelContext.fetch(descriptor)
+            print("🔍 DEBUG: fetchAudioRecordings - Found \(recordings.count) recordings")
+            recordings.forEach { recording in
+                print("🔍 DEBUG: fetchAudioRecordings - Recording: \(recording.transcription) at \(recording.date)")
+            }
+            audioRecordings = recordings
+        } catch {
+            print("🔍 DEBUG: fetchAudioRecordings - Error: \(error)")
+        }
     }
 }
 
