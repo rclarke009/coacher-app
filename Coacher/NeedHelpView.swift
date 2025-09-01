@@ -91,9 +91,8 @@ struct CategoryButton: View {
             HStack(spacing: 16) {
                 Image(systemName: type.icon)
                     .font(.title2)
-                    .foregroundStyle(type.color)
+                    .foregroundColor(type.color)
                     .frame(width: 30)
-                    .background(Color.green.opacity(0.3)) // Debug: Add green background to see if icon is there
                     .onAppear {
                         print("🔍 DEBUG: CategoryButton - type: \(type), icon: \(type.icon), color: \(type.color)")
                     }
@@ -101,17 +100,15 @@ struct CategoryButton: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(type.displayName)
                         .font(.headline)
-                        .foregroundStyle(.primary)
-                        .background(Color.red.opacity(0.3)) // Debug: Add red background to see if text is there
+                        .foregroundColor(.primary)
                         .onAppear {
                             print("🔍 DEBUG: CategoryButton - displayName: '\(type.displayName)'")
                         }
                     
                     Text(type.description)
                         .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .foregroundColor(.secondary)
                         .multilineTextAlignment(.leading)
-                        .background(Color.blue.opacity(0.3)) // Debug: Add blue background to see if text is there
                         .onAppear {
                             print("🔍 DEBUG: CategoryButton - description: '\(type.description)'")
                         }
@@ -121,7 +118,7 @@ struct CategoryButton: View {
                 
                 Image(systemName: "chevron.right")
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .foregroundColor(.secondary)
             }
             .padding()
             .background(
