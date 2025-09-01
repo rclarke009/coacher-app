@@ -15,6 +15,7 @@ struct MiniCoachView: View {
     let onComplete: (CravingNote) -> Void
     
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext) private var modelContext
     @State private var currentStep: MiniCoachStep = .introduction
     @State private var voiceText = ""
     @State private var isRecording = false
@@ -23,6 +24,7 @@ struct MiniCoachView: View {
     @State private var recordingTimer: Timer?
     @State private var transcribedText = ""
     @State private var showingTextEditor = false
+    @State private var savedAudioURL: URL?
     
     enum MiniCoachStep: Int, CaseIterable {
         case introduction = 0, action = 1, capture = 2, save = 3
@@ -55,7 +57,8 @@ struct MiniCoachView: View {
                         recordingTime: $recordingTime,
                         recordingTimer: $recordingTimer,
                         transcribedText: $transcribedText,
-                        showingTextEditor: $showingTextEditor
+                        showingTextEditor: $showingTextEditor,
+                        savedAudioURL: $savedAudioURL
                     ) {
                         currentStep = .save
                     }
@@ -64,10 +67,30 @@ struct MiniCoachView: View {
                         type: type,
                         text: transcribedText.isEmpty ? voiceText : transcribedText
                     ) {
+                        // Save audio recording to database if we have one
+                        if let audioURL = savedAudioURL {
+                            let transcription = transcribedText.isEmpty ? voiceText : transcribedText
+                            let recording = AudioRecording(
+                                audioURL: audioURL,
+                                transcription: transcription,
+                                type: type,
+                                duration: recordingTime
+                            )
+                            
+                            modelContext.insert(recording)
+                            
+                            do {
+                                try modelContext.save()
+                                print("🔍 DEBUG: Saved audio recording to database")
+                            } catch {
+                                print("🔍 DEBUG: Failed to save audio recording: \(error)")
+                            }
+                        }
+                        
                         let note = CravingNote(
                             type: type,
                             text: transcribedText.isEmpty ? voiceText : transcribedText,
-                            keptAudio: false
+                            keptAudio: savedAudioURL != nil
                         )
                         onComplete(note)
                     }
@@ -225,6 +248,7 @@ struct CaptureStep: View {
     @Binding var recordingTimer: Timer?
     @Binding var transcribedText: String
     @Binding var showingTextEditor: Bool
+    @Binding var savedAudioURL: URL?
     let onNext: () -> Void
     
     var body: some View {
@@ -360,7 +384,11 @@ struct CaptureStep: View {
     }
     
     private func stopRecording() {
-        audioRecorder?.stop()
+        if let recorder = audioRecorder {
+            savedAudioURL = recorder.url
+            recorder.stop()
+        }
+        
         isRecording = false
         recordingTimer?.invalidate()
         recordingTimer = nil
@@ -371,7 +399,7 @@ struct CaptureStep: View {
             voiceText = "I was feeling \(type.displayName.lowercased()) and needed support. This is a placeholder transcription - real audio was recorded."
         }
         
-        print("🔍 DEBUG: Stopped recording")
+        print("🔍 DEBUG: Stopped recording, saved URL: \(savedAudioURL?.absoluteString ?? "nil")")
     }
     
 
