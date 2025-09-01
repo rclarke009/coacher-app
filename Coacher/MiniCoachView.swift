@@ -422,6 +422,6 @@ struct TextEditorView: View {
 }
 
 #Preview {
-    MiniCoachView(type: .stress) { _ in }
+    MiniCoachView(type: .habit) { _ in }
         .modelContainer(for: [DailyEntry.self, Achievement.self, LLMMessage.self, CravingNote.self], inMemory: true)
 }
