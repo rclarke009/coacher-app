@@ -19,67 +19,64 @@ struct NeedHelpView: View {
     }
     
     var body: some View {
-        NavigationView {
-            VStack(spacing: 24) {
-                // Header
-                VStack(spacing: 12) {
-                    Image(systemName: "hand.raised.fill")
-                        .font(.system(size: 60))
-                        .foregroundStyle(.blue)
-                    
-                    Text("I Need Help")
-                        .font(.largeTitle)
-                        .bold()
-                    
-                    Text("What's happening right now? Choose the category that best describes your situation.")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal)
-                }
-                .padding(.top)
+        VStack(spacing: 24) {
+            // Header
+            VStack(spacing: 12) {
+                Image(systemName: "hand.raised.fill")
+                    .font(.system(size: 60))
+                    .foregroundStyle(.blue)
                 
-                // Category Selection
-                VStack(spacing: 16) {
-                    ForEach(CravingType.allCases) { type in
-                        CategoryButton(type: type) {
-                            print("🔍 DEBUG: Button tapped for type: \(type)")
-                            selectedType = type
-                            showingMiniCoach = true
-                            print("🔍 DEBUG: selectedType set to: \(selectedType), showingMiniCoach: \(showingMiniCoach)")
-                        }
-                    }
-                }
-                .onAppear {
-                    print("🔍 DEBUG: NeedHelpView - CravingType.allCases: \(CravingType.allCases)")
-                    for type in CravingType.allCases {
-                        print("🔍 DEBUG: NeedHelpView - type: \(type), displayName: '\(type.displayName)', icon: '\(type.icon)', color: \(type.color)")
-                    }
-                }
-                .padding(.horizontal)
+                Text("I Need Help")
+                    .font(.largeTitle)
+                    .bold()
                 
-                Spacer()
-                
-                // Cancel Button
-                Button("Cancel", action: { dismiss() })
+                Text("What's happening right now? Choose the category that best describes your situation.")
+                    .font(.subheadline)
                     .foregroundStyle(.secondary)
-                    .padding(.bottom)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal)
             }
-            .navigationBarHidden(true)
-            .sheet(isPresented: $showingMiniCoach) {
-                if let type = selectedType {
-                    VStack {
-                        Text("Test Sheet - Type: \(type.displayName)")
-                            .font(.title)
-                            .padding()
-                        
-                        Button("Close") {
-                            showingMiniCoach = false
-                        }
-                        .buttonStyle(.borderedProminent)
+            .padding(.top)
+            
+            // Category Selection
+            VStack(spacing: 16) {
+                ForEach(CravingType.allCases) { type in
+                    CategoryButton(type: type) {
+                        print("🔍 DEBUG: Button tapped for type: \(type)")
+                        selectedType = type
+                        showingMiniCoach = true
+                        print("🔍 DEBUG: selectedType set to: \(selectedType), showingMiniCoach: \(showingMiniCoach)")
                     }
-                    .padding()
                 }
+            }
+            .onAppear {
+                print("🔍 DEBUG: NeedHelpView - CravingType.allCases: \(CravingType.allCases)")
+                for type in CravingType.allCases {
+                    print("🔍 DEBUG: NeedHelpView - type: \(type), displayName: '\(type.displayName)', icon: '\(type.icon)', color: \(type.color)")
+                }
+            }
+            .padding(.horizontal)
+            
+            Spacer()
+            
+            // Cancel Button
+            Button("Cancel", action: { dismiss() })
+                .foregroundStyle(.secondary)
+                .padding(.bottom)
+        }
+        .sheet(isPresented: $showingMiniCoach) {
+            if let type = selectedType {
+                VStack {
+                    Text("Test Sheet - Type: \(type.displayName)")
+                        .font(.title)
+                        .padding()
+                    
+                    Button("Close") {
+                        showingMiniCoach = false
+                    }
+                    .buttonStyle(.borderedProminent)
+                }
+                .padding()
             }
         }
     }
