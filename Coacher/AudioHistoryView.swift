@@ -67,12 +67,9 @@ struct AudioRecordingRow: View {
     let recording: AudioRecording
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 8) {
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(recording.date, style: .date)
-                        .font(.headline)
-                    
                     Text(recording.date, style: .time)
                         .font(.caption)
                         .foregroundStyle(.secondary)
@@ -82,12 +79,12 @@ struct AudioRecordingRow: View {
                 
                 if let type = recording.type {
                     Label(type.displayName, systemImage: type.icon)
-                        .font(.caption)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
+                        .font(.caption2)
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 2)
                         .background(
-                            RoundedRectangle(cornerRadius: 12)
-                                .fill(type.color.opacity(0.2))
+                            RoundedRectangle(cornerRadius: 8)
+                                .fill(type.color.opacity(0.15))
                         )
                         .foregroundStyle(type.color)
                 }
@@ -97,16 +94,12 @@ struct AudioRecordingRow: View {
                 .font(.body)
                 .lineLimit(3)
                 .multilineTextAlignment(.leading)
-            
-            HStack {
-                Image(systemName: "mic.fill")
-                    .font(.caption)
-                    .foregroundStyle(.blue)
-                
-                Spacer()
-            }
         }
-        .padding(.vertical, 4)
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color(.secondarySystemBackground))
+        )
     }
 }
 
