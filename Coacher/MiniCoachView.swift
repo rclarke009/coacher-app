@@ -71,7 +71,6 @@ struct MiniCoachView: View {
                         if let audioURL = savedAudioURL {
                             let transcription = transcribedText.isEmpty ? voiceText : transcribedText
                             let recording = AudioRecording(
-                                audioURL: audioURL,
                                 transcription: transcription,
                                 type: type,
                                 duration: recordingTime
@@ -88,6 +87,10 @@ struct MiniCoachView: View {
                                 print("🔍 DEBUG: Successfully saved audio recording to database")
                                 print("🔍 DEBUG: Recording ID: \(recording.id)")
                                 print("🔍 DEBUG: Recording date: \(recording.date)")
+                                
+                                // Clean up the audio file after successful transcription
+                                try FileManager.default.removeItem(at: audioURL)
+                                print("🔍 DEBUG: Cleaned up audio file: \(audioURL.lastPathComponent)")
                             } catch {
                                 print("🔍 DEBUG: Failed to save audio recording: \(error)")
                             }

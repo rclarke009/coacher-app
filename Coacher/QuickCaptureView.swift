@@ -101,24 +101,27 @@ struct QuickCaptureView: View {
     }
     
     private func saveCapture() {
-        if captureType == .voice, let audioURL = savedAudioURL {
-            // Save audio recording to database
-            let transcription = "Quick voice capture - \(Date().formatted(date: .abbreviated, time: .shortened))"
-            let recording = AudioRecording(
-                audioURL: audioURL,
-                transcription: transcription,
-                duration: recordingTime
-            )
-            
-            modelContext.insert(recording)
-            
-            do {
-                try modelContext.save()
-                print("🔍 DEBUG: Saved audio recording to database")
-            } catch {
-                print("🔍 DEBUG: Failed to save audio recording: \(error)")
+                    if captureType == .voice, let audioURL = savedAudioURL {
+                // Save audio recording to database
+                let transcription = "Quick voice capture - \(Date().formatted(date: .abbreviated, time: .shortened))"
+                let recording = AudioRecording(
+                    transcription: transcription,
+                    duration: recordingTime
+                )
+
+                modelContext.insert(recording)
+
+                do {
+                    try modelContext.save()
+                    print("🔍 DEBUG: Saved audio recording to database")
+                    
+                    // Clean up the audio file after successful transcription
+                    try FileManager.default.removeItem(at: audioURL)
+                    print("🔍 DEBUG: Cleaned up audio file: \(audioURL.lastPathComponent)")
+                } catch {
+                    print("🔍 DEBUG: Failed to save audio recording: \(error)")
+                }
             }
-        }
         
         dismiss()
     }

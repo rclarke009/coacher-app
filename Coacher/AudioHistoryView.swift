@@ -49,16 +49,9 @@ struct AudioHistoryView: View {
         for index in offsets {
             let recording = audioRecordings[index]
             
-            // Delete the audio file
-            do {
-                try FileManager.default.removeItem(at: recording.audioURL)
-                print("🔍 DEBUG: Deleted audio file at \(recording.audioURL)")
-            } catch {
-                print("🔍 DEBUG: Failed to delete audio file: \(error)")
-            }
-            
-            // Delete the database record
+            // Delete the database record (no audio files to clean up)
             modelContext.delete(recording)
+            print("🔍 DEBUG: Deleted audio recording from database: \(recording.transcription)")
         }
         
         // Save changes
@@ -112,14 +105,15 @@ struct AudioRecordingRow: View {
                 
                 Spacer()
                 
-                Button(action: {
-                    // TODO: Implement audio playback
-                    print("🔍 DEBUG: Play audio for \(recording.id)")
-                }) {
-                    Image(systemName: "play.circle.fill")
-                        .font(.title2)
-                        .foregroundStyle(.blue)
-                }
+                Text("Text Only")
+                    .font(.caption2)
+                    .foregroundStyle(.tertiary)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(Color(.tertiarySystemBackground))
+                    )
             }
         }
         .padding(.vertical, 4)
