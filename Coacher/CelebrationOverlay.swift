@@ -9,25 +9,9 @@ enum CelebrationStyle: String, CaseIterable, Identifiable {
     
     var displayName: String {
         switch self {
-        case .calm: return "✨ Calm"
-        case .playful: return "🎉 Playful"
+        case .calm: return "🌱 Growing"
+        case .playful: return "🌱 Growing"
         case .off: return "🚫 Off"
-        }
-    }
-    
-    var primaryColor: Color {
-        switch self {
-        case .calm: return .teal
-        case .playful: return .purple
-        case .off: return .clear
-        }
-    }
-    
-    var secondaryColor: Color {
-        switch self {
-        case .calm: return .cyan
-        case .playful: return .indigo
-        case .off: return .clear
         }
     }
 }
@@ -38,97 +22,126 @@ struct CelebrationOverlay: View {
     let title: String
     let subtitle: String
     
-    @State private var sparkleProgress: CGFloat = 0.0
     @State private var cardScale: CGFloat = 0.8
     @State private var cardOpacity: Double = 0.0
     @State private var textOpacity: Double = 0.0
+    @State private var plantScale: CGFloat = 0.1
+    @State private var leafRotation: Double = 0
+    @State private var glowOpacity: Double = 0.0
     
     // Reset animation state when overlay appears
     private func resetAnimationState() {
-        sparkleProgress = 0.0
         cardScale = 0.8
         cardOpacity = 0.0
         textOpacity = 0.0
+        plantScale = 0.1
+        leafRotation = 0
+        glowOpacity = 0.0
     }
     
     var body: some View {
         if isPresented {
             GeometryReader { geometry in
                 ZStack {
-                // Full-screen dim background
-                Color.black.opacity(0.4)
-                    .ignoresSafeArea()
-                    .onTapGesture {
-                        dismissCelebration()
-                    }
-                
-                // Success card
-                VStack(spacing: 12) {
-                    Image(systemName: "checkmark.circle.fill")
-                        .font(.system(size: 36))
-                        .foregroundColor(style.primaryColor)
+                    // Full-screen dim background
+                    Color.black.opacity(0.4)
+                        .ignoresSafeArea()
+                        .onTapGesture {
+                            dismissCelebration()
+                        }
                     
-                    Text(title)
-                        .font(.title3)
-                        .fontWeight(.semibold)
-                        .foregroundColor(.primary)
-                    
-                    Text(subtitle)
-                        .font(.callout)
-                        .foregroundColor(.secondary)
-                        .multilineTextAlignment(.center)
-                }
-                .padding(20)
-                .background(
-                    RoundedRectangle(cornerRadius: 20)
-                        .fill(.ultraThinMaterial)
-                        .overlay(
-                            // Perimeter sparkle trail
-                            RoundedRectangle(cornerRadius: 20)
-                                .stroke(
-                                    style.primaryColor.opacity(0.6),
-                                    lineWidth: 2
+                    // Growing plant celebration card (smaller size)
+                    VStack(spacing: 0) {
+                        // Animated plant container
+                        ZStack {
+                            // Background glow
+                            Circle()
+                                .fill(
+                                    RadialGradient(
+                                        colors: [Color.green.opacity(0.3), Color.clear],
+                                        center: .center,
+                                        startRadius: 20,
+                                        endRadius: 80
+                                    )
                                 )
+                                .frame(width: 160, height: 160)
+                                .opacity(glowOpacity)
+                            
+                            // Growing plant animation
+                            VStack(spacing: 4) {
+                                // Stem
+                                RoundedRectangle(cornerRadius: 2)
+                                    .fill(Color.green)
+                                    .frame(width: 4, height: 40 * plantScale)
+                                    .scaleEffect(y: plantScale, anchor: .bottom)
+                                
+                                // Leaves
+                                HStack(spacing: 8) {
+                                    // Left leaf
+                                    Image(systemName: "leaf.fill")
+                                        .font(.system(size: 24))
+                                        .foregroundColor(.green)
+                                        .rotationEffect(.degrees(-30 + leafRotation))
+                                        .scaleEffect(plantScale)
+                                    
+                                    // Right leaf
+                                    Image(systemName: "leaf.fill")
+                                        .font(.system(size: 24))
+                                        .foregroundColor(.green)
+                                        .rotationEffect(.degrees(30 - leafRotation))
+                                        .scaleEffect(plantScale)
+                                }
+                                
+                                // Top leaf
+                                Image(systemName: "leaf.fill")
+                                    .font(.system(size: 28))
+                                    .foregroundColor(.green)
+                                    .rotationEffect(.degrees(leafRotation))
+                                    .scaleEffect(plantScale)
+                            }
+                        }
+                        .frame(width: 200, height: 140)
+                        .background(
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(Color.green.opacity(0.1))
                                 .overlay(
-                                    // Traveling sparkle (more visible)
-                                    Circle()
-                                        .fill(
-                                            RadialGradient(
-                                                colors: [style.secondaryColor, style.primaryColor],
-                                                center: .center,
-                                                startRadius: 0,
-                                                endRadius: 12
-                                            )
-                                        )
-                                        .frame(width: 24, height: 24)
-                                        .blur(radius: 1)
-                                        .offset(
-                                            x: calculateSparkleX(progress: sparkleProgress),
-                                            y: calculateSparkleY(progress: sparkleProgress)
-                                        )
-                                        .overlay(
-                                            // Sparkle trail (more visible)
-                                            ForEach(0..<6, id: \.self) { index in
-                                                Circle()
-                                                    .fill(style.secondaryColor.opacity(0.9))
-                                                    .frame(width: 6, height: 6)
-                                                    .blur(radius: 0.5)
-                                                    .offset(
-                                                        x: calculateSparkleX(progress: sparkleProgress - Double(index) * 0.08),
-                                                        y: calculateSparkleY(progress: sparkleProgress - Double(index) * 0.08)
-                                                    )
-                                                    .opacity(1.0 - Double(index) * 0.15)
-                                            }
-                                        )
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .stroke(Color.green.opacity(0.3), lineWidth: 1)
                                 )
                         )
-                )
-                .scaleEffect(cardScale)
-                .opacity(cardOpacity)
-                .position(
-                    x: geometry.size.width / 2,
-                    y: geometry.size.height / 2
-                )
+                        
+                        // Text overlay
+                        VStack(spacing: 6) {
+                            Text(title)
+                                .font(.title3)
+                                .fontWeight(.bold)
+                                .foregroundColor(.white)
+                                .shadow(color: .black, radius: 2, x: 0, y: 1)
+                            
+                            Text(subtitle)
+                                .font(.caption)
+                                .foregroundColor(.white.opacity(0.9))
+                                .multilineTextAlignment(.center)
+                                .shadow(color: .black, radius: 2, x: 0, y: 1)
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 12)
+                        .background(
+                            RoundedRectangle(cornerRadius: 16)
+                                .fill(.ultraThinMaterial)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 16)
+                                        .stroke(Color.green.opacity(0.6), lineWidth: 2)
+                                )
+                        )
+                        .offset(y: -20) // Smaller overlap
+                    }
+                    .scaleEffect(cardScale)
+                    .opacity(cardOpacity)
+                    .position(
+                        x: geometry.size.width / 2,
+                        y: geometry.size.height / 2
+                    )
                 }
             }
             .onAppear {
@@ -139,31 +152,34 @@ struct CelebrationOverlay: View {
     }
     
     private func startCelebration() {
-        // Haptic feedback
-        let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
-        impactFeedback.impactOccurred()
-        
         // Card entrance animation
-        withAnimation(.easeOut(duration: 0.3)) {
+        withAnimation(.easeOut(duration: 0.4)) {
             cardScale = 1.0
             cardOpacity = 1.0
         }
         
+        // Plant growth animation
+        withAnimation(.easeOut(duration: 1.2).delay(0.3)) {
+            plantScale = 1.0
+        }
+        
+        // Leaf movement
+        withAnimation(.easeInOut(duration: 2.0).delay(0.8).repeatCount(2, autoreverses: true)) {
+            leafRotation = 15
+        }
+        
+        // Glow effect
+        withAnimation(.easeInOut(duration: 1.5).delay(0.5)) {
+            glowOpacity = 1.0
+        }
+        
         // Text fade in
-        withAnimation(.easeIn(duration: 0.4).delay(0.2)) {
+        withAnimation(.easeIn(duration: 0.5).delay(0.8)) {
             textOpacity = 1.0
         }
         
-        // Perimeter sparkle animation (more visible)
-        withAnimation(.easeInOut(duration: 3.0).delay(0.5)) {
-            sparkleProgress = 1.0
-        }
-        
-        // Debug: Print animation progress
-        print("Celebration started - sparkleProgress will animate from 0.0 to 1.0 over 3 seconds")
-        
-        // Auto-dismiss after animation (extended time)
-        DispatchQueue.main.asyncAfter(deadline: .now() + 4.4) {
+        // Auto-dismiss after animation
+        DispatchQueue.main.asyncAfter(deadline: .now() + 4.5) {
             dismissCelebration()
         }
     }
@@ -179,66 +195,12 @@ struct CelebrationOverlay: View {
             isPresented = false
         }
     }
-    
-    // MARK: - Sparkle Path Calculations
-    
-    /// Calculates X position for sparkle traveling around rectangular border
-    /// Sparkle starts from center (0,0) and travels around the frame edge
-    private func calculateSparkleX(progress: CGFloat) -> CGFloat {
-        let cardWidth: CGFloat = 240  // Approximate card width
-        let cardHeight: CGFloat = 160 // Approximate card height
-        let perimeter = 2 * (cardWidth + cardHeight)
-        let distance = progress * perimeter
-        
-        // Top edge (0 to cardWidth) - start from center, go to top-right
-        if distance < cardWidth {
-            return distance - cardWidth/2
-        }
-        // Right edge (cardWidth to cardWidth + cardHeight) - go down right side
-        else if distance < cardWidth + cardHeight {
-            return cardWidth/2
-        }
-        // Bottom edge (cardWidth + cardHeight to 2*cardWidth + cardHeight) - go left along bottom
-        else if distance < 2*cardWidth + cardHeight {
-            return (2*cardWidth + cardHeight - distance) - cardWidth/2
-        }
-        // Left edge (2*cardWidth + cardHeight to perimeter) - go up left side
-        else {
-            return -cardWidth/2
-        }
-    }
-    
-    /// Calculates Y position for sparkle traveling around rectangular border
-    /// Sparkle starts from center (0,0) and travels around the frame edge
-    private func calculateSparkleY(progress: CGFloat) -> CGFloat {
-        let cardWidth: CGFloat = 240  // Approximate card width
-        let cardHeight: CGFloat = 160 // Approximate card height
-        let perimeter = 2 * (cardWidth + cardHeight)
-        let distance = progress * perimeter
-        
-        // Top edge (0 to cardWidth) - start from center, go to top-right
-        if distance < cardWidth {
-            return -cardHeight/2
-        }
-        // Right edge (cardWidth to cardWidth + cardHeight) - go down right side
-        else if distance < cardWidth + cardHeight {
-            return (distance - cardWidth) - cardHeight/2
-        }
-        // Bottom edge (cardWidth + cardHeight to 2*cardWidth + cardHeight) - go left along bottom
-        else if distance < 2*cardWidth + cardHeight {
-            return cardHeight/2
-        }
-        // Left edge (2*cardWidth + cardHeight to perimeter) - go up left side back to center
-        else {
-            return (perimeter - distance) - cardHeight/2
-        }
-    }
 }
 
 #Preview {
     CelebrationOverlay(
         isPresented: .constant(true),
-        style: .playful,
+        style: .calm,
         title: "Swap logged!",
         subtitle: "Small steps, big wins."
     )
