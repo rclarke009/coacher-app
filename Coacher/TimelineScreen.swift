@@ -12,6 +12,7 @@ enum DayKey: Hashable { case day(Int) } // -1..-7 past, 0 today
 
 struct TimelineScreen: View {
     @Environment(\.modelContext) private var context
+    @EnvironmentObject private var celebrationManager: CelebrationManager
     @Query(sort: \DailyEntry.date, order: .reverse) private var entries: [DailyEntry]
     
     @StateObject private var timeManager = TimeManager()
