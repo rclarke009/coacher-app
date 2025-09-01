@@ -134,6 +134,8 @@ struct IntroductionStep: View {
     
     private var introductionText: String {
         switch type {
+        case .stress:
+            return "Stress and emotional triggers can create powerful cravings. Let's take a moment to understand what's happening and find a healthier way forward."
         case .habit:
             return "Habitual behaviors often happen automatically. Let's identify the triggers and create a plan to break the pattern."
         case .physical:
@@ -185,6 +187,12 @@ struct ActionStep: View {
     
     private var actionItems: [String] {
         switch type {
+        case .stress:
+            return [
+                "Take 3 deep breaths",
+                "Drink a glass of water",
+                "Set a 5-minute timer before deciding"
+            ]
         case .habit:
             return [
                 "Identify the trigger (time/place)",
