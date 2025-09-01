@@ -33,10 +33,10 @@ struct MorningFocusSection: View {
             } label: {
                 HStack {
                     Text(entry.challenge == .none ? "Select…" : entry.challenge.displayName)
-                        .foregroundColor(entry.challenge == .none ? .leafYellow : .dynamicText)
+                        .foregroundColor(entry.challenge == .none ? .brightYellow : .dynamicText)
                     Spacer()
                     Image(systemName: "chevron.down")
-                        .foregroundColor(.leafYellow)
+                        .foregroundColor(.brightYellow)
                         .font(.caption)
                 }
             }

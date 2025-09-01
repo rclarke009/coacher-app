@@ -12,6 +12,8 @@ extension Color {
     static let brandBlue = Color(hex: "0C2F89")
     static let leafGreen = Color(hex: "5CB85C")
     static let leafYellow = Color(hex: "FFD54F")
+    static let brightYellow = Color(hex: "FFC107") // Brighter yellow for better visibility in light mode
+    static let stressOrange = Color(hex: "FF8C00") // Orange color for stress/emotional cards
     
     // MARK: - Light Mode Colors
     static let lightBackground = Color(hex: "FAFAFA")
