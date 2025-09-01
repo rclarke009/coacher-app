@@ -8,9 +8,24 @@
 import SwiftUI
 import SwiftData
 
+enum TimelineItem: Identifiable {
+    case entry(DailyEntry)
+    case audioRecording(AudioRecording)
+    
+    var id: String {
+        switch self {
+        case .entry(let entry):
+            return "entry-\(entry.id.uuidString)"
+        case .audioRecording(let recording):
+            return "recording-\(recording.id.uuidString)"
+        }
+    }
+}
+
 struct HistoryView: View {
     @Environment(\.modelContext) private var context
     @Query(sort: \DailyEntry.date, order: .reverse) private var entries: [DailyEntry]
+    @Query(sort: \AudioRecording.date, order: .reverse) private var audioRecordings: [AudioRecording]
     
     var body: some View {
         let _ = print("🔍 DEBUG: HistoryView - ModelContext: \(context)")
@@ -26,14 +41,16 @@ struct HistoryView: View {
                     WeeklyCompletionRing(entries: entries)
                         .padding(.horizontal)
                     
-                    // Audio Recordings Section
-                    AudioRecordingsSection()
-                        .padding(.horizontal)
-                    
-                    // Entries List
+                    // Combined Timeline (Entries + Audio Recordings)
                     LazyVStack(spacing: 12) {
-                        ForEach(entries) { entry in
-                            EntryRowView(entry: entry)
+                        let combinedItems = createCombinedTimeline()
+                        ForEach(combinedItems, id: \.id) { item in
+                            switch item {
+                            case .entry(let entry):
+                                EntryRowView(entry: entry)
+                            case .audioRecording(let recording):
+                                AudioRecordingRow(recording: recording)
+                            }
                         }
                     }
                     .padding(.horizontal)
@@ -41,6 +58,42 @@ struct HistoryView: View {
                 .padding(.vertical)
             }
             .navigationTitle("History")
+        }
+    }
+    
+    private func createCombinedTimeline() -> [TimelineItem] {
+        var items: [TimelineItem] = []
+        
+        // Add daily entries
+        for entry in entries {
+            items.append(.entry(entry))
+        }
+        
+        // Add audio recordings
+        for recording in audioRecordings {
+            items.append(.audioRecording(recording))
+        }
+        
+        // Sort by date (most recent first)
+        return items.sorted { first, second in
+            let firstDate: Date
+            let secondDate: Date
+            
+            switch first {
+            case .entry(let entry):
+                firstDate = entry.date
+            case .audioRecording(let recording):
+                firstDate = recording.date
+            }
+            
+            switch second {
+            case .entry(let entry):
+                secondDate = entry.date
+            case .audioRecording(let recording):
+                secondDate = recording.date
+            }
+            
+            return firstDate > secondDate
         }
     }
 }
@@ -98,6 +151,8 @@ struct EntryRowView: View {
         .buttonStyle(.plain)
     }
 }
+
+
 
 struct EntryDetailView: View {
     let entry: DailyEntry
@@ -176,90 +231,7 @@ struct WeeklyCompletionRing: View {
     }
 }
 
-struct AudioRecordingsSection: View {
-    @Environment(\.modelContext) private var modelContext
-    @State private var audioRecordings: [AudioRecording] = []
-    
-    var body: some View {
-        let _ = print("🔍 DEBUG: AudioRecordingsSection - Found \(audioRecordings.count) recordings")
-        let _ = print("🔍 DEBUG: AudioRecordingsSection - ModelContext: \(modelContext)")
-        let _ = audioRecordings.forEach { recording in
-            print("🔍 DEBUG: AudioRecordingsSection - Recording: \(recording.transcription) at \(recording.date)")
-        }
-        VStack(alignment: .leading, spacing: 16) {
-            HStack {
-                Image(systemName: "mic.fill")
-                    .foregroundStyle(.blue)
-                Text("Voice Recordings")
-                    .font(.headline)
-                Spacer()
-                Text("\(audioRecordings.count)")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                    .background(
-                        RoundedRectangle(cornerRadius: 8)
-                            .fill(Color(.tertiarySystemBackground))
-                    )
-            }
-            
-            if audioRecordings.isEmpty {
-                VStack(spacing: 12) {
-                    Image(systemName: "mic.slash")
-                        .font(.system(size: 40))
-                        .foregroundStyle(.secondary)
-                    Text("No voice recordings yet")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                }
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 24)
-                .background(
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(Color(.tertiarySystemBackground))
-                )
-            } else {
-                LazyVStack(spacing: 8) {
-                    ForEach(audioRecordings.prefix(5)) { recording in
-                        AudioRecordingRow(recording: recording)
-                    }
-                    
-                    if audioRecordings.count > 5 {
-                        Button("View All \(audioRecordings.count) Recordings") {
-                            // TODO: Navigate to full audio recordings list
-                        }
-                        .font(.caption)
-                        .foregroundStyle(.blue)
-                        .padding(.top, 8)
-                    }
-                }
-            }
-        }
-        .padding()
-        .background(
-            RoundedRectangle(cornerRadius: 16)
-                .fill(Color(.secondarySystemBackground))
-        )
-        .onAppear {
-            fetchAudioRecordings()
-        }
-    }
-    
-    private func fetchAudioRecordings() {
-        do {
-            let descriptor = FetchDescriptor<AudioRecording>(sortBy: [SortDescriptor(\.date, order: .reverse)])
-            let recordings = try modelContext.fetch(descriptor)
-            print("🔍 DEBUG: fetchAudioRecordings - Found \(recordings.count) recordings")
-            recordings.forEach { recording in
-                print("🔍 DEBUG: fetchAudioRecordings - Recording: \(recording.transcription) at \(recording.date)")
-            }
-            audioRecordings = recordings
-        } catch {
-            print("🔍 DEBUG: fetchAudioRecordings - Error: \(error)")
-        }
-    }
-}
+
 
 
 

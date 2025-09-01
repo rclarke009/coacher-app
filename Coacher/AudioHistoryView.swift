@@ -99,21 +99,11 @@ struct AudioRecordingRow: View {
                 .multilineTextAlignment(.leading)
             
             HStack {
-                Label("\(Int(recording.duration))s", systemImage: "waveform")
+                Image(systemName: "mic.fill")
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(.blue)
                 
                 Spacer()
-                
-                Text("Text Only")
-                    .font(.caption2)
-                    .foregroundStyle(.tertiary)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                    .background(
-                        RoundedRectangle(cornerRadius: 8)
-                            .fill(Color(.tertiarySystemBackground))
-                    )
             }
         }
         .padding(.vertical, 4)
