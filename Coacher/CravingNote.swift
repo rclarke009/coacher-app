@@ -62,12 +62,12 @@ enum CravingType: String, Codable, CaseIterable, Identifiable {
         }
     }
     
-    var color: String {
+    var color: Color {
         switch self {
-        case .stress: return "stressOrange"
-        case .habit: return "blue"
-        case .physical: return "green"
-        case .other: return "gray"
+        case .stress: return .stressOrange
+        case .habit: return .blue
+        case .physical: return .green
+        case .other: return .gray
         }
     }
 }

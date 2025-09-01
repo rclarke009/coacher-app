@@ -109,7 +109,7 @@ struct IntroductionStep: View {
         VStack(spacing: 24) {
             Image(systemName: type.icon)
                 .font(.system(size: 80))
-                .foregroundStyle(Color(type.color))
+                .foregroundStyle(type.color)
             
             Text("Let's address this \(type.displayName.lowercased()) craving")
                 .font(.title2)

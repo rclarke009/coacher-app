@@ -81,7 +81,7 @@ struct CategoryButton: View {
             HStack(spacing: 16) {
                 Image(systemName: type.icon)
                     .font(.title2)
-                    .foregroundStyle(Color(type.color))
+                    .foregroundStyle(type.color)
                     .frame(width: 30)
                 
                 VStack(alignment: .leading, spacing: 4) {
