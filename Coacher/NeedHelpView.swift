@@ -12,7 +12,11 @@ struct NeedHelpView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var context
     @State private var selectedType: CravingType?
-    @State private var showingMiniCoach = false
+    @State private var showingMiniCoach = false {
+        didSet {
+            print("🔍 DEBUG: showingMiniCoach changed to: \(showingMiniCoach)")
+        }
+    }
     
     var body: some View {
         NavigationView {
