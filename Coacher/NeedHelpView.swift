@@ -89,42 +89,23 @@ struct CategoryButton: View {
     var body: some View {
         Button(action: action) {
             HStack(spacing: 16) {
-                Image(systemName: type.icon)
-                    .font(.title2)
-                    .foregroundColor(type.color)
-                    .frame(width: 30)
-                    .onAppear {
-                        print("🔍 DEBUG: CategoryButton - type: \(type), icon: \(type.icon), color: \(type.color)")
-                    }
-                
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(type.displayName)
-                        .font(.headline)
-                        .foregroundColor(.primary)
-                        .onAppear {
-                            print("🔍 DEBUG: CategoryButton - displayName: '\(type.displayName)'")
-                        }
-                    
-                    Text(type.description)
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                        .multilineTextAlignment(.leading)
-                        .onAppear {
-                            print("🔍 DEBUG: CategoryButton - description: '\(type.description)'")
-                        }
-                }
+                // Simple test - just show the type name directly
+                Text("TEST: \(type.displayName)")
+                    .font(.headline)
+                    .foregroundColor(.red)
+                    .background(Color.yellow)
                 
                 Spacer()
                 
-                Image(systemName: "chevron.right")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+                Text("→")
+                    .font(.title)
+                    .foregroundColor(.blue)
             }
             .padding()
-            .background(
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(Color(.secondarySystemBackground))
-            )
+            .background(Color.gray.opacity(0.2))
+            .onAppear {
+                print("🔍 DEBUG: CategoryButton - type: \(type), displayName: '\(type.displayName)'")
+            }
         }
         .buttonStyle(.plain)
     }
