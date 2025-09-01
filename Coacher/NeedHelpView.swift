@@ -39,8 +39,10 @@ struct NeedHelpView: View {
                 VStack(spacing: 16) {
                     ForEach(CravingType.allCases) { type in
                         CategoryButton(type: type) {
+                            print("🔍 DEBUG: Button tapped for type: \(type)")
                             selectedType = type
                             showingMiniCoach = true
+                            print("🔍 DEBUG: selectedType set to: \(selectedType), showingMiniCoach: \(showingMiniCoach)")
                         }
                     }
                 }
@@ -62,10 +64,14 @@ struct NeedHelpView: View {
             .navigationBarHidden(true)
             .sheet(isPresented: $showingMiniCoach) {
                 if let type = selectedType {
+                    print("🔍 DEBUG: Sheet presenting MiniCoachView for type: \(type)")
                     MiniCoachView(type: type, onComplete: { cravingNote in
+                        print("🔍 DEBUG: MiniCoachView completed with note: \(cravingNote)")
                         saveCravingNote(cravingNote)
                         dismiss()
                     })
+                } else {
+                    print("🔍 DEBUG: Sheet presenting but selectedType is nil")
                 }
             }
         }
