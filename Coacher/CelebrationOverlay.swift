@@ -22,6 +22,8 @@ struct CelebrationOverlay: View {
     let title: String
     let subtitle: String
     
+    @EnvironmentObject private var celebrationManager: CelebrationManager
+    
     @State private var cardScale: CGFloat = 0.8
     @State private var cardOpacity: Double = 0.0
     @State private var textOpacity: Double = 0.0
@@ -68,42 +70,87 @@ struct CelebrationOverlay: View {
                                 .opacity(glowOpacity)
                             
                             // Growing plant animation
-                            VStack(spacing: 4) {
-                                // Stem
-                                RoundedRectangle(cornerRadius: 2)
-                                    .fill(Color.green)
-                                    .frame(width: 4, height: 40 * plantScale)
-                                    .scaleEffect(y: plantScale, anchor: .bottom)
-                                
-                                // Leaves
-                                HStack(spacing: 8) {
-                                    // Left leaf
-                                    Image(systemName: "leaf.fill")
-                                        .font(.system(size: 24))
-                                        .foregroundColor(.green)
-                                        .rotationEffect(.degrees(-30 + leafRotation))
-                                        .scaleEffect(plantScale)
+                            ZStack {
+                                // Apple with bite
+                                ZStack {
+                                    // Main apple body
+                                    Circle()
+                                        .fill(Color.red)
+                                        .frame(width: 60, height: 60)
+                                        .overlay(
+                                            Circle()
+                                                .stroke(Color.red.opacity(0.8), lineWidth: 2)
+                                        )
                                     
-                                    // Right leaf
-                                    Image(systemName: "leaf.fill")
-                                        .font(.system(size: 24))
-                                        .foregroundColor(.green)
-                                        .rotationEffect(.degrees(30 - leafRotation))
-                                        .scaleEffect(plantScale)
+                                    // Bite taken out (using a smaller circle overlay)
+                                    Circle()
+                                        .fill(Color(red: 0.99, green: 0.97, blue: 0.94))
+                                        .frame(width: 25, height: 25)
+                                        .offset(x: 15, y: -15)
+                                    
+                                    // Apple stem
+                                    RoundedRectangle(cornerRadius: 2)
+                                        .fill(Color.brown)
+                                        .frame(width: 4, height: 8)
+                                        .offset(x: 0, y: -34)
                                 }
-                                
-                                // Top leaf
-                                Image(systemName: "leaf.fill")
-                                    .font(.system(size: 28))
-                                    .foregroundColor(.green)
-                                    .rotationEffect(.degrees(leafRotation))
-                                    .scaleEffect(plantScale)
+                                .scaleEffect(plantScale)
+                                .animation(
+                                    .easeInOut(duration: 1.5)
+                                        .repeatCount(1, autoreverses: false),
+                                    value: plantScale
+                                )
                             }
+                            
+                            // Commented out leaves for potential future use
+                            /*
+                            ZStack {
+                                // Left leaf
+                                Ellipse()
+                                    .fill(Color.green)
+                                    .frame(width: 20, height: 12)
+                                    .offset(x: -15, y: 0)
+                                    .rotationEffect(.degrees(-8))
+                                    .scaleEffect(leafRotation ? 1.1 : 1.0)
+                                    .animation(
+                                        .easeInOut(duration: 0.8)
+                                            .repeatCount(3, autoreverses: true)
+                                            .delay(0.2),
+                                        value: leafRotation
+                                    )
+                                
+                                // Right leaf
+                                Ellipse()
+                                    .fill(Color.green)
+                                    .frame(width: 20, height: 12)
+                                    .offset(x: 15, y: 0)
+                                    .rotationEffect(.degrees(8))
+                                    .scaleEffect(leafRotation ? 1.1 : 1.0)
+                                    .animation(
+                                        .easeInOut(duration: 0.8)
+                                            .repeatCount(3, autoreverses: true)
+                                            .delay(0.4),
+                                        value: leafRotation
+                                    )
+                                
+                                // Center leaf
+                                Ellipse()
+                                    .fill(Color.green)
+                                    .frame(width: 24, height: 14)
+                                    .offset(x: 0, y: -5)
+                                    .scaleEffect(leafRotation ? 1.15 : 1.0)
+                                    .animation(
+                                        .easeInOut(duration: 0.8)
+                                            .repeatCount(3, autoreverses: true),
+                                        value: leafRotation
+                                    )
+                            }
+                            */
                         }
                         .frame(width: 200, height: 140)
                         .background(
                             RoundedRectangle(cornerRadius: 12)
-                                .fill(Color.green.opacity(0.1))
+                                .fill(Color(red: 0.99, green: 0.97, blue: 0.94))
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 12)
                                         .stroke(Color.green.opacity(0.3), lineWidth: 1)
@@ -111,24 +158,17 @@ struct CelebrationOverlay: View {
                         )
                         
                         // Text overlay
-                        VStack(spacing: 6) {
-                            Text(title)
-                                .font(.title3)
-                                .fontWeight(.bold)
-                                .foregroundColor(.white)
-                                .shadow(color: .black, radius: 2, x: 0, y: 1)
-                            
+                        VStack(spacing: 0) {
                             Text(subtitle)
-                                .font(.caption)
-                                .foregroundColor(.white.opacity(0.9))
+                                .font(.body)
+                                .foregroundColor(.secondary)
                                 .multilineTextAlignment(.center)
-                                .shadow(color: .black, radius: 2, x: 0, y: 1)
                         }
                         .padding(.horizontal, 16)
-                        .padding(.vertical, 12)
+                        .padding(.vertical, 16)
                         .background(
                             RoundedRectangle(cornerRadius: 16)
-                                .fill(.ultraThinMaterial)
+                                .fill(Color(red: 0.99, green: 0.97, blue: 0.94))
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 16)
                                         .stroke(Color.green.opacity(0.6), lineWidth: 2)

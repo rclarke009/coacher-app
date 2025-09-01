@@ -16,7 +16,24 @@ class CelebrationManager: ObservableObject {
         "Every choice counts!",
         "Growing healthier habits!",
         "Great job staying on track!",
-        "You're making progress!"
+        "You're making progress!",
+        "Little swaps, lasting change.",
+        "Another brick in your strong foundation.",
+        "Tiny steps grow into giant leaps.",
+        "You chose health today.",
+        "That's how habits are built—one choice.",
+        "Momentum is on your side.",
+        "Keep stacking wins like this.",
+        "Today's choice shapes tomorrow's you.",
+        "You're proving it's possible.",
+        "That swap is a gift to your future self.",
+        "Onward and upward!",
+        "Next stop: a healthier you",
+        "You're leveling up!",
+        "Ka-ching! Another win.",
+        "Your future self just high-fived you",
+        "Momentum unlocked!",
+        "That's how champions roll."
     ]
     
     var currentStyle: CelebrationStyle {
