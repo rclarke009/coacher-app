@@ -339,6 +339,23 @@ struct CaptureStep: View {
             DispatchQueue.main.async {
                 if granted {
                     print("🔍 DEBUG: Microphone permission granted")
+                    // Also request speech recognition permission
+                    SFSpeechRecognizer.requestAuthorization { status in
+                        DispatchQueue.main.async {
+                            switch status {
+                            case .authorized:
+                                print("🔍 DEBUG: Speech recognition permission granted")
+                            case .denied:
+                                print("🔍 DEBUG: Speech recognition permission denied")
+                            case .restricted:
+                                print("🔍 DEBUG: Speech recognition permission restricted")
+                            case .notDetermined:
+                                print("🔍 DEBUG: Speech recognition permission not determined")
+                            @unknown default:
+                                print("🔍 DEBUG: Speech recognition permission unknown status")
+                            }
+                        }
+                    }
                 } else {
                     print("🔍 DEBUG: Microphone permission denied")
                 }
@@ -394,12 +411,45 @@ struct CaptureStep: View {
         recordingTimer = nil
         recordingTime = 0
         
-        // For now, use placeholder text until we implement real transcription
-        if voiceText.isEmpty {
-            voiceText = "I was feeling \(type.displayName.lowercased()) and needed support. This is a placeholder transcription - real audio was recorded."
+        // Transcribe the recorded audio
+        if let audioURL = savedAudioURL {
+            transcribeAudio(from: audioURL)
         }
         
         print("🔍 DEBUG: Stopped recording, saved URL: \(savedAudioURL?.absoluteString ?? "nil")")
+    }
+    
+    private func transcribeAudio(from url: URL) {
+        let recognizer = SFSpeechRecognizer(locale: Locale(identifier: "en-US"))
+        
+        guard let recognizer = recognizer, recognizer.isAvailable else {
+            print("🔍 DEBUG: Speech recognition not available")
+            // Fallback to placeholder text
+            if voiceText.isEmpty {
+                voiceText = "I was feeling \(type.displayName.lowercased()) and needed support. Speech recognition not available."
+            }
+            return
+        }
+        
+        let request = SFSpeechURLRecognitionRequest(url: url)
+        request.shouldReportPartialResults = false
+        
+        recognizer.recognitionTask(with: request) { result, error in
+            DispatchQueue.main.async {
+                if let error = error {
+                    print("🔍 DEBUG: Speech recognition error: \(error)")
+                    // Fallback to placeholder text
+                    if self.voiceText.isEmpty {
+                        self.voiceText = "I was feeling \(self.type.displayName.lowercased()) and needed support. Speech recognition failed."
+                    }
+                } else if let result = result, result.isFinal {
+                    let transcription = result.bestTranscription.formattedString
+                    print("🔍 DEBUG: Transcription completed: \(transcription)")
+                    self.voiceText = transcription
+                    self.transcribedText = transcription
+                }
+            }
+        }
     }
     
 
