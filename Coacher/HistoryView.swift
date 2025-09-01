@@ -111,7 +111,7 @@ struct EntryDetailView: View {
                 Divider()
                 EndOfDaySection(
                     entry: .constant(entry),
-                    onCelebrationTrigger: { _, _, _ in }
+                    onCelebrationTrigger: { _, _ in }
                 )
             }
             .padding()

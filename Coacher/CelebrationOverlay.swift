@@ -1,24 +1,7 @@
 import SwiftUI
 
-enum CelebrationStyle: String, CaseIterable, Identifiable {
-    case calm = "calm"
-    case playful = "playful"
-    case off = "off"
-    
-    var id: String { rawValue }
-    
-    var displayName: String {
-        switch self {
-        case .calm: return "🌱 Growing"
-        case .playful: return "🌱 Growing"
-        case .off: return "🚫 Off"
-        }
-    }
-}
-
 struct CelebrationOverlay: View {
     @Binding var isPresented: Bool
-    let style: CelebrationStyle
     let title: String
     let subtitle: String
     
@@ -198,19 +181,25 @@ struct CelebrationOverlay: View {
             cardOpacity = 1.0
         }
         
-        // Plant growth animation
-        withAnimation(.easeOut(duration: 1.2).delay(0.3)) {
+        if celebrationManager.animationsEnabled {
+            // Plant growth animation
+            withAnimation(.easeOut(duration: 1.2).delay(0.3)) {
+                plantScale = 1.0
+            }
+            
+            // Leaf movement
+            withAnimation(.easeInOut(duration: 2.0).delay(0.8).repeatCount(2, autoreverses: true)) {
+                leafRotation = 15
+            }
+            
+            // Glow effect
+            withAnimation(.easeInOut(duration: 1.5).delay(0.5)) {
+                glowOpacity = 1.0
+            }
+        } else {
+            // No animations - just show the plant at full size
             plantScale = 1.0
-        }
-        
-        // Leaf movement
-        withAnimation(.easeInOut(duration: 2.0).delay(0.8).repeatCount(2, autoreverses: true)) {
-            leafRotation = 15
-        }
-        
-        // Glow effect
-        withAnimation(.easeInOut(duration: 1.5).delay(0.5)) {
-            glowOpacity = 1.0
+            glowOpacity = 0.0
         }
         
         // Text fade in
@@ -219,7 +208,8 @@ struct CelebrationOverlay: View {
         }
         
         // Auto-dismiss after animation
-        DispatchQueue.main.asyncAfter(deadline: .now() + 4.5) {
+        let dismissDelay = celebrationManager.animationsEnabled ? 4.5 : 2.5
+        DispatchQueue.main.asyncAfter(deadline: .now() + dismissDelay) {
             dismissCelebration()
         }
     }
@@ -240,7 +230,6 @@ struct CelebrationOverlay: View {
 #Preview {
     CelebrationOverlay(
         isPresented: .constant(true),
-        style: .calm,
         title: "Swap logged!",
         subtitle: "Small steps, big wins."
     )

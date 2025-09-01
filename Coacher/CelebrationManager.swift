@@ -1,11 +1,9 @@
 import SwiftUI
 import Foundation
 
-// CelebrationStyle is now defined in CelebrationOverlay.swift
-
 class CelebrationManager: ObservableObject {
-    @AppStorage("celebrationStyle") private var celebrationStyle: CelebrationStyle = .playful
     @AppStorage("showCelebrations") private var showCelebrations: Bool = true
+    @AppStorage("showAnimations") private var showAnimations: Bool = true
     
     @Published var showingMilestoneCelebration = false
     @Published var milestoneStreakCount = 0
@@ -47,18 +45,18 @@ class CelebrationManager: ObservableObject {
         return streakManager
     }
     
-    var currentStyle: CelebrationStyle {
-        get { celebrationStyle }
-        set { 
-            celebrationStyle = newValue
-            objectWillChange.send()
-        }
-    }
-    
     var celebrationsEnabled: Bool {
         get { showCelebrations }
         set { 
             showCelebrations = newValue
+            objectWillChange.send()
+        }
+    }
+    
+    var animationsEnabled: Bool {
+        get { showAnimations }
+        set { 
+            showAnimations = newValue
             objectWillChange.send()
         }
     }

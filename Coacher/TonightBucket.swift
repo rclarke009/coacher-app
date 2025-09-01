@@ -12,7 +12,7 @@ struct TonightBucket: View {
     let entries: [DailyEntry]
     @Binding var entryToday: DailyEntry
     @Binding var hasUnsavedChanges: Bool
-    let onCelebrationTrigger: (String, String, CelebrationStyle) -> Void
+    let onCelebrationTrigger: (String, String) -> Void
     
     @StateObject private var timeManager = TimeManager()
     @State private var tomorrowEntry: DailyEntry = DailyEntry()
@@ -82,7 +82,7 @@ struct TonightBucket: View {
         entries: [],
         entryToday: .constant(DailyEntry()),
         hasUnsavedChanges: .constant(false),
-        onCelebrationTrigger: { _, _, _ in }
+        onCelebrationTrigger: { _, _ in }
     )
     .padding()
 }

@@ -22,7 +22,6 @@ struct TimelineScreen: View {
     @State private var showingCelebration = false
     @State private var celebrationTitle = ""
     @State private var celebrationSubtitle = ""
-    @State private var celebrationStyle: CelebrationStyle = .playful
     
     var body: some View {
         NavigationView {
@@ -80,7 +79,6 @@ struct TimelineScreen: View {
                     // Global celebration overlay - truly full screen
                     CelebrationOverlay(
                         isPresented: $showingCelebration,
-                        style: celebrationStyle,
                         title: celebrationTitle,
                         subtitle: celebrationSubtitle
                     )
@@ -120,10 +118,9 @@ struct TimelineScreen: View {
         impactFeedback.impactOccurred()
     }
     
-    private func triggerCelebration(title: String, subtitle: String, style: CelebrationStyle) {
+    private func triggerCelebration(title: String, subtitle: String) {
         celebrationTitle = title
         celebrationSubtitle = subtitle
-        celebrationStyle = style
         showingCelebration = true
     }
 }

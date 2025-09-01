@@ -10,7 +10,7 @@ import SwiftUI
 struct EndOfDaySection: View {
     @Binding var entry: DailyEntry
     @EnvironmentObject private var celebrationManager: CelebrationManager
-    let onCelebrationTrigger: (String, String, CelebrationStyle) -> Void
+    let onCelebrationTrigger: (String, String) -> Void
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -36,8 +36,7 @@ struct EndOfDaySection: View {
                             // Show regular celebration
                             onCelebrationTrigger(
                                 "Swap logged!",
-                                celebrationManager.randomEncouragingPhrase(),
-                                celebrationManager.currentStyle
+                                celebrationManager.randomEncouragingPhrase()
                             )
                         }
                     }
@@ -57,8 +56,7 @@ struct EndOfDaySection: View {
                             // Show regular celebration
                             onCelebrationTrigger(
                                 "Swap logged!",
-                                celebrationManager.randomEncouragingPhrase(),
-                                celebrationManager.currentStyle
+                                celebrationManager.randomEncouragingPhrase()
                             )
                         }
                     }
@@ -76,6 +74,6 @@ struct EndOfDaySection: View {
 #Preview {
     EndOfDaySection(
         entry: .constant(DailyEntry()),
-        onCelebrationTrigger: { _, _, _ in }
+        onCelebrationTrigger: { _, _ in }
     )
 }

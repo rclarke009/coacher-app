@@ -68,7 +68,7 @@ struct TodayView: View {
                     ) {
                         EndOfDaySection(
                             entry: $entry,
-                            onCelebrationTrigger: { _, _, _ in }
+                            onCelebrationTrigger: { _, _ in }
                         )
                             .onChange(of: entry.followedSwap) { _, _ in hasUnsavedChanges = true }
                             .onChange(of: entry.feelAboutIt) { _, _ in hasUnsavedChanges = true }

@@ -39,12 +39,7 @@ struct SettingsView: View {
                     Toggle("Show celebrations", isOn: $celebrationManager.celebrationsEnabled)
                     
                     if celebrationManager.celebrationsEnabled {
-                        Picker("Celebration Style", selection: $celebrationManager.currentStyle) {
-                            ForEach(CelebrationStyle.allCases, id: \.self) { style in
-                                Text(style.displayName).tag(style)
-                            }
-                        }
-                        .pickerStyle(.segmented)
+                        Toggle("Show animations", isOn: $celebrationManager.animationsEnabled)
                     }
                     
                     Toggle("Show streak widgets", isOn: $showStreakWidgets)
