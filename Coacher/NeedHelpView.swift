@@ -44,6 +44,12 @@ struct NeedHelpView: View {
                         }
                     }
                 }
+                .onAppear {
+                    print("🔍 DEBUG: NeedHelpView - CravingType.allCases: \(CravingType.allCases)")
+                    for type in CravingType.allCases {
+                        print("🔍 DEBUG: NeedHelpView - type: \(type), displayName: '\(type.displayName)', icon: '\(type.icon)', color: \(type.color)")
+                    }
+                }
                 .padding(.horizontal)
                 
                 Spacer()
@@ -83,16 +89,25 @@ struct CategoryButton: View {
                     .font(.title2)
                     .foregroundStyle(type.color)
                     .frame(width: 30)
+                    .onAppear {
+                        print("🔍 DEBUG: CategoryButton - type: \(type), icon: \(type.icon), color: \(type.color)")
+                    }
                 
                 VStack(alignment: .leading, spacing: 4) {
                     Text(type.displayName)
                         .font(.headline)
                         .foregroundStyle(.primary)
+                        .onAppear {
+                            print("🔍 DEBUG: CategoryButton - displayName: '\(type.displayName)'")
+                        }
                     
                     Text(type.description)
                         .font(.caption)
                         .foregroundStyle(.secondary)
                         .multilineTextAlignment(.leading)
+                        .onAppear {
+                            print("🔍 DEBUG: CategoryButton - description: '\(type.description)'")
+                        }
                 }
                 
                 Spacer()
