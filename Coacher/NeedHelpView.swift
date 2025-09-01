@@ -89,11 +89,18 @@ struct CategoryButton: View {
     var body: some View {
         Button(action: action) {
             HStack(spacing: 16) {
-                // Simple test - just show the type name directly
-                Text("TEST: \(type.displayName)")
-                    .font(.headline)
-                    .foregroundColor(.red)
-                    .background(Color.yellow)
+                // Show the raw type value and displayName
+                VStack(alignment: .leading) {
+                    Text("TYPE: \(type.rawValue)")
+                        .font(.caption)
+                        .foregroundColor(.purple)
+                        .background(Color.white)
+                    
+                    Text("NAME: \(type.displayName)")
+                        .font(.headline)
+                        .foregroundColor(.red)
+                        .background(Color.yellow)
+                }
                 
                 Spacer()
                 
@@ -104,7 +111,7 @@ struct CategoryButton: View {
             .padding()
             .background(Color.gray.opacity(0.2))
             .onAppear {
-                print("🔍 DEBUG: CategoryButton - type: \(type), displayName: '\(type.displayName)'")
+                print("🔍 DEBUG: CategoryButton - type: \(type), rawValue: '\(type.rawValue)', displayName: '\(type.displayName)'")
             }
         }
         .buttonStyle(.plain)
