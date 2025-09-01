@@ -42,6 +42,11 @@ class CelebrationManager: ObservableObject {
         "That's how champions roll."
     ]
     
+    // Get the streak manager for external access
+    var streakTracker: StreakManager {
+        return streakManager
+    }
+    
     var currentStyle: CelebrationStyle {
         get { celebrationStyle }
         set { 
@@ -56,11 +61,6 @@ class CelebrationManager: ObservableObject {
             showCelebrations = newValue
             objectWillChange.send()
         }
-    }
-    
-    // Get the streak manager for external access
-    var streakManager: StreakManager {
-        return self.streakManager
     }
     
     func randomEncouragingPhrase() -> String {
