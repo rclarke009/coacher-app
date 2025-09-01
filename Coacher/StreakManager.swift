@@ -1,6 +1,9 @@
 import Foundation
 import SwiftUI
 
+// 🧪 TESTING MODE: Milestone thresholds temporarily set to [1, 2, 3] days for quick testing
+// Remember to change back to [3, 7, 14, 30, 100] when done testing!
+
 class StreakManager: ObservableObject {
     @AppStorage("currentStreak") private var currentStreak: Int = 0
     @AppStorage("longestStreak") private var longestStreak: Int = 0
@@ -8,10 +11,20 @@ class StreakManager: ObservableObject {
     @AppStorage("lastMilestoneCelebrated") private var lastMilestoneCelebrated: Int = 0
     
     // Milestone thresholds
-    private let milestoneThresholds = [3, 7, 14, 30, 100]
+    private let milestoneThresholds = [1, 2, 3] // TESTING: Changed from [3, 7, 14, 30, 100] for quick testing
     
     // Milestone quotes for different streak lengths
     private let milestoneQuotes: [Int: [String]] = [
+        1: [
+            "First day! You've started your journey! 🌟",
+            "Day one complete — every great habit begins with a single step.",
+            "You showed up today — that's what matters most!"
+        ],
+        2: [
+            "Two days in a row — you're building momentum! ⚡",
+            "Back-to-back days — your future self is taking notice.",
+            "Two days strong — you're proving you can do this!"
+        ],
         3: [
             "Three days straight — your new habit is taking root. 🌱",
             "Consistency is growing — keep watering it.",
