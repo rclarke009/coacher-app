@@ -30,6 +30,13 @@ struct MiniCoachView: View {
     var body: some View {
         NavigationView {
             VStack(spacing: 20) {
+                // Debug header
+                Text("DEBUG: MiniCoachView for \(type.displayName)")
+                    .font(.title)
+                    .foregroundColor(.red)
+                    .background(Color.yellow)
+                    .padding()
+                
                 // Progress indicator
                 ProgressView(value: Double(currentStep.rawValue), total: Double(MiniCoachStep.allCases.count - 1))
                     .padding(.horizontal)
@@ -107,6 +114,13 @@ struct IntroductionStep: View {
     
     var body: some View {
         VStack(spacing: 24) {
+            // Debug text
+            Text("DEBUG: IntroductionStep for \(type.displayName)")
+                .font(.headline)
+                .foregroundColor(.blue)
+                .background(Color.green)
+                .padding()
+            
             Image(systemName: type.icon)
                 .font(.system(size: 80))
                 .foregroundStyle(type.color)
