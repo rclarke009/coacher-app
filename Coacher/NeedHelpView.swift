@@ -68,14 +68,11 @@ struct NeedHelpView: View {
             .navigationBarHidden(true)
             .sheet(isPresented: $showingMiniCoach) {
                 if let type = selectedType {
-                    print("🔍 DEBUG: Sheet presenting MiniCoachView for type: \(type)")
                     MiniCoachView(type: type, onComplete: { cravingNote in
                         print("🔍 DEBUG: MiniCoachView completed with note: \(cravingNote)")
                         saveCravingNote(cravingNote)
                         dismiss()
                     })
-                } else {
-                    print("🔍 DEBUG: Sheet presenting but selectedType is nil")
                 }
             }
         }
