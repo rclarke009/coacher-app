@@ -93,6 +93,7 @@ struct CategoryButton: View {
                     .font(.title2)
                     .foregroundStyle(type.color)
                     .frame(width: 30)
+                    .background(Color.green.opacity(0.3)) // Debug: Add green background to see if icon is there
                     .onAppear {
                         print("🔍 DEBUG: CategoryButton - type: \(type), icon: \(type.icon), color: \(type.color)")
                     }
@@ -101,6 +102,7 @@ struct CategoryButton: View {
                     Text(type.displayName)
                         .font(.headline)
                         .foregroundStyle(.primary)
+                        .background(Color.red.opacity(0.3)) // Debug: Add red background to see if text is there
                         .onAppear {
                             print("🔍 DEBUG: CategoryButton - displayName: '\(type.displayName)'")
                         }
@@ -109,6 +111,7 @@ struct CategoryButton: View {
                         .font(.caption)
                         .foregroundStyle(.secondary)
                         .multilineTextAlignment(.leading)
+                        .background(Color.blue.opacity(0.3)) // Debug: Add blue background to see if text is there
                         .onAppear {
                             print("🔍 DEBUG: CategoryButton - description: '\(type.description)'")
                         }
