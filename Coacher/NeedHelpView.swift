@@ -11,10 +11,9 @@ import SwiftData
 struct NeedHelpView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var context
-    @State private var selectedType: CravingType?
-    @State private var showingMiniCoach = false {
+    @State private var selectedType: CravingType? {
         didSet {
-            print("🔍 DEBUG: showingMiniCoach changed to: \(showingMiniCoach)")
+            print("🔍 DEBUG: selectedType changed to: \(selectedType)")
         }
     }
     
@@ -44,8 +43,7 @@ struct NeedHelpView: View {
                     CategoryButton(type: type) {
                         print("🔍 DEBUG: Button tapped for type: \(type)")
                         selectedType = type
-                        showingMiniCoach = true
-                        print("🔍 DEBUG: selectedType set to: \(selectedType), showingMiniCoach: \(showingMiniCoach)")
+                        print("🔍 DEBUG: selectedType set to: \(selectedType)")
                     }
                 }
             }
@@ -64,14 +62,12 @@ struct NeedHelpView: View {
                 .foregroundStyle(.secondary)
                 .padding(.bottom)
         }
-        .sheet(isPresented: $showingMiniCoach) {
-            if let type = selectedType {
-                MiniCoachView(type: type, onComplete: { cravingNote in
-                    print("🔍 DEBUG: MiniCoachView completed with note: \(cravingNote)")
-                    saveCravingNote(cravingNote)
-                    dismiss()
-                })
-            }
+        .sheet(item: $selectedType) { type in
+            MiniCoachView(type: type, onComplete: { cravingNote in
+                print("🔍 DEBUG: MiniCoachView completed with note: \(cravingNote)")
+                saveCravingNote(cravingNote)
+                dismiss()
+            })
         }
     }
     

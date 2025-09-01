@@ -28,8 +28,30 @@ struct MiniCoachView: View {
     }
     
     var body: some View {
-        NavigationView {
+        let _ = print("🔍 DEBUG: MiniCoachView body called for type: \(type.displayName)")
+        return NavigationView {
             VStack(spacing: 20) {
+                // Simple test - just show a basic text
+                Text("TEST: This should always show")
+                    .font(.largeTitle)
+                    .foregroundColor(.red)
+                    .background(Color.yellow)
+                    .padding()
+                
+                // Debug header
+                Text("DEBUG: MiniCoachView for \(type.displayName)")
+                    .font(.title)
+                    .foregroundColor(.red)
+                    .background(Color.yellow)
+                    .padding()
+                
+                // Additional debug info
+                Text("DEBUG: currentStep = \(currentStep.rawValue)")
+                    .font(.caption)
+                    .foregroundColor(.purple)
+                    .background(Color.white)
+                    .padding()
+                
                 // Progress indicator
                 ProgressView(value: Double(currentStep.rawValue), total: Double(MiniCoachStep.allCases.count - 1))
                     .padding(.horizontal)
@@ -97,6 +119,9 @@ struct MiniCoachView: View {
             .sheet(isPresented: $showingTextEditor) {
                 TextEditorView(text: $transcribedText, originalText: voiceText)
             }
+            .onAppear {
+                print("🔍 DEBUG: MiniCoachView onAppear for type: \(type.displayName), currentStep: \(currentStep.rawValue)")
+            }
         }
     }
 }
@@ -107,6 +132,13 @@ struct IntroductionStep: View {
     
     var body: some View {
         VStack(spacing: 24) {
+            // Debug text
+            Text("DEBUG: IntroductionStep for \(type.displayName)")
+                .font(.headline)
+                .foregroundColor(.blue)
+                .background(Color.green)
+                .padding()
+            
             Image(systemName: type.icon)
                 .font(.system(size: 80))
                 .foregroundStyle(type.color)
@@ -127,6 +159,9 @@ struct IntroductionStep: View {
                 .padding(.top)
         }
         .padding()
+        .onAppear {
+            print("🔍 DEBUG: IntroductionStep onAppear for type: \(type.displayName)")
+        }
     }
     
     private var introductionText: String {
