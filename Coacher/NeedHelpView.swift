@@ -66,17 +66,11 @@ struct NeedHelpView: View {
         }
         .sheet(isPresented: $showingMiniCoach) {
             if let type = selectedType {
-                VStack {
-                    Text("Test Sheet - Type: \(type.displayName)")
-                        .font(.title)
-                        .padding()
-                    
-                    Button("Close") {
-                        showingMiniCoach = false
-                    }
-                    .buttonStyle(.borderedProminent)
-                }
-                .padding()
+                MiniCoachView(type: type, onComplete: { cravingNote in
+                    print("🔍 DEBUG: MiniCoachView completed with note: \(cravingNote)")
+                    saveCravingNote(cravingNote)
+                    dismiss()
+                })
             }
         }
     }
