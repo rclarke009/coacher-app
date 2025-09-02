@@ -39,7 +39,7 @@ struct DayBucket: View {
                 SectionCard(
                     title: "Last Night's Prep",
                     icon: "moon.stars.fill",
-                    accent: .purple,
+                    accent: .dimmedGreen,
                     collapsed: $pastLastNightPrepCollapsed,
                     dimmed: true
                 ) {
@@ -57,7 +57,7 @@ struct DayBucket: View {
                 SectionCard(
                     title: "Morning Focus",
                     icon: "sun.max.fill",
-                    accent: .blue,
+                    accent: .goldenYellow,
                     collapsed: $pastMorningFocusCollapsed,
                     dimmed: true
                 ) {
@@ -76,7 +76,7 @@ struct DayBucket: View {
                 SectionCard(
                     title: "Last Night's Prep (for Today)",
                     icon: "moon.stars.fill",
-                    accent: .purple,
+                    accent: .dimmedGreen,
                     collapsed: $lastNightPrepCollapsed,
                     dimmed: true
                 ) {
@@ -94,7 +94,7 @@ struct DayBucket: View {
                 SectionCard(
                     title: "Morning Focus (Today)",
                     icon: "sun.max.fill",
-                    accent: .teal,
+                    accent: .goldenYellow,
                     collapsed: $morningFocusCollapsed
                 ) {
                     if let entryToday = entryToday, let hasUnsavedChanges = hasUnsavedChanges {

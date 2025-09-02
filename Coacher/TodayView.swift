@@ -33,7 +33,7 @@ struct TodayView: View {
                         SectionCard(
                             title: "Last Night's Prep (for Today)",
                             icon: "moon.stars.fill",
-                            accent: .purple,
+                            accent: .dimmedGreen,
                             collapsed: $lastNightPrepExpanded,
                             dimmed: true
                         ) {
@@ -45,7 +45,7 @@ struct TodayView: View {
                     SectionCard(
                         title: "Morning Focus (Today)",
                         icon: "sun.max.fill",
-                        accent: .teal,
+                        accent: .goldenYellow,
                         collapsed: $morningFocusExpanded,
                         dimmed: timeManager.isEveningPhase
                     ) {

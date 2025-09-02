@@ -102,6 +102,10 @@ struct SectionCard<Content: View>: View {
             return Color.brandBlue.opacity(0.12).gradient
         case .teal:
             return Color.leafGreen.opacity(0.15).gradient
+        case .goldenYellow:
+            return Color.leafYellow.opacity(0.15).gradient
+        case .dimmedGreen:
+            return Color.leafGreen.opacity(0.08).gradient
         case .gray:
             return Color.dynamicSecondaryText.opacity(0.14).gradient
         }
@@ -116,6 +120,10 @@ struct SectionCard<Content: View>: View {
             return .brandBlue
         case .teal:
             return .leafGreen
+        case .goldenYellow:
+            return .leafYellow
+        case .dimmedGreen:
+            return .leafGreen.opacity(0.6)
         case .gray:
             return .dynamicSecondaryText
         }
@@ -133,6 +141,10 @@ struct SectionCard<Content: View>: View {
             return Color.brandBlue.opacity(0.20)
         case .teal:
             return Color.leafGreen.opacity(0.25)
+        case .goldenYellow:
+            return Color.leafYellow.opacity(0.25)
+        case .dimmedGreen:
+            return Color.leafGreen.opacity(0.15)
         case .gray:
             return Color.dynamicSecondaryText.opacity(0.22)
         }
@@ -142,7 +154,7 @@ struct SectionCard<Content: View>: View {
 // MARK: - Supporting Types
 
 enum SectionAccent: CaseIterable {
-    case blue, purple, teal, gray
+    case blue, purple, teal, gray, goldenYellow, dimmedGreen
 }
 
 #Preview {
