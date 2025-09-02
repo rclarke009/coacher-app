@@ -34,6 +34,16 @@ struct ContentView: View {
                 notificationHandler.shouldShowTab = 0 // Reset
             }
         }
+        .overlay(
+            // Status bar cover - tiny strip to hide distracting system elements
+            VStack {
+                Rectangle()
+                    .fill(Color(.systemBackground))
+                    .frame(height: 50) // Covers status bar area
+                    .ignoresSafeArea(.all, edges: .top)
+                Spacer()
+            }
+        )
     }
 }
 
