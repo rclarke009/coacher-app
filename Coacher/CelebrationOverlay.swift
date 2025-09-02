@@ -197,9 +197,10 @@ struct CelebrationOverlay: View {
                 glowOpacity = 1.0
             }
         } else {
-            // No animations - just show the plant at full size
-            plantScale = 1.0
+            // No animations - keep plant small and no effects
+            plantScale = 0.3
             glowOpacity = 0.0
+            leafRotation = 0
         }
         
         // Text fade in
