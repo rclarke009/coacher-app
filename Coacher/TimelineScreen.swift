@@ -61,7 +61,7 @@ struct TimelineScreen: View {
                         .padding(.bottom, 24)
                     }
                     .padding(.horizontal)
-                    .padding(.top, 8)
+                    .padding(.top, 20)
                 }
                 .onAppear { 
                     loadOrCreateToday()

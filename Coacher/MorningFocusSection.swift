@@ -212,7 +212,7 @@ struct StepCard<Content: View>: View {
     }
     
     private var stepBackgroundColor: Color {
-        return Color(.systemGray6).opacity(0.6) // Consistent gray background for all steps
+        return Color.blue.opacity(0.15) // Light blue background for all steps
     }
 }
 
@@ -229,7 +229,7 @@ struct CommitCard<Content: View>: View {
                 .padding(20) // Extra padding for final step
                 .background(
                     RoundedRectangle(cornerRadius: 12)
-                        .fill(Color(.systemGray6).opacity(0.6)) // Gray background for commitment
+                        .fill(Color.blue.opacity(0.15)) // Light blue background for commitment
                         .shadow(color: .black.opacity(0.1), radius: 3, x: 0, y: 2)
                 )
                 .overlay(
