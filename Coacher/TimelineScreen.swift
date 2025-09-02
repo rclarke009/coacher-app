@@ -64,7 +64,7 @@ struct TimelineScreen: View {
                 }
                 .onAppear { 
                     loadOrCreateToday()
-                    proxy.scrollTo(DayKey.day(0), anchor: .center)
+                    proxy.scrollTo("todayBucket", anchor: .center)
                 }
                 .onReceive(notificationHandler.$shouldNavigateToSection) { section in
                     if let section = section {

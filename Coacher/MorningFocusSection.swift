@@ -100,44 +100,56 @@ struct MorningFocusSection: View {
             }
             
             // Step 4 – Commit (Special treatment)
-            CommitCard {
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("④ Commit (2 minutes)")
-                        .font(.headline)
-                        .fontWeight(.semibold)
+            VStack(alignment: .leading, spacing: 0) {
+                HStack {
+                    Text("④")
+                        .font(.title2)
+                        .fontWeight(.bold)
                         .foregroundColor(.blue)
                     
-                    Text("Today I will … instead of …")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                    
-                    VStack(spacing: 12) {
-                        TextField("do this…", text: $entry.commitTo)
-                            .foregroundColor(.white)
-                            .padding(16) // Extra padding for commit fields
-                            .frame(height: 50) // Taller field for commitment
-                            .background(Color(.systemGray6))
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 8)
-                                    .stroke(Color.gray.opacity(0.4), lineWidth: 1)
-                            )
-                            .clipShape(RoundedRectangle(cornerRadius: 8))
+                    Spacer()
+                }
+                .padding(.bottom, 8)
+                
+                CommitCard {
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Commit (2 minutes)")
+                            .font(.headline)
+                            .fontWeight(.semibold)
+                            .foregroundColor(.blue)
                         
-                        Text("instead of")
-                            .font(.caption)
+                        Text("Today I will … instead of …")
+                            .font(.subheadline)
                             .foregroundStyle(.secondary)
-                            .frame(maxWidth: .infinity, alignment: .center)
                         
-                        TextField("not this…", text: $entry.commitFrom)
-                            .foregroundColor(.white)
-                            .padding(16) // Extra padding for commit fields
-                            .frame(height: 50) // Taller field for commitment
-                            .background(Color(.systemGray6))
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 8)
-                                    .stroke(Color.gray.opacity(0.4), lineWidth: 1)
-                            )
-                            .clipShape(RoundedRectangle(cornerRadius: 8))
+                        VStack(spacing: 12) {
+                            TextField("do this…", text: $entry.commitTo)
+                                .foregroundColor(.white)
+                                .padding(16) // Extra padding for commit fields
+                                .frame(height: 50) // Taller field for commitment
+                                .background(Color(.systemGray6))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .stroke(Color.gray.opacity(0.4), lineWidth: 1)
+                                )
+                                .clipShape(RoundedRectangle(cornerRadius: 8))
+                            
+                            Text("instead of")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                                .frame(maxWidth: .infinity, alignment: .center)
+                            
+                            TextField("not this…", text: $entry.commitFrom)
+                                .foregroundColor(.white)
+                                .padding(16) // Extra padding for commit fields
+                                .frame(height: 50) // Taller field for commitment
+                                .background(Color(.systemGray6))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .stroke(Color.gray.opacity(0.4), lineWidth: 1)
+                                )
+                                .clipShape(RoundedRectangle(cornerRadius: 8))
+                        }
                     }
                 }
             }
