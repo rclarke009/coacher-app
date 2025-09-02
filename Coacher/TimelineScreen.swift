@@ -20,6 +20,7 @@ struct TimelineScreen: View {
     @State private var entryToday = DailyEntry()
     @State private var showingNeedHelp = false
     @State private var hasUnsavedChanges = false
+    @State private var autoSaveTimer: Timer?
     @State private var showingCelebration = false
     @State private var celebrationTitle = ""
     @State private var celebrationSubtitle = ""
@@ -93,13 +94,7 @@ struct TimelineScreen: View {
                     }
                 }
                 .navigationTitle("Today")
-                .toolbar {
-                    ToolbarItem(placement: .navigationBarTrailing) {
-                        SaveButton(entry: entryToday, hasUnsavedChanges: hasUnsavedChanges) {
-                            saveEntry()
-                        }
-                    }
-                }
+
                 .sheet(isPresented: $showingNeedHelp) {
                     NeedHelpView()
                 }
@@ -133,6 +128,29 @@ struct TimelineScreen: View {
             context.insert(entryToday)
             try? context.save()
         }
+    }
+    
+    private func scheduleAutoSave() {
+        hasUnsavedChanges = true
+        
+        // Cancel existing timer
+        autoSaveTimer?.invalidate()
+        
+        // Schedule auto-save after 2 seconds of inactivity
+        autoSaveTimer = Timer.scheduledTimer(withTimeInterval: 2.0, repeats: false) { _ in
+            autoSave()
+        }
+    }
+    
+    private func autoSave() {
+        try? context.save()
+        hasUnsavedChanges = false
+        
+        // Record activity for milestone tracking
+        celebrationManager.recordActivity()
+        
+        let impactFeedback = UIImpactFeedbackGenerator(style: .light)
+        impactFeedback.impactOccurred()
     }
     
     private func saveEntry() {

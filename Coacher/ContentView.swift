@@ -27,6 +27,7 @@ struct ContentView: View {
                 .tabItem { Label("Settings", systemImage: "gear") }
                 .tag(3)
         }
+        .accentColor(.leafGreen)
         .onReceive(notificationHandler.$shouldShowTab) { tabIndex in
             if tabIndex != 0 { // Only change if it's not the default value
                 selectedTab = tabIndex

@@ -17,6 +17,7 @@ struct TodayView: View {
     @State private var tomorrowEntry: DailyEntry = DailyEntry()
     @State private var showingNeedHelp = false
     @State private var hasUnsavedChanges = false
+    @State private var autoSaveTimer: Timer?
     
     // Section expansion states
     @State private var lastNightPrepExpanded = false
@@ -50,12 +51,12 @@ struct TodayView: View {
                         dimmed: timeManager.isEveningPhase
                     ) {
                         MorningFocusSection(entry: $entry)
-                            .onChange(of: entry.myWhy) { _, _ in hasUnsavedChanges = true }
-                            .onChange(of: entry.challenge) { _, _ in hasUnsavedChanges = true }
-                            .onChange(of: entry.challengeOther) { _, _ in hasUnsavedChanges = true }
-                            .onChange(of: entry.chosenSwap) { _, _ in hasUnsavedChanges = true }
-                            .onChange(of: entry.commitFrom) { _, _ in hasUnsavedChanges = true }
-                            .onChange(of: entry.commitTo) { _, _ in hasUnsavedChanges = true }
+                                        .onChange(of: entry.myWhy) { _, _ in scheduleAutoSave() }
+            .onChange(of: entry.challenge) { _, _ in scheduleAutoSave() }
+            .onChange(of: entry.challengeOther) { _, _ in scheduleAutoSave() }
+            .onChange(of: entry.chosenSwap) { _, _ in scheduleAutoSave() }
+            .onChange(of: entry.commitFrom) { _, _ in scheduleAutoSave() }
+            .onChange(of: entry.commitTo) { _, _ in scheduleAutoSave() }
                     }
                     
                     // End-of-Day Check-In - Primary in Evening Phase
@@ -112,13 +113,7 @@ struct TodayView: View {
                 loadOrCreateTomorrow()
                 setDefaultExpansionStates()
             }
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    SaveButton(entry: entry, hasUnsavedChanges: hasUnsavedChanges) {
-                        saveEntry()
-                    }
-                }
-            }
+
             .sheet(isPresented: $showingNeedHelp) {
                 NeedHelpView()
             }
@@ -172,10 +167,29 @@ struct TodayView: View {
         }
     }
     
-    private func saveEntry() {
+    private func scheduleAutoSave() {
+        hasUnsavedChanges = true
+        
+        // Cancel existing timer
+        autoSaveTimer?.invalidate()
+        
+        // Schedule auto-save after 2 seconds of inactivity
+        autoSaveTimer = Timer.scheduledTimer(withTimeInterval: 2.0, repeats: false) { _ in
+            autoSave()
+        }
+    }
+    
+    private func autoSave() {
         try? context.save()
         hasUnsavedChanges = false
         let impactFeedback = UIImpactFeedbackGenerator(style: .light)
+        impactFeedback.impactOccurred()
+    }
+    
+    private func saveEntry() {
+        try? context.save()
+        hasUnsavedChanges = false
+        let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
         impactFeedback.impactOccurred()
         hideKeyboard()
     }
@@ -185,29 +199,7 @@ struct TodayView: View {
     }
 }
 
-struct SaveButton: View {
-    let entry: DailyEntry
-    let hasUnsavedChanges: Bool
-    let onSave: () -> Void
-    
-    var body: some View {
-        Button(action: onSave) {
-            HStack(spacing: 4) {
-                if hasUnsavedChanges {
-                    Image(systemName: "circle.fill")
-                        .font(.caption2)
-                        .foregroundStyle(.orange)
-                }
-                Text(hasUnsavedChanges ? "Save" : "Saved")
-                    .fontWeight(hasUnsavedChanges ? .semibold : .medium)
-            }
-        }
-        .buttonStyle(.bordered)
-        .tint(hasUnsavedChanges ? .orange : .secondary)
-        .disabled(!hasUnsavedChanges)
-        .animation(.easeInOut(duration: 0.2), value: hasUnsavedChanges)
-    }
-}
+
 
 #Preview {
     TodayView()
