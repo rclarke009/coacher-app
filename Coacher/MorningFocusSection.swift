@@ -22,7 +22,7 @@ struct MorningFocusSection: View {
                     
                     TextEditor(text: $entry.myWhy)
                         .frame(minHeight: 100) // Increased height
-                        .foregroundColor(.primary)
+                        .foregroundColor(.white)
                         .background(Color(.systemGray6))
                         .overlay(
                             RoundedRectangle(cornerRadius: 8)
@@ -90,7 +90,7 @@ struct MorningFocusSection: View {
                         .foregroundColor(.purple)
                     
                     TextEditor(text: $entry.chosenSwap)
-                        .foregroundColor(.primary)
+                        .foregroundColor(.white)
                         .font(.subheadline)
                         .padding(12)
                         .frame(minHeight: 60) // Two rows to start, expandable
@@ -122,9 +122,9 @@ struct MorningFocusSection: View {
                             .fontWeight(.semibold)
                             .foregroundColor(.blue)
                         
-                        Text("Today I will … instead of …")
+                        Text("Today I will... instead of...")
                             .font(.subheadline)
-                            .foregroundStyle(.secondary)
+                            .foregroundColor(.white)
                         
                         VStack(spacing: 12) {
                             HStack(spacing: 16) {
@@ -134,7 +134,7 @@ struct MorningFocusSection: View {
                                         .foregroundStyle(.secondary)
                                     
                                     TextEditor(text: $entry.commitTo)
-                                        .foregroundColor(.primary)
+                                        .foregroundColor(.white)
                                         .font(.subheadline)
                                         .padding(12)
                                         .frame(minHeight: 60) // Two rows to start
@@ -152,7 +152,7 @@ struct MorningFocusSection: View {
                                         .foregroundStyle(.secondary)
                                     
                                     TextEditor(text: $entry.commitFrom)
-                                        .foregroundColor(.primary)
+                                        .foregroundColor(.white)
                                         .font(.subheadline)
                                         .padding(12)
                                         .frame(minHeight: 60) // Two rows to start
