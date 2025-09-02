@@ -52,9 +52,8 @@ struct CelebrationOverlay: View {
                                 .frame(width: 160, height: 160)
                                 .opacity(glowOpacity)
                             
-                            // Growing plant animation
-                            ZStack {
-                                // Apple with bite
+                            if celebrationManager.animationsEnabled {
+                                // Animated Apple with bite
                                 ZStack {
                                     // Main apple body
                                     Circle()
@@ -83,6 +82,31 @@ struct CelebrationOverlay: View {
                                         .repeatCount(1, autoreverses: false),
                                     value: plantScale
                                 )
+                            } else {
+                                // Static Apple with bite (no animations)
+                                ZStack {
+                                    // Main apple body
+                                    Circle()
+                                        .fill(Color.red)
+                                        .frame(width: 60, height: 60)
+                                        .overlay(
+                                            Circle()
+                                                .stroke(Color.red.opacity(0.8), lineWidth: 2)
+                                        )
+                                    
+                                    // Bite taken out (using a smaller circle overlay)
+                                    Circle()
+                                        .fill(Color(red: 0.99, green: 0.97, blue: 0.94))
+                                        .frame(width: 25, height: 25)
+                                        .offset(x: 15, y: -15)
+                                    
+                                    // Apple stem
+                                    RoundedRectangle(cornerRadius: 2)
+                                        .fill(Color.brown)
+                                        .frame(width: 4, height: 8)
+                                        .offset(x: 0, y: -34)
+                                }
+                                .scaleEffect(1.0) // Always full size when static
                             }
                             
                             // Commented out leaves for potential future use
