@@ -66,13 +66,15 @@ struct MorningFocusSection: View {
                     }
                     
                     if entry.challenge == .other {
-                        TextField("Describe the challenge…", text: $entry.challengeOther)
+                        TextEditor(text: $entry.challengeOther)
                             .foregroundColor(.white)
+                            .font(.subheadline)
                             .padding(12)
+                            .frame(minHeight: 60) // Two rows to start, expandable
                             .background(Color(.systemGray6))
                             .overlay(
                                 RoundedRectangle(cornerRadius: 8)
-                                    .stroke(Color.gray.opacity(0.4), lineWidth: 1)
+                                    .stroke(Color.gray.opacity(0.4), lineWidth: 0.6)
                             )
                             .clipShape(RoundedRectangle(cornerRadius: 8))
                     }
@@ -87,13 +89,15 @@ struct MorningFocusSection: View {
                         .fontWeight(.semibold)
                         .foregroundColor(.purple)
                     
-                    TextField("What healthier choice will I do instead?", text: $entry.chosenSwap)
+                    TextEditor(text: $entry.chosenSwap)
                         .foregroundColor(.white)
+                        .font(.subheadline)
                         .padding(12)
+                        .frame(minHeight: 60) // Two rows to start, expandable
                         .background(Color(.systemGray6))
                         .overlay(
                             RoundedRectangle(cornerRadius: 8)
-                                .stroke(Color.gray.opacity(0.4), lineWidth: 1)
+                                .stroke(Color.gray.opacity(0.4), lineWidth: 0.6)
                         )
                         .clipShape(RoundedRectangle(cornerRadius: 8))
                 }
