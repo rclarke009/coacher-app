@@ -93,7 +93,7 @@ struct TimelineScreen: View {
                         notificationHandler.shouldNavigateToSection = nil
                     }
                 }
-                .navigationTitle("Today")
+
 
                 .sheet(isPresented: $showingNeedHelp) {
                     NeedHelpView()
