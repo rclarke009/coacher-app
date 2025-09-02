@@ -50,7 +50,7 @@ struct MorningFocusSection: View {
                     } label: {
                         HStack {
                             Text(entry.challenge == .none ? "Select…" : entry.challenge.displayName)
-                                .foregroundColor(entry.challenge == .none ? .brightYellow : .white)
+                                .foregroundColor(entry.challenge == .none ? .brightYellow : .primary)
                             Spacer()
                             Image(systemName: "chevron.down")
                                 .foregroundColor(.brightYellow)
