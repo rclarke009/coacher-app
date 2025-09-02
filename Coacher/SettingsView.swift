@@ -55,22 +55,7 @@ struct SettingsView: View {
                             }
                     }
                     
-                    // Test buttons for debugging
-                    HStack {
-                        Button("Test Reminder (10s)") {
-                            Task {
-                                await reminderManager.scheduleTestReminder()
-                            }
-                        }
-                        .buttonStyle(.bordered)
-                        
-                        Button("Check Status") {
-                            Task {
-                                await reminderManager.checkNotificationStatus()
-                            }
-                        }
-                        .buttonStyle(.bordered)
-                    }
+
                 }
                 
                 Section("Gamification") {

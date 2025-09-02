@@ -130,38 +130,5 @@ class ReminderManager: ObservableObject {
         await scheduleReminders()
     }
     
-    // MARK: - Testing Methods
-    
-    func scheduleTestReminder() async {
-        let center = UNUserNotificationCenter.current()
-        
-        let content = UNMutableNotificationContent()
-        content.title = "Test Reminder! 🧪"
-        content.body = "This is a test notification to verify reminders are working"
-        content.sound = .default
-        content.userInfo = ["destination": "test"]
-        
-        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 10, repeats: false)
-        
-        let request = UNNotificationRequest(
-            identifier: "testReminder",
-            content: content,
-            trigger: trigger
-        )
-        
-        do {
-            try await center.add(request)
-        } catch {
-            // Handle error silently
-        }
-    }
-    
-    func checkNotificationStatus() async {
-        let center = UNUserNotificationCenter.current()
-        
-        let settings = await center.notificationSettings()
-        let pendingRequests = await center.pendingNotificationRequests()
-        
-        // This method is kept for potential future debugging but doesn't print anything
-    }
+
 }

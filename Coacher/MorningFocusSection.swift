@@ -122,14 +122,10 @@ struct MorningFocusSection: View {
                             .fontWeight(.semibold)
                             .foregroundColor(.blue)
                         
-                        Text("Today I will... instead of...")
-                            .font(.subheadline)
-                            .foregroundColor(.white)
-                        
                         VStack(spacing: 12) {
                             HStack(spacing: 16) {
                                 VStack(alignment: .leading, spacing: 8) {
-                                    Text("I will...")
+                                    Text("Today I will...")
                                         .font(.caption)
                                         .foregroundStyle(.secondary)
                                     
