@@ -17,6 +17,7 @@ struct SectionCard<Content: View>: View {
     
     @Environment(\.colorScheme) private var colorScheme
     @State private var isKeyboardVisible = false
+    @State private var hasFocusedTextField = false
     
     init(
         title: String,
@@ -60,10 +61,13 @@ struct SectionCard<Content: View>: View {
             .clipShape(.rect(cornerRadius: 16, style: .continuous))
             .contentShape(Rectangle())
             .onTapGesture {
-                // Only respond to taps if keyboard is not visible
-                if !isKeyboardVisible {
-                    withAnimation(.snappy) { 
-                        collapsed.toggle() 
+                // Add a small delay to prevent accidental triggers when exiting text fields
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    // Only respond to taps if keyboard is not visible and no text field is focused
+                    if !isKeyboardVisible && !hasFocusedTextField {
+                        withAnimation(.snappy) { 
+                            collapsed.toggle() 
+                        }
                     }
                 }
             }
@@ -90,6 +94,16 @@ struct SectionCard<Content: View>: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)) { _ in
             isKeyboardVisible = false
+            // Reset text field focus state when keyboard hides
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                hasFocusedTextField = false
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UITextField.textDidBeginEditingNotification)) { _ in
+            hasFocusedTextField = true
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UITextView.textDidBeginEditingNotification)) { _ in
+            hasFocusedTextField = true
         }
     }
 
