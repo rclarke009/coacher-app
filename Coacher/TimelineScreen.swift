@@ -13,6 +13,7 @@ enum DayKey: Hashable { case day(Int) } // -1..-7 past, 0 today
 struct TimelineScreen: View {
     @Environment(\.modelContext) private var context
     @EnvironmentObject private var celebrationManager: CelebrationManager
+    @EnvironmentObject private var notificationHandler: NotificationHandler
     @Query(sort: \DailyEntry.date, order: .reverse) private var entries: [DailyEntry]
     
     @StateObject private var timeManager = TimeManager()
@@ -22,7 +23,7 @@ struct TimelineScreen: View {
     @State private var showingCelebration = false
     @State private var celebrationTitle = ""
     @State private var celebrationSubtitle = ""
-    
+
     var body: some View {
         NavigationView {
             ScrollViewReader { proxy in
@@ -63,6 +64,26 @@ struct TimelineScreen: View {
                 .onAppear { 
                     loadOrCreateToday()
                     proxy.scrollTo(DayKey.day(0), anchor: .center)
+                }
+                .onReceive(notificationHandler.$shouldNavigateToSection) { section in
+                    if let section = section {
+                        switch section {
+                        case "morningFocus":
+                            // Scroll to today's morning focus section
+                            withAnimation(.easeInOut(duration: 0.5)) {
+                                proxy.scrollTo(DayKey.day(0), anchor: .center)
+                            }
+                        case "nightPrep":
+                            // Scroll to tonight's prep section
+                            withAnimation(.easeInOut(duration: 0.5)) {
+                                // Tonight section is at the bottom, so scroll to end
+                                proxy.scrollTo(DayKey.day(0), anchor: .bottom)
+                            }
+                        default:
+                            break
+                        }
+                        notificationHandler.shouldNavigateToSection = nil
+                    }
                 }
                 .navigationTitle("Today")
                 .toolbar {
@@ -123,6 +144,8 @@ struct TimelineScreen: View {
         celebrationSubtitle = subtitle
         showingCelebration = true
     }
+    
+
 }
 
 #Preview {

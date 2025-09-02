@@ -11,6 +11,7 @@ import SwiftData
 struct SettingsView: View {
     @Environment(\.modelContext) private var context
     @EnvironmentObject private var celebrationManager: CelebrationManager
+    @EnvironmentObject private var reminderManager: ReminderManager
     @Query private var achievements: [Achievement]
     @StateObject private var mlcManager = SimplifiedMLCManager()
     
@@ -25,13 +26,33 @@ struct SettingsView: View {
             List {
                 Section("Reminders") {
                     Toggle("Night Prep Reminder", isOn: $nightPrepReminder)
+                        .onChange(of: nightPrepReminder) { _, _ in
+                            Task {
+                                await reminderManager.updateReminders()
+                            }
+                        }
                     if nightPrepReminder {
                         DatePicker("Time", selection: $nightPrepTime, displayedComponents: .hourAndMinute)
+                            .onChange(of: nightPrepTime) { _, _ in
+                                Task {
+                                    await reminderManager.updateReminders()
+                                }
+                            }
                     }
                     
                     Toggle("Morning Focus Reminder", isOn: $morningFocusReminder)
+                        .onChange(of: morningFocusReminder) { _, _ in
+                            Task {
+                                await reminderManager.updateReminders()
+                            }
+                        }
                     if morningFocusReminder {
                         DatePicker("Time", selection: $morningFocusTime, displayedComponents: .hourAndMinute)
+                            .onChange(of: morningFocusTime) { _, _ in
+                                Task {
+                                    await reminderManager.updateReminders()
+                                }
+                            }
                     }
                 }
                 
