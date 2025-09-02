@@ -62,11 +62,16 @@ struct SectionCard<Content: View>: View {
             .contentShape(Rectangle())
             .onTapGesture {
                 // Add a small delay to prevent accidental triggers when exiting text fields
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
                     // Only respond to taps if keyboard is not visible and no text field is focused
                     if !isKeyboardVisible && !hasFocusedTextField {
                         withAnimation(.snappy) { 
                             collapsed.toggle() 
+                        }
+                    } else {
+                        // If we're blocked, force reset the focus state to prevent getting stuck
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                            hasFocusedTextField = false
                         }
                     }
                 }
@@ -95,7 +100,7 @@ struct SectionCard<Content: View>: View {
         .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)) { _ in
             isKeyboardVisible = false
             // Reset text field focus state when keyboard hides
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                 hasFocusedTextField = false
             }
         }
@@ -104,6 +109,18 @@ struct SectionCard<Content: View>: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: UITextView.textDidBeginEditingNotification)) { _ in
             hasFocusedTextField = true
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UITextField.textDidEndEditingNotification)) { _ in
+            // Reset focus state when text field editing ends
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                hasFocusedTextField = false
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UITextView.textDidEndEditingNotification)) { _ in
+            // Reset focus state when text view editing ends
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                hasFocusedTextField = false
+            }
         }
     }
 
