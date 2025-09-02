@@ -8,25 +8,46 @@
 import SwiftUI
 
 struct SectionCard<Content: View>: View {
-    enum Accent {
-        case blue, purple, teal, gray
-    }
-    
     let title: String
-    let icon: String?
-    let accent: Accent
+    let icon: String
+    let accent: SectionAccent
     @Binding var collapsed: Bool
     var dimmed: Bool = false
+    let content: Content
+    
     @Environment(\.colorScheme) private var colorScheme
     
-    @ViewBuilder var content: Content
-
+    init(
+        title: String,
+        icon: String,
+        accent: SectionAccent,
+        collapsed: Binding<Bool>,
+        dimmed: Bool = false,
+        @ViewBuilder content: () -> Content
+    ) {
+        self.title = title
+        self.icon = icon
+        self.accent = accent
+        self._collapsed = collapsed
+        self.dimmed = dimmed
+        self.content = content()
+    }
+    
     var body: some View {
         VStack(spacing: 0) {
-            // Header with integrated title and chevron
-            HStack(spacing: 8) {
-                if let icon { Image(systemName: icon) }
-                Text(title).font(.headline)
+            // Header with tap gesture
+            HStack {
+                HStack(spacing: 8) {
+                    Image(systemName: icon)
+                        .font(.title3)
+                        .foregroundStyle(headerForeground)
+                    
+                    Text(title)
+                        .font(.headline)
+                        .fontWeight(.semibold)
+                        .multilineTextAlignment(.leading)
+                }
+                
                 Spacer()
                 Image(systemName: collapsed ? "chevron.down" : "chevron.up")
                     .font(.subheadline)
@@ -37,7 +58,14 @@ struct SectionCard<Content: View>: View {
             .background(headerBackground)
             .clipShape(.rect(cornerRadius: 16, style: .continuous))
             .contentShape(Rectangle())
-            .onTapGesture { withAnimation(.snappy) { collapsed.toggle() } }
+            .onTapGesture {
+                // Add a small delay to prevent accidental triggers when exiting text fields
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    withAnimation(.snappy) { 
+                        collapsed.toggle() 
+                    }
+                }
+            }
 
             // Content integrated into the same card background
             if !collapsed {
@@ -90,7 +118,7 @@ struct SectionCard<Content: View>: View {
         Color.dynamicCardBackground
     }
     
-    private var borderColor: Color {
+    private var borderColor: some ShapeStyle {
         switch accent {
         case .blue:
             return Color.brandBlue.opacity(0.25)
@@ -102,6 +130,12 @@ struct SectionCard<Content: View>: View {
             return Color.dynamicSecondaryText.opacity(0.22)
         }
     }
+}
+
+// MARK: - Supporting Types
+
+enum SectionAccent: CaseIterable {
+    case blue, purple, teal, gray
 }
 
 #Preview {
@@ -131,31 +165,24 @@ struct SectionCard<Content: View>: View {
             dimmed: true
         ) {
             VStack(alignment: .leading, spacing: 12) {
-                Text("No prep was done last night")
+                Text("Sample prep items would appear here")
                     .foregroundStyle(.secondary)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding()
-                    .background(.gray.opacity(0.08))
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
             }
         }
         
-        // Evening section (teal)
+        // Teal section
         SectionCard(
-            title: "End-of-Day Check-In",
-            icon: "clock.fill",
+            title: "End of Day",
+            icon: "sunset.fill",
             accent: .teal,
-            collapsed: .constant(false),
-            dimmed: false
+            collapsed: .constant(false)
         ) {
             VStack(alignment: .leading, spacing: 12) {
-                Text("How did today go?")
-                    .font(.subheadline)
-                    .bold()
-                Text("Sample end-of-day content")
+                Text("Sample end of day content")
                     .foregroundStyle(.secondary)
             }
         }
     }
     .padding()
+    .background(Color(.systemGroupedBackground))
 }
