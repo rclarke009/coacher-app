@@ -129,10 +129,11 @@ struct MorningFocusSection: View {
                                         .font(.caption)
                                         .foregroundStyle(.secondary)
                                     
-                                    TextField("do this…", text: $entry.commitTo)
+                                    TextEditor(text: $entry.commitTo)
                                         .foregroundColor(.white)
-                                        .padding(16)
-                                        .frame(minHeight: 50)
+                                        .font(.subheadline)
+                                        .padding(12)
+                                        .frame(minHeight: 60) // Two rows to start
                                         .background(Color(.systemGray6))
                                         .overlay(
                                             RoundedRectangle(cornerRadius: 8)
@@ -146,10 +147,11 @@ struct MorningFocusSection: View {
                                         .font(.caption)
                                         .foregroundStyle(.secondary)
                                     
-                                    TextField("not this…", text: $entry.commitFrom)
+                                    TextEditor(text: $entry.commitFrom)
                                         .foregroundColor(.white)
-                                        .padding(16)
-                                        .frame(minHeight: 50)
+                                        .font(.subheadline)
+                                        .padding(12)
+                                        .frame(minHeight: 60) // Two rows to start
                                         .background(Color(.systemGray6))
                                         .overlay(
                                             RoundedRectangle(cornerRadius: 8)

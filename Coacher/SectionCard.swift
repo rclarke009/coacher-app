@@ -59,8 +59,8 @@ struct SectionCard<Content: View>: View {
             .clipShape(.rect(cornerRadius: 16, style: .continuous))
             .contentShape(Rectangle())
             .onTapGesture {
-                // Add a small delay to prevent accidental triggers when exiting text fields
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                // Add a longer delay to prevent accidental triggers when exiting text fields
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                     withAnimation(.snappy) { 
                         collapsed.toggle() 
                     }
