@@ -37,7 +37,7 @@ struct TimelineScreen: View {
                         
                         // TODAY (expanded morning)
                         DayBucket(offset: 0, entries: entries, entryToday: $entryToday, hasUnsavedChanges: $hasUnsavedChanges)
-                            .id(DayKey.day(0))
+                            .id("todayBucket")
                         
                         // TONIGHT ONLY (no future placeholders)
                         TonightBucket(
@@ -46,6 +46,7 @@ struct TimelineScreen: View {
                             hasUnsavedChanges: $hasUnsavedChanges,
                             onCelebrationTrigger: triggerCelebration
                         )
+                        .id("tonightBucket")
                         
                         // I Need Help Button
                         Button(action: { showingNeedHelp = true }) {
@@ -67,20 +68,26 @@ struct TimelineScreen: View {
                 }
                 .onReceive(notificationHandler.$shouldNavigateToSection) { section in
                     if let section = section {
-                        switch section {
-                        case "morningFocus":
-                            // Scroll to today's morning focus section
-                            withAnimation(.easeInOut(duration: 0.5)) {
-                                proxy.scrollTo(DayKey.day(0), anchor: .center)
+                        print("🔍 DEBUG: TimelineScreen - Navigating to section: \(section)")
+                        
+                        // Add a small delay to ensure the view is fully loaded
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                            switch section {
+                            case "morningFocus":
+                                // Scroll to today's morning focus section
+                                print("🔍 DEBUG: TimelineScreen - Scrolling to morning focus")
+                                withAnimation(.easeInOut(duration: 0.5)) {
+                                    proxy.scrollTo("todayBucket", anchor: .center)
+                                }
+                            case "nightPrep":
+                                // Scroll to tonight's prep section
+                                print("🔍 DEBUG: TimelineScreen - Scrolling to night prep")
+                                withAnimation(.easeInOut(duration: 0.5)) {
+                                    proxy.scrollTo("tonightBucket", anchor: .center)
+                                }
+                            default:
+                                break
                             }
-                        case "nightPrep":
-                            // Scroll to tonight's prep section
-                            withAnimation(.easeInOut(duration: 0.5)) {
-                                // Tonight section is at the bottom, so scroll to end
-                                proxy.scrollTo(DayKey.day(0), anchor: .bottom)
-                            }
-                        default:
-                            break
                         }
                         notificationHandler.shouldNavigateToSection = nil
                     }
