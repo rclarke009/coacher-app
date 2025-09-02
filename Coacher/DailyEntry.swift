@@ -52,9 +52,9 @@ final class DailyEntry {
         self.waterReady = false
         self.breakfastPrepped = false
         self.nightOther = ""
-        self.eveningPrepItems = []
-        self.customPrepItems = []
-        self.completedCustomPrepItems = []
+        self.eveningPrepItems = nil
+        self.customPrepItems = nil
+        self.completedCustomPrepItems = nil
         self.myWhy = ""
         self.challenge = Challenge.none
         self.challengeOther = ""
@@ -64,8 +64,8 @@ final class DailyEntry {
         self.followedSwap = nil
         self.feelAboutIt = ""
         self.whatGotInTheWay = ""
-        self.voiceNotes = []
-        self.cravingNotes = []
+        self.voiceNotes = nil
+        self.cravingNotes = nil
     }
     
     // Computed properties for convenience
@@ -105,7 +105,28 @@ final class DailyEntry {
     var safeCravingNotes: [CravingNote] {
         cravingNotes ?? []
     }
+    
+    // MARK: - Array Management Helpers
+    func ensureArraysInitialized() {
+        if eveningPrepItems == nil {
+            eveningPrepItems = []
+        }
+        if customPrepItems == nil {
+            customPrepItems = []
+        }
+        if completedCustomPrepItems == nil {
+            completedCustomPrepItems = []
+        }
+        if voiceNotes == nil {
+            voiceNotes = []
+        }
+        if cravingNotes == nil {
+            cravingNotes = []
+        }
+    }
 }
+
+
 
 enum Challenge: String, Codable, CaseIterable, Identifiable {
     case none, skippingMeals, lateNightSnacking, sugaryDrinks, onTheGo, emotionalEating, other
