@@ -29,16 +29,10 @@ struct CoacherApp: App {
     }
     
     private func setupNotifications() {
-        print("🔍 DEBUG: CoacherApp - setupNotifications() called")
         Task {
             let granted = await reminderManager.requestNotificationPermissions()
-            print("🔍 DEBUG: CoacherApp - Notification permissions granted: \(granted)")
             if granted {
-                print("🔍 DEBUG: CoacherApp - Scheduling reminders...")
                 await reminderManager.scheduleReminders()
-                print("🔍 DEBUG: CoacherApp - Reminders scheduled")
-            } else {
-                print("🔍 DEBUG: CoacherApp - Notification permissions denied")
             }
         }
     }

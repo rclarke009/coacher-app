@@ -118,8 +118,7 @@ struct PrepTonightSection: View {
         let trimmedItem = newOtherItem.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedItem.isEmpty else { return }
         
-        print("🔍 DEBUG: PrepTonightSection - Adding custom item: '\(trimmedItem)'")
-                    print("🔍 DEBUG: PrepTonightSection - Current custom items: \(entry.safeCustomPrepItems.count)")
+
         
         // Add to DailyEntry's custom prep items (so it stays visible)
         if entry.customPrepItems == nil {
@@ -136,33 +135,32 @@ struct PrepTonightSection: View {
         // Clear the input
         newOtherItem = ""
         
-        print("🔍 DEBUG: PrepTonightSection - After adding, custom items: \(entry.safeCustomPrepItems.count)")
-        print("🔍 DEBUG: PrepTonightSection - Custom items array: \(entry.safeCustomPrepItems)")
+
         
         // Save the context
         try? context.save()
-        print("🔍 DEBUG: PrepTonightSection - Context saved")
+
         
         // Force UI refresh
         refreshTrigger.toggle()
-        print("🔍 DEBUG: PrepTonightSection - Refresh triggered: \(refreshTrigger)")
+
     }
     
     private func toggleCustomItem(_ item: String) {
         if entry.safeCompletedCustomPrepItems.contains(item) {
             entry.completedCustomPrepItems?.removeAll { $0 == item }
-            print("🔍 DEBUG: PrepTonightSection - Toggled custom item: \(item), now checked: false")
+
         } else {
             if entry.completedCustomPrepItems == nil {
                 entry.completedCustomPrepItems = []
             }
             entry.completedCustomPrepItems?.append(item)
-            print("🔍 DEBUG: PrepTonightSection - Toggled custom item: \(item), now checked: true")
+
         }
         
         // Save the context
         try? context.save()
-        print("🔍 DEBUG: PrepTonightSection - Context saved after toggle")
+
         
         // Force UI refresh
         refreshTrigger.toggle()
@@ -177,11 +175,11 @@ struct PrepTonightSection: View {
             entry.completedCustomPrepItems?.removeAll { $0 == item }
         }
         
-        print("🔍 DEBUG: PrepTonightSection - Deleted custom items: \(itemsToDelete)")
+
         
         // Save the context
         try? context.save()
-        print("🔍 DEBUG: PrepTonightSection - Context saved after delete")
+
         
         // Force UI refresh
         refreshTrigger.toggle()

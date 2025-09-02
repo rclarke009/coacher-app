@@ -114,13 +114,13 @@ struct QuickCaptureView: View {
 
             do {
                 try modelContext.save()
-                print("🔍 DEBUG: Saved audio recording to database")
+
                 
                 // Clean up the audio file after successful transcription
                 try FileManager.default.removeItem(at: audioURL)
-                print("🔍 DEBUG: Cleaned up audio file: \(audioURL.lastPathComponent)")
+
             } catch {
-                print("🔍 DEBUG: Failed to save audio recording: \(error)")
+
             }
         }
         
@@ -192,9 +192,9 @@ struct VoiceCaptureView: View {
         AVAudioSession.sharedInstance().requestRecordPermission { granted in
             DispatchQueue.main.async {
                 if granted {
-                    print("🔍 DEBUG: Microphone permission granted")
+
                 } else {
-                    print("🔍 DEBUG: Microphone permission denied")
+
                 }
             }
         }
@@ -231,9 +231,9 @@ struct VoiceCaptureView: View {
                 }
             }
             
-            print("🔍 DEBUG: Started recording to \(audioFilename)")
+
         } catch {
-            print("🔍 DEBUG: Failed to start recording: \(error)")
+
         }
     }
     
@@ -248,7 +248,7 @@ struct VoiceCaptureView: View {
         recordingTimer = nil
         recordingTime = 0
         
-        print("🔍 DEBUG: Stopped recording, saved URL: \(savedAudioURL?.absoluteString ?? "nil")")
+
     }
     
 

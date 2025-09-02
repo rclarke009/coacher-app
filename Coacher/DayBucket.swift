@@ -46,12 +46,9 @@ struct DayBucket: View {
                     PastNightPrepPreview(offset: offset)
                 }
                 .onTapGesture {
-                    print("🔍 DEBUG: Past Last Night Prep tapped! offset: \(offset)")
-                    print("🔍 DEBUG: pastLastNightPrepCollapsed before: \(pastLastNightPrepCollapsed)")
                     withAnimation(.snappy) {
                         pastLastNightPrepCollapsed.toggle()
                     }
-                    print("🔍 DEBUG: pastLastNightPrepCollapsed after: \(pastLastNightPrepCollapsed)")
                 }
                 
                 SectionCard(
@@ -64,12 +61,9 @@ struct DayBucket: View {
                     PastMorningFocusPreview(offset: offset)
                 }
                 .onTapGesture {
-                    print("🔍 DEBUG: Past Morning Focus tapped! offset: \(offset)")
-                    print("🔍 DEBUG: pastMorningFocusCollapsed before: \(pastMorningFocusCollapsed)")
                     withAnimation(.snappy) {
                         pastMorningFocusCollapsed.toggle()
                     }
-                    print("🔍 DEBUG: pastMorningFocusCollapsed after: \(pastMorningFocusCollapsed)")
                 }
             } else {
                 // TODAY
@@ -83,12 +77,9 @@ struct DayBucket: View {
                     LastNightPrepReviewView(entry: getLastNightEntry())
                 }
                 .onTapGesture {
-                    print("🔍 DEBUG: Today Last Night Prep tapped!")
-                    print("🔍 DEBUG: lastNightPrepCollapsed before: \(lastNightPrepCollapsed)")
                     withAnimation(.snappy) {
                         lastNightPrepCollapsed.toggle()
                     }
-                    print("🔍 DEBUG: lastNightPrepCollapsed after: \(lastNightPrepCollapsed)")
                 }
                 
                 SectionCard(
@@ -110,12 +101,9 @@ struct DayBucket: View {
                     }
                 }
                 .onTapGesture {
-                    print("🔍 DEBUG: Today Morning Focus tapped!")
-                    print("🔍 DEBUG: morningFocusCollapsed before: \(morningFocusCollapsed)")
                     withAnimation(.snappy) {
                         morningFocusCollapsed.toggle()
                     }
-                    print("🔍 DEBUG: morningFocusCollapsed after: \(morningFocusCollapsed)")
                 }
             }
         }
@@ -125,17 +113,14 @@ struct DayBucket: View {
     }
     
     private func setDefaultCollapsedStates() {
-        print("🔍 DEBUG: setDefaultCollapsedStates called for offset: \(offset)")
         if offset == 0 {
             // Today: Morning Focus expanded by default
             morningFocusCollapsed = false
             lastNightPrepCollapsed = true
-            print("🔍 DEBUG: Today - morningFocusCollapsed: \(morningFocusCollapsed), lastNightPrepCollapsed: \(lastNightPrepCollapsed)")
         } else {
             // Past days: both collapsed by default
             pastMorningFocusCollapsed = true
             pastLastNightPrepCollapsed = true
-            print("🔍 DEBUG: Past day - pastMorningFocusCollapsed: \(pastMorningFocusCollapsed), pastLastNightPrepCollapsed: \(pastLastNightPrepCollapsed)")
         }
     }
     

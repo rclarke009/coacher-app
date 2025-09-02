@@ -68,20 +68,20 @@ struct TimelineScreen: View {
                 }
                 .onReceive(notificationHandler.$shouldNavigateToSection) { section in
                     if let section = section {
-                        print("🔍 DEBUG: TimelineScreen - Navigating to section: \(section)")
+
                         
                         // Add a small delay to ensure the view is fully loaded
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                             switch section {
                             case "morningFocus":
                                 // Scroll to today's morning focus section
-                                print("🔍 DEBUG: TimelineScreen - Scrolling to morning focus")
+
                                 withAnimation(.easeInOut(duration: 0.5)) {
                                     proxy.scrollTo("todayBucket", anchor: .center)
                                 }
                             case "nightPrep":
                                 // Scroll to tonight's prep section
-                                print("🔍 DEBUG: TimelineScreen - Scrolling to night prep")
+
                                 withAnimation(.easeInOut(duration: 0.5)) {
                                     proxy.scrollTo("tonightBucket", anchor: .center)
                                 }
