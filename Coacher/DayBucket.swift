@@ -94,7 +94,7 @@ struct DayBucket: View {
                 SectionCard(
                     title: "Morning Focus (Today)",
                     icon: "sun.max.fill",
-                    accent: .blue,
+                    accent: .teal,
                     collapsed: $morningFocusCollapsed
                 ) {
                     if let entryToday = entryToday, let hasUnsavedChanges = hasUnsavedChanges {

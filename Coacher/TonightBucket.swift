@@ -41,7 +41,7 @@ struct TonightBucket: View {
             SectionCard(
                 title: "Prep Tonight (for Tomorrow)",
                 icon: "calendar.badge.clock",
-                accent: .purple,
+                accent: .teal,
                 collapsed: $prepTonightCollapsed
             ) {
                 PrepTonightSection(entry: $tomorrowEntry)
