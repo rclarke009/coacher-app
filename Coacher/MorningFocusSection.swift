@@ -137,7 +137,7 @@ struct MorningFocusSection: View {
                                         .background(Color(.systemGray6))
                                         .overlay(
                                             RoundedRectangle(cornerRadius: 8)
-                                                .stroke(Color.gray.opacity(0.4), lineWidth: 1)
+                                                .stroke(Color.gray.opacity(0.4), lineWidth: 0.6)
                                         )
                                         .clipShape(RoundedRectangle(cornerRadius: 8))
                                 }
@@ -155,7 +155,7 @@ struct MorningFocusSection: View {
                                         .background(Color(.systemGray6))
                                         .overlay(
                                             RoundedRectangle(cornerRadius: 8)
-                                                .stroke(Color.gray.opacity(0.4), lineWidth: 1)
+                                                .stroke(Color.gray.opacity(0.4), lineWidth: 0.6)
                                         )
                                         .clipShape(RoundedRectangle(cornerRadius: 8))
                                 }
@@ -243,7 +243,7 @@ struct CommitCard<Content: View>: View {
                 )
                 .overlay(
                     RoundedRectangle(cornerRadius: 12)
-                        .stroke(Color.blue.opacity(0.4), lineWidth: 1.5) // Stronger border for commitment
+                        .stroke(Color.blue.opacity(0.4), lineWidth: 0.8) // Thinner border for commitment
                 )
         }
     }
