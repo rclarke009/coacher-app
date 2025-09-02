@@ -2,7 +2,6 @@ import SwiftUI
 import Foundation
 
 class CelebrationManager: ObservableObject {
-    @AppStorage("showCelebrations") private var showCelebrations: Bool = true
     @AppStorage("showAnimations") private var showAnimations: Bool = true
     
     @Published var showingMilestoneCelebration = false
@@ -45,14 +44,6 @@ class CelebrationManager: ObservableObject {
         return streakManager
     }
     
-    var celebrationsEnabled: Bool {
-        get { showCelebrations }
-        set { 
-            showCelebrations = newValue
-            objectWillChange.send()
-        }
-    }
-    
     var animationsEnabled: Bool {
         get { showAnimations }
         set { 
@@ -66,13 +57,11 @@ class CelebrationManager: ObservableObject {
     }
     
     func shouldCelebrate() -> Bool {
-        return showCelebrations
+        return true // Always show celebration text
     }
     
     // Check for milestone celebrations
     func checkForMilestoneCelebration() {
-        guard showCelebrations else { return }
-        
         if streakManager.shouldCelebrateMilestone() {
             milestoneStreakCount = streakManager.streak
             milestoneMessage = streakManager.milestoneQuote() ?? "Amazing achievement!"

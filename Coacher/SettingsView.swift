@@ -36,11 +36,7 @@ struct SettingsView: View {
                 }
                 
                 Section("Gamification") {
-                    Toggle("Show celebrations", isOn: $celebrationManager.celebrationsEnabled)
-                    
-                    if celebrationManager.celebrationsEnabled {
-                        Toggle("Show animations", isOn: $celebrationManager.animationsEnabled)
-                    }
+                    Toggle("Show animations", isOn: $celebrationManager.animationsEnabled)
                     
                     Toggle("Show streak widgets", isOn: $showStreakWidgets)
                     

@@ -144,7 +144,7 @@ struct CelebrationOverlay: View {
                         VStack(spacing: 0) {
                             Text(subtitle)
                                 .font(.body)
-                                .foregroundColor(.secondary)
+                                .foregroundColor(.primary)
                                 .multilineTextAlignment(.center)
                         }
                         .padding(.horizontal, 16)
