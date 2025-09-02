@@ -16,6 +16,7 @@ struct SectionCard<Content: View>: View {
     let content: Content
     
     @Environment(\.colorScheme) private var colorScheme
+    @State private var isKeyboardVisible = false
     
     init(
         title: String,
@@ -59,8 +60,8 @@ struct SectionCard<Content: View>: View {
             .clipShape(.rect(cornerRadius: 16, style: .continuous))
             .contentShape(Rectangle())
             .onTapGesture {
-                // Add a longer delay to prevent accidental triggers when exiting text fields
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                // Only respond to taps if keyboard is not visible
+                if !isKeyboardVisible {
                     withAnimation(.snappy) { 
                         collapsed.toggle() 
                     }
@@ -84,6 +85,12 @@ struct SectionCard<Content: View>: View {
         )
         .accessibilityElement(children: .contain)
         .accessibilityLabel(Text(title))
+        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { _ in
+            isKeyboardVisible = true
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)) { _ in
+            isKeyboardVisible = false
+        }
     }
 
     // MARK: - Colors
