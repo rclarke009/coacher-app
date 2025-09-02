@@ -63,6 +63,7 @@ struct TimelineScreen: View {
                     .padding(.horizontal)
                     .padding(.top, 20)
                 }
+                .background(Color(hex: "f9fdff"))
                 .onAppear { 
                     loadOrCreateToday()
                     proxy.scrollTo("todayBucket", anchor: .center)
