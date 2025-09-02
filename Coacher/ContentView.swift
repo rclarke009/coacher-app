@@ -38,7 +38,7 @@ struct ContentView: View {
             // Status bar cover - tiny strip to hide distracting system elements
             VStack {
                 Rectangle()
-                    .fill(Color(.systemBackground))
+                    .fill(Color(hex: "e7f7fd"))
                     .frame(height: 50) // Covers status bar area
                     .ignoresSafeArea(.all, edges: .top)
                 Spacer()
