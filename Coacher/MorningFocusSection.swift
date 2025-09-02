@@ -123,32 +123,41 @@ struct MorningFocusSection: View {
                             .foregroundStyle(.secondary)
                         
                         VStack(spacing: 12) {
-                            TextField("do this…", text: $entry.commitTo)
-                                .foregroundColor(.white)
-                                .padding(16) // Extra padding for commit fields
-                                .frame(height: 50) // Taller field for commitment
-                                .background(Color(.systemGray6))
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 8)
-                                        .stroke(Color.gray.opacity(0.4), lineWidth: 1)
-                                )
-                                .clipShape(RoundedRectangle(cornerRadius: 8))
-                            
-                            Text("instead of")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                                .frame(maxWidth: .infinity, alignment: .center)
-                            
-                            TextField("not this…", text: $entry.commitFrom)
-                                .foregroundColor(.white)
-                                .padding(16) // Extra padding for commit fields
-                                .frame(height: 50) // Taller field for commitment
-                                .background(Color(.systemGray6))
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 8)
-                                        .stroke(Color.gray.opacity(0.4), lineWidth: 1)
-                                )
-                                .clipShape(RoundedRectangle(cornerRadius: 8))
+                            HStack(spacing: 16) {
+                                VStack(alignment: .leading, spacing: 8) {
+                                    Text("I will...")
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                    
+                                    TextField("do this…", text: $entry.commitTo)
+                                        .foregroundColor(.white)
+                                        .padding(16)
+                                        .frame(minHeight: 50)
+                                        .background(Color(.systemGray6))
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 8)
+                                                .stroke(Color.gray.opacity(0.4), lineWidth: 1)
+                                        )
+                                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                                }
+                                
+                                VStack(alignment: .leading, spacing: 8) {
+                                    Text("instead of...")
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                    
+                                    TextField("not this…", text: $entry.commitFrom)
+                                        .foregroundColor(.white)
+                                        .padding(16)
+                                        .frame(minHeight: 50)
+                                        .background(Color(.systemGray6))
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 8)
+                                                .stroke(Color.gray.opacity(0.4), lineWidth: 1)
+                                        )
+                                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                                }
+                            }
                         }
                     }
                 }
