@@ -152,7 +152,7 @@ struct SectionCard<Content: View>: View {
         case .teal:
             return .leafGreen
         case .goldenYellow:
-            return .leafYellow
+            return colorScheme == .dark ? .leafYellow : Color(hex: "F2C04B")
         case .dimmedGreen:
             return .leafGreen.opacity(0.6)
         case .gray:

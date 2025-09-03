@@ -130,5 +130,10 @@ class ReminderManager: ObservableObject {
         await scheduleReminders()
     }
     
+    func cancelMorningReminder() {
+        let center = UNUserNotificationCenter.current()
+        center.removePendingNotificationRequests(withIdentifiers: ["morningFocusReminder"])
+    }
+    
 
 }
