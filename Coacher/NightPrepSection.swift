@@ -11,9 +11,11 @@ import SwiftData
 struct NightPrepSection: View {
     @Binding var entry: DailyEntry
     @Environment(\.modelContext) private var context
+    @StateObject private var reminderManager = ReminderManager.shared
     
     @State private var newOtherItem = ""
     @State private var refreshTrigger = false
+    @State private var showingPrepSuggestions = false
     
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -23,6 +25,12 @@ struct NightPrepSection: View {
                     .bold()
                 
                 Spacer()
+                
+                Button(action: { showingPrepSuggestions = true }) {
+                    Image(systemName: "info.circle")
+                        .font(.title3)
+                        .foregroundColor(.brightBlue)
+                }
             }
             
             // Default prep items (reordered as requested)
@@ -111,7 +119,7 @@ struct NightPrepSection: View {
                 
                 Button(action: addCustomItem) {
                     Image(systemName: "plus.circle.fill")
-                        .foregroundColor(.brandBlue)
+                        .foregroundColor(.brightBlue)
                         .font(.title2)
                 }
                 .disabled(newOtherItem.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
@@ -123,6 +131,14 @@ struct NightPrepSection: View {
                 .fill(Color(.secondarySystemBackground))
         )
         .id(refreshTrigger) // Force UI refresh when needed
+        .onChange(of: entry.waterReady) { _, _ in checkNightPrepCompletion() }
+        .onChange(of: entry.breakfastPrepped) { _, _ in checkNightPrepCompletion() }
+        .onChange(of: entry.stickyNotes) { _, _ in checkNightPrepCompletion() }
+        .onChange(of: entry.preppedProduce) { _, _ in checkNightPrepCompletion() }
+        .onChange(of: entry.completedCustomPrepItems) { _, _ in checkNightPrepCompletion() }
+        .sheet(isPresented: $showingPrepSuggestions) {
+            NightPrepSuggestionsView()
+        }
     }
     
     // MARK: - Custom Item Management
@@ -198,6 +214,198 @@ struct NightPrepSection: View {
         
         // Force UI refresh
         refreshTrigger.toggle()
+    }
+    
+    private func checkNightPrepCompletion() {
+        // Check if any night prep items are completed
+        let hasCompletedItems = entry.waterReady || 
+                               entry.breakfastPrepped || 
+                               entry.stickyNotes || 
+                               entry.preppedProduce || 
+                               !entry.safeCompletedCustomPrepItems.isEmpty
+        
+        // If any items are completed, cancel today's reminder and reschedule for tomorrow
+        if hasCompletedItems {
+            reminderManager.cancelNightPrepReminder()
+            // Reschedule the reminder for tomorrow since user completed prep early
+            Task {
+                await reminderManager.rescheduleNightPrepReminderForTomorrow()
+            }
+        }
+    }
+}
+
+struct NightPrepSuggestionsView: View {
+    @Environment(\.dismiss) private var dismiss
+    @State private var selectedProblem: PrepProblem? = nil
+    
+    enum PrepProblem: String, CaseIterable, Identifiable {
+        case foodTemptations = "foodTemptations"
+        case timeCrunch = "timeCrunch"
+        case lowEnergy = "lowEnergy"
+        case socialTriggers = "socialTriggers"
+        case notSure = "notSure"
+        
+        var id: String { rawValue }
+        
+        var title: String {
+            switch self {
+            case .foodTemptations: return "🍫 Food Temptations"
+            case .timeCrunch: return "⏰ Time Crunch"
+            case .lowEnergy: return "😴 Low Energy"
+            case .socialTriggers: return "👥 Social Triggers"
+            case .notSure: return "❓ Not Sure"
+            }
+        }
+        
+        var description: String {
+            switch self {
+            case .foodTemptations: return "I keep grabbing junk food or sugary snacks"
+            case .timeCrunch: return "I skip meals or grab fast food when I'm rushed"
+            case .lowEnergy: return "I get tired, stressed, or snack late at night"
+            case .socialTriggers: return "I overeat when with friends, coworkers, or at restaurants"
+            case .notSure: return "I'm not sure what trips me up"
+            }
+        }
+        
+        var solutions: [String] {
+            switch self {
+            case .foodTemptations:
+                return [
+                    "Put chips/cookies out of sight or in a high cupboard",
+                    "Prep cut veggies/fruit and place them front-and-center in the fridge",
+                    "Portion one small treat into a baggie so you control the amount",
+                    "Put a sticky note on the fridge/pantry: 'Water first'",
+                    "Swap candy in a dish for fruit or nuts",
+                    "Toss or donate one junk item tonight"
+                ]
+            case .timeCrunch:
+                return [
+                    "Pack lunch or snacks in a bag tonight",
+                    "Prep overnight oats, hard-boiled eggs, or a protein box",
+                    "Set water bottle, coffee mug, or vitamins where you'll see them",
+                    "Lay out tomorrow's breakfast dish/utensils to save time",
+                    "Write one quick 'fallback meal' idea for tomorrow",
+                    "Block 10 minutes on your calendar for lunch"
+                ]
+            case .lowEnergy:
+                return [
+                    "Plan a protein snack for mid-afternoon",
+                    "Set a bedtime reminder on your phone",
+                    "Choose a 2-minute 'reset' for tomorrow (walk, stretch, deep breath)",
+                    "Put herbal tea by the kettle for a calming evening ritual",
+                    "Write down one stressor and one small thing you can do about it",
+                    "Keep water at your bedside to start the day hydrated"
+                ]
+            case .socialTriggers:
+                return [
+                    "Text a friend to meet at a healthier restaurant",
+                    "Decide on your order before you get there",
+                    "Ask a coworker to walk instead of snack break",
+                    "Pack an extra snack to avoid arriving hungry",
+                    "Tell someone your swap goal for tomorrow",
+                    "Invite a friend/family member to prep with you"
+                ]
+            case .notSure:
+                return [
+                    "Put a full water bottle in the fridge or on your nightstand",
+                    "Put fruit or veggies at eye level in the fridge",
+                    "Prep one protein-rich snack (boiled egg, cheese stick, yogurt cup)",
+                    "Write your 'why' or swap on a sticky note for tomorrow",
+                    "Put sneakers, yoga mat, or resistance band where you'll see them",
+                    "Set a bedtime reminder on your phone"
+                ]
+            }
+        }
+    }
+    
+    var body: some View {
+        NavigationView {
+            VStack(spacing: 24) {
+                if selectedProblem == nil {
+                    // Problem selection view
+                    VStack(spacing: 20) {
+                        Text("Think about what usually makes tomorrow harder. Tap one:")
+                            .font(.headline)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal)
+                        
+                        VStack(spacing: 12) {
+                            ForEach(PrepProblem.allCases) { problem in
+                                Button(action: { selectedProblem = problem }) {
+                                    VStack(alignment: .leading, spacing: 4) {
+                                        Text(problem.title)
+                                            .font(.headline)
+                                            .foregroundColor(.brightBlue)
+                                        
+                                        Text(problem.description)
+                                            .font(.caption)
+                                            .foregroundColor(.secondary)
+                                            .multilineTextAlignment(.leading)
+                                    }
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .padding()
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 12)
+                                            .fill(Color(.secondarySystemBackground))
+                                    )
+                                }
+                                .buttonStyle(.plain)
+                            }
+                        }
+                        .padding(.horizontal)
+                    }
+                } else {
+                    // Solutions view
+                    VStack(spacing: 20) {
+                        Text("Here are some prep ideas for \(selectedProblem?.title ?? ""):")
+                            .font(.headline)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal)
+                        
+                        ScrollView {
+                            VStack(spacing: 12) {
+                                ForEach(selectedProblem?.solutions ?? [], id: \.self) { solution in
+                                    HStack {
+                                        Image(systemName: "lightbulb.fill")
+                                            .foregroundColor(.yellow)
+                                            .font(.caption)
+                                        
+                                        Text(solution)
+                                            .font(.body)
+                                            .multilineTextAlignment(.leading)
+                                        
+                                        Spacer()
+                                    }
+                                    .padding()
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 12)
+                                            .fill(Color(.secondarySystemBackground))
+                                    )
+                                }
+                            }
+                            .padding(.horizontal)
+                        }
+                        
+                        Button("Back to Problems") {
+                            selectedProblem = nil
+                        }
+                        .buttonStyle(.bordered)
+                        .foregroundColor(.brightBlue)
+                    }
+                }
+                
+                Spacer()
+            }
+            .navigationTitle("Night Prep Ideas")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Done") { dismiss() }
+                        .foregroundColor(.brightBlue)
+                }
+            }
+        }
     }
 }
 

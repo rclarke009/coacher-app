@@ -16,7 +16,6 @@ struct DayBucket: View {
     
     @StateObject private var timeManager = TimeManager()
     @State private var lastNightPrepCollapsed = true
-    @State private var morningFocusCollapsed = false
     
     // Separate state for past days to allow expansion
     @State private var pastLastNightPrepCollapsed = true
@@ -82,11 +81,9 @@ struct DayBucket: View {
                     }
                 }
                 
-                SectionCard(
+                MorningFocusCard(
                     title: "Morning Focus (Today)",
-                    icon: "sun.max.fill",
-                    accent: .goldenYellow,
-                    collapsed: $morningFocusCollapsed
+                    icon: "sun.max.fill"
                 ) {
                     if let entryToday = entryToday, let hasUnsavedChanges = hasUnsavedChanges {
                         MorningFocusSection(entry: entryToday)
@@ -100,11 +97,11 @@ struct DayBucket: View {
                         MorningFocusSection(entry: .constant(DailyEntry()))
                     }
                 }
-                .onTapGesture {
-                    withAnimation(.snappy) {
-                        morningFocusCollapsed.toggle()
-                    }
-                }
+//                .onTapGesture {
+//                    withAnimation(.snappy) {
+//                        morningFocusCollapsed.toggle()
+//                    }
+//                }
             }
         }
         .onAppear {
@@ -114,8 +111,7 @@ struct DayBucket: View {
     
     private func setDefaultCollapsedStates() {
         if offset == 0 {
-            // Today: Morning Focus expanded by default
-            morningFocusCollapsed = false
+            // Today: Morning Focus is always visible (no collapse)
             lastNightPrepCollapsed = true
         } else {
             // Past days: both collapsed by default

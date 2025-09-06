@@ -11,6 +11,8 @@ import SwiftData
 enum TimelineItem: Identifiable {
     case entry(DailyEntry)
     case audioRecording(AudioRecording)
+    case successNote(SuccessNote)
+    case cravingNote(CravingNote)
     
     var id: String {
         switch self {
@@ -18,14 +20,21 @@ enum TimelineItem: Identifiable {
             return "entry-\(entry.id.uuidString)"
         case .audioRecording(let recording):
             return "recording-\(recording.id.uuidString)"
+        case .successNote(let note):
+            return "success-\(note.id.uuidString)"
+        case .cravingNote(let note):
+            return "craving-\(note.id.uuidString)"
         }
     }
 }
 
 struct HistoryView: View {
     @Environment(\.modelContext) private var context
+    @Environment(\.colorScheme) private var colorScheme
     @Query(sort: \DailyEntry.date, order: .reverse) private var entries: [DailyEntry]
     @Query(sort: \AudioRecording.date, order: .reverse) private var audioRecordings: [AudioRecording]
+    @Query(sort: \SuccessNote.date, order: .reverse) private var successNotes: [SuccessNote]
+    @Query(sort: \CravingNote.date, order: .reverse) private var cravingNotes: [CravingNote]
     
     var body: some View {
         let _ = print("🔍 DEBUG: HistoryView - ModelContext: \(context)")
@@ -50,6 +59,10 @@ struct HistoryView: View {
                                 EntryRowView(entry: entry)
                             case .audioRecording(let recording):
                                 AudioRecordingRow(recording: recording)
+                            case .successNote(let note):
+                                SuccessNoteRow(note: note)
+                            case .cravingNote(let note):
+                                CravingNoteRow(note: note)
                             }
                         }
                     }
@@ -58,6 +71,10 @@ struct HistoryView: View {
                 .padding(.vertical)
             }
             .navigationTitle("History")
+            .background(
+                Color.appBackground
+                    .ignoresSafeArea(.all)
+            )
         }
     }
     
@@ -74,6 +91,16 @@ struct HistoryView: View {
             items.append(.audioRecording(recording))
         }
         
+        // Add success notes
+        for note in successNotes {
+            items.append(.successNote(note))
+        }
+        
+        // Add craving notes
+        for note in cravingNotes {
+            items.append(.cravingNote(note))
+        }
+        
         // Sort by date (most recent first)
         return items.sorted { first, second in
             let firstDate: Date
@@ -84,6 +111,10 @@ struct HistoryView: View {
                 firstDate = entry.date
             case .audioRecording(let recording):
                 firstDate = recording.date
+            case .successNote(let note):
+                firstDate = note.date
+            case .cravingNote(let note):
+                firstDate = note.date
             }
             
             switch second {
@@ -91,6 +122,10 @@ struct HistoryView: View {
                 secondDate = entry.date
             case .audioRecording(let recording):
                 secondDate = recording.date
+            case .successNote(let note):
+                secondDate = note.date
+            case .cravingNote(let note):
+                secondDate = note.date
             }
             
             return firstDate > secondDate
@@ -145,7 +180,7 @@ struct EntryRowView: View {
             .padding()
             .background(
                 RoundedRectangle(cornerRadius: 12)
-                    .fill(Color(.secondarySystemBackground))
+                    .fill(Color.cardBackground)
             )
         }
         .buttonStyle(.plain)
@@ -178,6 +213,7 @@ struct EntryDetailView: View {
 
 struct WeeklyCompletionRing: View {
     let entries: [DailyEntry]
+    @Environment(\.colorScheme) private var colorScheme
     
     private var weeklyProgress: Double {
         let calendar = Calendar.current
@@ -226,7 +262,7 @@ struct WeeklyCompletionRing: View {
         .padding()
         .background(
             RoundedRectangle(cornerRadius: 16)
-                .fill(Color(.secondarySystemBackground))
+                .fill(colorScheme == .dark ? Color(.secondarySystemBackground) : Color.white)
         )
     }
 }
@@ -235,7 +271,105 @@ struct WeeklyCompletionRing: View {
 
 
 
+struct SuccessNoteRow: View {
+    let note: SuccessNote
+    @Environment(\.colorScheme) private var colorScheme
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Image(systemName: note.type.icon)
+                    .foregroundColor(note.type.color)
+                    .font(.title3)
+                
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(note.type.displayName)
+                        .font(.headline)
+                        .foregroundColor(note.type.color)
+                    
+                    Text(note.date, style: .date)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                
+                Spacer()
+            }
+            
+            if !note.text.isEmpty {
+                Text(note.text)
+                    .font(.body)
+                    .padding(.leading, 32)
+            }
+            
+            if note.keptAudio && note.audioURL != nil {
+                HStack {
+                    Image(systemName: "play.circle.fill")
+                        .foregroundColor(.blue)
+                    Text("Audio recording available")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                .padding(.leading, 32)
+            }
+        }
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(colorScheme == .dark ? Color(.secondarySystemBackground) : Color.white)
+        )
+    }
+}
+
+struct CravingNoteRow: View {
+    let note: CravingNote
+    @Environment(\.colorScheme) private var colorScheme
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Image(systemName: note.type.icon)
+                    .foregroundColor(note.type.color)
+                    .font(.title3)
+                
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(note.type.displayName)
+                        .font(.headline)
+                        .foregroundColor(note.type.color)
+                    
+                    Text(note.date, style: .date)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                
+                Spacer()
+            }
+            
+            if !note.text.isEmpty {
+                Text(note.text)
+                    .font(.body)
+                    .padding(.leading, 32)
+            }
+            
+            if note.keptAudio && note.audioURL != nil {
+                HStack {
+                    Image(systemName: "play.circle.fill")
+                        .foregroundColor(.blue)
+                    Text("Audio recording available")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                .padding(.leading, 32)
+            }
+        }
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(colorScheme == .dark ? Color(.secondarySystemBackground) : Color.white)
+        )
+    }
+}
+
 #Preview {
     HistoryView()
-        .modelContainer(for: [DailyEntry.self, Achievement.self, LLMMessage.self, AudioRecording.self], inMemory: true)
+        .modelContainer(for: [DailyEntry.self, Achievement.self, LLMMessage.self, AudioRecording.self, SuccessNote.self, CravingNote.self], inMemory: true)
 }

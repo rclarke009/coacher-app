@@ -90,7 +90,7 @@ class MLCLLMManager: ObservableObject {
         //     )
         //     let stream = await engine.chat.completions.create(
         //         messages: [systemMessage, userCompletionMessage],
-        //         max_tokens: 150,
+        //         max_tokens: 400,
         //         temperature: 0.7,
         //         stream: true
         //     )

@@ -10,6 +10,7 @@ import SwiftUI
 struct EndOfDaySection: View {
     @Binding var entry: DailyEntry
     @EnvironmentObject private var celebrationManager: CelebrationManager
+    @Environment(\.colorScheme) private var colorScheme
     let onCelebrationTrigger: (String, String) -> Void
     
     var body: some View {
@@ -62,11 +63,27 @@ struct EndOfDaySection: View {
                     }
             }
             
-            TextField("If yes, how do I feel about it?", text: $entry.feelAboutIt)
-                .textFieldStyle(.roundedBorder)
+            TextEditor(text: $entry.feelAboutIt)
+                .frame(minHeight: 60)
+                .foregroundColor(colorScheme == .dark ? .white : .primary)
+                .background(colorScheme == .dark ? Color.darkTextInputBackground : Color.clear)
+                .padding(0)
+                .clipShape(RoundedRectangle(cornerRadius: 14))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 14)
+                            .strokeBorder(Color(.systemGray2), lineWidth: 0.5)
+                    )
             
-            TextField("If no, what got in the way?", text: $entry.whatGotInTheWay)
-                .textFieldStyle(.roundedBorder)
+            TextEditor(text: $entry.whatGotInTheWay)
+                .frame(minHeight: 60)
+                .foregroundColor(colorScheme == .dark ? .white : .primary)
+                .background(colorScheme == .dark ? Color.darkTextInputBackground : Color.clear)
+                .padding(0)
+                .clipShape(RoundedRectangle(cornerRadius: 14))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 14)
+                            .strokeBorder(Color(.systemGray2), lineWidth: 0.5)
+                    )
         }
     }
 }

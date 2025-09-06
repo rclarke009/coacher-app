@@ -102,30 +102,48 @@ struct QuickCaptureView: View {
     }
     
     private func saveCapture() {
-        if captureType == .voice, let audioURL = savedAudioURL {
-            // Save audio recording to database
-            let transcription = "Quick voice capture - \(Date().formatted(date: .abbreviated, time: .shortened))"
+        if captureType == .voice {
+            if let audioURL = savedAudioURL, recordingTime > 0 {
+                // Save audio recording to database with meaningful transcription
+                let transcription = "Quick voice capture - \(Date().formatted(date: .abbreviated, time: .shortened))"
+                let recording = AudioRecording(
+                    transcription: transcription,
+                    duration: recordingTime
+                )
+
+                modelContext.insert(recording)
+
+                do {
+                    try modelContext.save()
+                    
+                    // Clean up the audio file after successful transcription
+                    try FileManager.default.removeItem(at: audioURL)
+                } catch {
+                    print("Failed to save audio recording: \(error)")
+                }
+                
+                // Record activity for milestone tracking
+                celebrationManager.recordActivity()
+            } else {
+                // No recording or very short recording - don't save anything
+                print("No meaningful recording to save")
+            }
+        } else if captureType == .text && !textInput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            // Save text capture
             let recording = AudioRecording(
-                transcription: transcription,
-                duration: recordingTime
+                transcription: textInput,
+                duration: 0
             )
-
+            
             modelContext.insert(recording)
-
+            
             do {
                 try modelContext.save()
-
-                
-                // Clean up the audio file after successful transcription
-                try FileManager.default.removeItem(at: audioURL)
-
+                celebrationManager.recordActivity()
             } catch {
-
+                print("Failed to save text recording: \(error)")
             }
         }
-        
-        // Record activity for milestone tracking (both voice and text)
-        celebrationManager.recordActivity()
         
         dismiss()
     }
@@ -256,6 +274,7 @@ struct VoiceCaptureView: View {
 
 struct TextCaptureView: View {
     @Binding var textInput: String
+    @Environment(\.colorScheme) private var colorScheme
     
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -263,6 +282,8 @@ struct TextCaptureView: View {
                 .font(.headline)
             
             TextEditor(text: $textInput)
+                .foregroundColor(colorScheme == .dark ? .white : .primary)
+                .background(colorScheme == .dark ? Color.darkTextInputBackground : Color.clear)
                 .frame(minHeight: 120)
                 .overlay(
                     RoundedRectangle(cornerRadius: 8)
@@ -275,6 +296,13 @@ struct TextCaptureView: View {
                 .foregroundStyle(.secondary)
         }
         .padding()
+        .onTapGesture {
+            hideKeyboard()
+        }
+    }
+    
+    private func hideKeyboard() {
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
     }
 }
 

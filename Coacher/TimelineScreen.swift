@@ -19,6 +19,7 @@ struct TimelineScreen: View {
     @StateObject private var timeManager = TimeManager()
     @State private var entryToday = DailyEntry()
     @State private var showingNeedHelp = false
+    @State private var showingSuccessCapture = false
     @State private var hasUnsavedChanges = false
     @State private var autoSaveTimer: Timer?
     @State private var showingCelebration = false
@@ -27,7 +28,11 @@ struct TimelineScreen: View {
 
     var body: some View {
         NavigationView {
-            ScrollViewReader { proxy in
+            ZStack {
+                Color.appBackground
+                    .ignoresSafeArea(.all)
+                
+                ScrollViewReader { proxy in
                 ScrollView {
                     LazyVStack(spacing: 16) {
                         // 7 PAST DAYS (collapsed, dimmed)
@@ -49,21 +54,41 @@ struct TimelineScreen: View {
                         )
                         .id("tonightBucket")
                         
-                        // I Need Help Button
-                        Button(action: { showingNeedHelp = true }) {
-                            Label("I Need Help", systemImage: "hand.raised.fill")
-                                .font(.title2)
-                                .padding()
-                                .frame(maxWidth: .infinity)
+                        // Success Flow Buttons
+                        HStack(spacing: 12) {
+                            // I Need Help Button
+                            Button(action: { showingNeedHelp = true }) {
+                                Label("I Need Help", systemImage: "hand.raised.fill")
+                                    .font(.title3)
+                                    .padding()
+                                    .frame(maxWidth: .infinity)
+                                    .multilineTextAlignment(.center)
+                            }
+                            .buttonStyle(.borderedProminent)
+                            .tint(.helpButtonBlue)
+                            .accessibilityLabel("I Need Help")
+                            .accessibilityHint("Opens support options for when you're struggling with cravings or challenges")
+                            
+                            // I Did Great Button
+                            Button(action: { showingSuccessCapture = true }) {
+                                Label("I Did Great!", systemImage: "checkmark.circle.fill")
+                                    .font(.title3)
+                                    .padding()
+                                    .frame(maxWidth: .infinity)
+                                    .multilineTextAlignment(.center)
+                            }
+                            .buttonStyle(.borderedProminent)
+                            .tint(.green)
+                            .accessibilityLabel("I Did Great")
+                            .accessibilityHint("Capture and celebrate a success or positive moment")
                         }
-                        .buttonStyle(.borderedProminent)
                         .padding(.top, 16)
                         .padding(.bottom, 24)
                     }
                     .padding(.horizontal)
                     .padding(.top, 20)
                 }
-                .background(Color(hex: "e7f7fd"))
+                .background(Color.appBackground)
                 .onAppear { 
                     loadOrCreateToday()
                     proxy.scrollTo("todayBucket", anchor: .center)
@@ -99,6 +124,9 @@ struct TimelineScreen: View {
                 .sheet(isPresented: $showingNeedHelp) {
                     NeedHelpView()
                 }
+                .sheet(isPresented: $showingSuccessCapture) {
+                    SuccessCaptureView()
+                }
                 .overlay(
                     // Global celebration overlay - truly full screen
                     CelebrationOverlay(
@@ -115,6 +143,7 @@ struct TimelineScreen: View {
                         message: celebrationManager.milestoneMessage
                     )
                 )
+                }
             }
         }
     }

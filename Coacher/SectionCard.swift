@@ -16,8 +16,6 @@ struct SectionCard<Content: View>: View {
     let content: Content
     
     @Environment(\.colorScheme) private var colorScheme
-    @State private var isKeyboardVisible = false
-    @State private var hasFocusedTextField = false
     
     init(
         title: String,
@@ -37,122 +35,106 @@ struct SectionCard<Content: View>: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            // Header with tap gesture
-            HStack {
-                HStack(spacing: 8) {
-                    Image(systemName: icon)
-                        .font(.title3)
-                        .foregroundStyle(headerForeground)
-                    
-                    Text(title)
-                        .font(.headline)
-                        .fontWeight(.semibold)
-                        .multilineTextAlignment(.leading)
-                }
+            // Header (non-tappable area)
+            HStack(spacing: 12) {
+                Image(systemName: icon)
+                    .font(.title3)
+                    .foregroundStyle(headerForeground)
+                    .accessibilityHidden(true)
+                
+                Text(title)
+                    .font(.headline)
+                    .fontWeight(.semibold)
+                    .multilineTextAlignment(.leading)
+                    .foregroundStyle(headerForeground)
                 
                 Spacer()
-                Image(systemName: collapsed ? "chevron.down" : "chevron.up")
-                    .font(.subheadline)
-                    .accessibilityHidden(true)
+                
+                // Chevron is the ONLY tappable control
+                Button(action: { 
+                    print("DEBUG: Chevron button tapped! Current collapsed state: \(collapsed)")
+                    withAnimation(.snappy) { 
+                        collapsed.toggle() 
+                    }
+                    print("DEBUG: After toggle, collapsed state: \(collapsed)")
+                }) {
+                    Image(systemName: collapsed ? "chevron.down" : "chevron.up")
+                        .font(.caption)
+                        .frame(width: 20, height: 20) // minimal size
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(collapsed ? "Expand section" : "Collapse section")
+                .accessibilityHint(collapsed ? "Shows the section content" : "Hides the section content")
             }
-            .foregroundStyle(headerForeground)
-            .padding(.horizontal, 14).padding(.vertical, 12)
+            .padding(.horizontal, 14).padding(.vertical, 6)
             .background(headerBackground)
             .clipShape(.rect(cornerRadius: 16, style: .continuous))
-            .contentShape(Rectangle())
-            .onTapGesture {
-                // Add a small delay to prevent accidental triggers when exiting text fields
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
-                    // Only respond to taps if keyboard is not visible and no text field is focused
-                    if !isKeyboardVisible && !hasFocusedTextField {
-                        withAnimation(.snappy) { 
-                            collapsed.toggle() 
-                        }
-                    } else {
-                        // If we're blocked, force reset the focus state to prevent getting stuck
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                            hasFocusedTextField = false
-                        }
-                    }
-                }
-            }
+            // DEBUG: Removed highPriorityGesture to see if it's interfering
 
             // Content integrated into the same card background
             if !collapsed {
                 VStack(alignment: .leading, spacing: 12) {
                     content
                 }
-                .padding(14)
+                .padding(14) // Add padding back for all accents
                 .padding(.top, 0) // Reduce top padding to connect with header
             }
         }
-        .background(headerBackground) // Single background for entire card
+        .background(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .fill(headerBackground)
+        ) // Single background for entire card
         .clipShape(.rect(cornerRadius: 16, style: .continuous))
         .overlay( // dim whole card if "past"
             RoundedRectangle(cornerRadius: 16)
-                .fill(.black.opacity(dimmed ? 0.05 : 0))
+                .fill(.black.opacity((accent == .blue || accent == .teal) ? 0 : (dimmed ? 0.05 : 0)))
         )
         .accessibilityElement(children: .contain)
         .accessibilityLabel(Text(title))
-        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { _ in
-            isKeyboardVisible = true
-        }
-        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)) { _ in
-            isKeyboardVisible = false
-            // Reset text field focus state when keyboard hides
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                hasFocusedTextField = false
-            }
-        }
-        .onReceive(NotificationCenter.default.publisher(for: UITextField.textDidBeginEditingNotification)) { _ in
-            hasFocusedTextField = true
-        }
-        .onReceive(NotificationCenter.default.publisher(for: UITextView.textDidBeginEditingNotification)) { _ in
-            hasFocusedTextField = true
-        }
-        .onReceive(NotificationCenter.default.publisher(for: UITextField.textDidEndEditingNotification)) { _ in
-            // Reset focus state when text field editing ends
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                hasFocusedTextField = false
-            }
-        }
-        .onReceive(NotificationCenter.default.publisher(for: UITextView.textDidEndEditingNotification)) { _ in
-            // Reset focus state when text view editing ends
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                hasFocusedTextField = false
-            }
-        }
     }
 
     // MARK: - Colors
-    private var headerBackground: some ShapeStyle {
+    private var headerBackground: AnyShapeStyle {
         switch accent {
         case .blue:
-            return Color.brandBlue.opacity(0.15).gradient
+            return AnyShapeStyle(
+                colorScheme == .dark ? 
+                Color.helpButtonBlue.gradient :
+                Color(hex: "b8e0f0").gradient
+            )
         case .purple:
-            return Color.brandBlue.opacity(0.12).gradient
+            return AnyShapeStyle(Color.brandBlue.opacity(0.12).gradient)
         case .teal:
-            return Color.leafGreen.opacity(0.15).gradient
+            return AnyShapeStyle(
+                colorScheme == .dark ? 
+                Color.leafGreen.gradient :
+                Color.leafGreen.gradient
+            )
         case .goldenYellow:
-            return Color.leafYellow.opacity(0.15).gradient
+            return AnyShapeStyle(LinearGradient(
+                colors: [Color.brandBlue.opacity(0.2), Color.brandBlue.opacity(0.2)],
+                startPoint: .top,
+                endPoint: .bottom
+            ))
         case .dimmedGreen:
-            return Color.leafGreen.opacity(0.08).gradient
+            return AnyShapeStyle(Color.leafGreen.opacity(0.2).gradient)
         case .gray:
-            return Color.dynamicSecondaryText.opacity(0.14).gradient
+            return AnyShapeStyle(Color.dynamicSecondaryText.opacity(0.14).gradient)
         }
     }
     
     private var headerForeground: Color {
         switch accent {
         case .blue:
-            // Use brighter blue for dark mode to make text pop
-            return colorScheme == .dark ? Color(hex: "4A90E2") : .brandBlue
+            // Use black text in light mode, white text in dark mode
+            return colorScheme == .dark ? .white : .black
         case .purple:
             return .brandBlue
         case .teal:
-            return .leafGreen
+            return colorScheme == .dark ? .white : .black
         case .goldenYellow:
-            return colorScheme == .dark ? .leafYellow : Color(hex: "F2C04B")
+            return colorScheme == .dark ? Color(hex: "4A90E2") : .brandBlue
         case .dimmedGreen:
             return .leafGreen.opacity(0.6)
         case .gray:
@@ -235,4 +217,63 @@ enum SectionAccent: CaseIterable {
     }
     .padding()
     .background(Color(.systemGroupedBackground))
+}
+
+// MARK: - Morning Focus Specific Card (No Collapse)
+struct MorningFocusCard<Content: View>: View {
+    let title: String
+    let icon: String
+    let content: Content
+    
+    @Environment(\.colorScheme) private var colorScheme
+    
+    init(
+        title: String,
+        icon: String,
+        @ViewBuilder content: () -> Content
+    ) {
+        self.title = title
+        self.icon = icon
+        self.content = content()
+    }
+    
+    var body: some View {
+        VStack(spacing: 0) {
+            // Header (no chevron, no collapse)
+            HStack(spacing: 12) {
+                Image(systemName: icon)
+                    .font(.title3)
+                    .foregroundStyle(colorScheme == .dark ? .white : .black)
+                    .accessibilityHidden(true)
+                
+                Text(title)
+                    .font(.headline)
+                    .fontWeight(.semibold)
+                    .multilineTextAlignment(.leading)
+                    .foregroundStyle(colorScheme == .dark ? .white : .black)
+                
+                Spacer()
+            }
+            .padding(.horizontal, 14).padding(.vertical, 6)
+            .background(
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .fill(Color.morningFocusBackground)
+            )
+            .clipShape(.rect(cornerRadius: 16, style: .continuous))
+
+            // Content (always visible)
+            VStack(alignment: .leading, spacing: 12) {
+                content
+            }
+            .padding(14)
+            .padding(.top, 0) // Reduce top padding to connect with header
+        }
+        .background(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .fill(Color.morningFocusBackground)
+        ) // Single background for entire card
+        .clipShape(.rect(cornerRadius: 16, style: .continuous))
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel(Text(title))
+    }
 }

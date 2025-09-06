@@ -114,6 +114,7 @@ struct EveningPrepManager: View {
 
 struct AddCustomPrepItemView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.colorScheme) private var colorScheme
     @State private var customItemText = ""
     let onAdd: (String) -> Void
     
@@ -127,6 +128,8 @@ struct AddCustomPrepItemView: View {
                 
                 TextField("e.g., Set out workout clothes", text: $customItemText, axis: .vertical)
                     .textFieldStyle(.roundedBorder)
+                    .foregroundColor(colorScheme == .dark ? .white : .primary)
+                    .background(colorScheme == .dark ? Color.darkTextInputBackground : Color.clear)
                     .lineLimit(3...6)
                 
                 Spacer()

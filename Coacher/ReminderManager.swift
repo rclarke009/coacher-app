@@ -10,6 +10,11 @@ class ReminderManager: ObservableObject {
     @AppStorage("nightPrepTime") private var nightPrepTime = Calendar.current.date(from: DateComponents(hour: 21, minute: 0)) ?? Date()
     @AppStorage("morningFocusTime") private var morningFocusTime = Calendar.current.date(from: DateComponents(hour: 8, minute: 0)) ?? Date()
     
+    // Get user's name from onboarding
+    var userName: String {
+        UserDefaults.standard.string(forKey: "userName") ?? "there"
+    }
+    
     private init() {}
     
     func requestNotificationPermissions() async -> Bool {
@@ -45,7 +50,7 @@ class ReminderManager: ObservableObject {
         
         let content = UNMutableNotificationContent()
         content.title = "Time for Evening Prep! 🌙"
-        content.body = "Plan your tomorrow and set yourself up for success"
+        content.body = "Hi \(userName)! Plan your tomorrow and set yourself up for success"
         content.sound = .default
         content.userInfo = ["destination": "nightPrep"]
         
@@ -88,7 +93,7 @@ class ReminderManager: ObservableObject {
         
         let content = UNMutableNotificationContent()
         content.title = "Morning Focus Time! ☀️"
-        content.body = "Review your plan and set your intentions for the day"
+        content.body = "Hi \(userName)! Review your plan and set your intentions for the day"
         content.sound = .default
         content.userInfo = ["destination": "morningFocus"]
         
@@ -135,5 +140,48 @@ class ReminderManager: ObservableObject {
         center.removePendingNotificationRequests(withIdentifiers: ["morningFocusReminder"])
     }
     
+    func cancelNightPrepReminder() {
+        let center = UNUserNotificationCenter.current()
+        center.removePendingNotificationRequests(withIdentifiers: ["nightPrepReminder"])
+    }
+    
+    func rescheduleNightPrepReminderForTomorrow() async {
+        let center = UNUserNotificationCenter.current()
+        
+        let content = UNMutableNotificationContent()
+        content.title = "Time for Evening Prep! 🌙"
+        content.body = "Hi \(userName)! Plan your tomorrow and set yourself up for success"
+        content.sound = .default
+        content.userInfo = ["destination": "nightPrep"]
+        
+        let calendar = Calendar.current
+        let components = calendar.dateComponents([.hour, .minute], from: nightPrepTime)
+        
+        // Schedule for tomorrow at the same time
+        var tomorrow = Date()
+        tomorrow = calendar.date(byAdding: .day, value: 1, to: tomorrow) ?? tomorrow
+        let tomorrowComponents = calendar.dateComponents([.year, .month, .day], from: tomorrow)
+        let combinedComponents = DateComponents(
+            year: tomorrowComponents.year,
+            month: tomorrowComponents.month,
+            day: tomorrowComponents.day,
+            hour: components.hour,
+            minute: components.minute
+        )
+        
+        let trigger = UNCalendarNotificationTrigger(dateMatching: combinedComponents, repeats: false)
+        
+        let request = UNNotificationRequest(
+            identifier: "nightPrepReminder",
+            content: content,
+            trigger: trigger
+        )
+        
+        do {
+            try await center.add(request)
+        } catch {
+            // Handle error silently
+        }
+    }
 
 }

@@ -16,31 +16,36 @@ class StreakManager: ObservableObject {
             "Three days straight — your new habit is taking root. 🌱",
             "Consistency is growing — keep watering it.",
             "That's a solid start! You're proving to yourself you can do this.",
-            "Momentum is on your side now — ride the wave!"
+            "Momentum is on your side now — ride the wave!",
+            "Three days strong, {name} — you're building something real! 🌱"
         ],
         7: [
             "One week strong — your future self is cheering! 🎉",
             "Seven days in a row — amazing consistency!",
             "A whole week of swaps adds up — you've changed your tomorrow, seven times over.",
-            "This is no fluke. You're building a real pattern."
+            "This is no fluke. You're building a real pattern.",
+            "One week down, {name} — you're on fire! 🎉"
         ],
         14: [
             "Two weeks of dedication — you're unstoppable! 🚀",
             "Fortnight fighter! Your habit is becoming second nature.",
             "Fourteen days strong — you've proven this isn't temporary.",
-            "Halfway to a month! You're building something lasting."
+            "Halfway to a month! You're building something lasting.",
+            "Two weeks strong, {name} — you're unstoppable! 🚀"
         ],
         30: [
             "One month of consistency — you're a habit master! 👑",
             "Thirty days strong — you've transformed your life!",
             "A full month of healthy choices — this is who you are now.",
-            "Monthly master! You've built a foundation that lasts."
+            "Monthly master! You've built a foundation that lasts.",
+            "One month down, {name} — you're a habit master! 👑"
         ],
         100: [
             "Century club! 100 days of dedication! 🏆",
             "One hundred days strong — you're absolutely incredible!",
             "A hundred days of healthy choices — you've changed your life forever.",
-            "Century achievement unlocked! You're a legend!"
+            "Century achievement unlocked! You're a legend!",
+            "100 days strong, {name} — you're absolutely legendary! 🏆"
         ]
     ]
     
@@ -77,7 +82,15 @@ class StreakManager: ObservableObject {
         guard let level = currentMilestoneLevel(),
               let quotes = milestoneQuotes[level] else { return nil }
         
-        return quotes.randomElement() ?? quotes[0]
+        let selectedQuote = quotes.randomElement() ?? quotes[0]
+        
+        // Replace {name} placeholder with user's name if available
+        let userName = UserDefaults.standard.string(forKey: "userName") ?? ""
+        if !userName.isEmpty && selectedQuote.contains("{name}") {
+            return selectedQuote.replacingOccurrences(of: "{name}", with: userName)
+        }
+        
+        return selectedQuote
     }
     
     // Mark milestone as celebrated

@@ -11,12 +11,29 @@ import SwiftData
 struct PrepTonightSection: View {
     @Environment(\.modelContext) private var context
     @Binding var entry: DailyEntry
+    @Environment(\.colorScheme) private var colorScheme
     
     @State private var newOtherItem = ""
     @State private var refreshTrigger = false
+    @State private var showingPrepSuggestions = false
     
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
+            // Header with title and info button
+            HStack {
+                Text("Night Prep (5 minutes)")
+                    .font(.title3)
+                    .bold()
+                
+                Spacer()
+                
+                Button(action: { showingPrepSuggestions = true }) {
+                    Image(systemName: "info.circle")
+                        .font(.title3)
+                        .foregroundColor(colorScheme == .dark ? .brightBlue : .brandBlue)
+                }
+            }
+            
             // Default prep items (reordered as requested)
             VStack(alignment: .leading, spacing: 12) {
                 // Water bottle first (everyone needs water)
@@ -98,18 +115,51 @@ struct PrepTonightSection: View {
             
             // Add new custom item
             HStack {
-                TextField("Add custom prep item...", text: $newOtherItem)
-                    .textFieldStyle(.roundedBorder)
+                // TextField("Add custom prep item...", text: $newOtherItem)
+                //     .textFieldStyle(.roundedBorder)
+                //     .foregroundColor(colorScheme == .dark ? .white : .primary)
+                //     .background(colorScheme == .dark ? Color.darkTextInputBackground : Color.clear)
                 
+                ZStack(alignment: .topLeading) {
+                    TextEditor(text: $newOtherItem)
+                        .frame(minHeight: 60)
+                        .foregroundColor(colorScheme == .dark ? .white : .primary)
+                        .background(colorScheme == .dark ? Color.darkTextInputBackground : Color.clear)
+                        .padding(0)
+                    
+                    .clipShape(RoundedRectangle(cornerRadius: 14))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 14)
+                            .strokeBorder(Color(.systemGray2), lineWidth: 0.5)
+                    )
+                    
+                    if newOtherItem.isEmpty {
+                        Text(" Add custom prep item...")
+                            .foregroundColor(.secondary)
+                            .padding(.top, 8)
+                            .padding(.leading, 4)
+                            .allowsHitTesting(false)
+                    }
+                }
+                .overlay(
+                    RoundedRectangle(cornerRadius: 14)
+                        .strokeBorder(Color(.systemGray2), lineWidth: 0.5)
+                )
+
+
+
                 Button(action: addCustomItem) {
                     Image(systemName: "plus.circle.fill")
-                        .foregroundColor(.leafGreen)
+                        .foregroundColor(colorScheme == .dark ? .brightBlue : .leafGreen)
                         .font(.title2)
                 }
                 .disabled(newOtherItem.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
             }
         }
         .id(refreshTrigger) // Force UI refresh when needed
+        .sheet(isPresented: $showingPrepSuggestions) {
+            NightPrepSuggestionsView()
+        }
     }
     
     // MARK: - Custom Item Management
@@ -185,6 +235,7 @@ struct PrepTonightSection: View {
         refreshTrigger.toggle()
     }
 }
+
 
 #Preview {
     PrepTonightSection(entry: .constant(DailyEntry()))

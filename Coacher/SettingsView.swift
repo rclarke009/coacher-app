@@ -12,8 +12,11 @@ struct SettingsView: View {
     @Environment(\.modelContext) private var context
     @EnvironmentObject private var celebrationManager: CelebrationManager
     @EnvironmentObject private var reminderManager: ReminderManager
+    @Environment(\.colorScheme) private var colorScheme
     @Query private var achievements: [Achievement]
     @StateObject private var mlcManager = SimplifiedMLCManager()
+    @State private var showOnboarding = false
+    @AppStorage("useCloudAI") private var useCloudAI = false
     
     @AppStorage("showStreakWidgets") private var showStreakWidgets = true
     @AppStorage("nightPrepReminder") private var nightPrepReminder = true
@@ -56,6 +59,82 @@ struct SettingsView: View {
                     }
                     
 
+                }
+                
+                Section("AI Coach") {
+                    VStack(alignment: .leading, spacing: 12) {
+                        HStack {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("AI Mode")
+                                    .font(.headline)
+                                Text(useCloudAI ? "Enhanced Cloud Coach" : "Local Coach")
+                                    .font(.subheadline)
+                                    .foregroundColor(.secondary)
+                            }
+                            Spacer()
+                            Toggle("", isOn: $useCloudAI)
+                                .labelsHidden()
+                        }
+                        
+                        VStack(alignment: .leading, spacing: 8) {
+                            if useCloudAI {
+                                VStack(alignment: .leading, spacing: 4) {
+                                    HStack {
+                                        Image(systemName: "cloud.fill")
+                                            .foregroundColor(.blue)
+                                        Text("Enhanced Cloud Coach")
+                                            .font(.subheadline)
+                                            .fontWeight(.medium)
+                                    }
+                                    Text("• Richer, more detailed conversations")
+                                    Text("• Requires internet connection")
+                                    Text("• Data sent to OpenAI servers")
+                                }
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                            } else {
+                                VStack(alignment: .leading, spacing: 4) {
+                                    HStack {
+                                        Image(systemName: "lock.fill")
+                                            .foregroundColor(.green)
+                                        Text("Local Coach")
+                                            .font(.subheadline)
+                                            .fontWeight(.medium)
+                                    }
+                                    Text("• Fast, private, and secure")
+                                    Text("• Works offline (airplane mode)")
+                                    Text("• Data never leaves your device")
+                                }
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                            }
+                        }
+                        .padding(.top, 4)
+                    }
+                    .padding(.vertical, 4)
+                }
+                
+                Section("Personalization") {
+                    HStack {
+                        Text("Name")
+                        Spacer()
+                        TextField("Your name", text: Binding(
+                            get: { UserDefaults.standard.string(forKey: "userName") ?? "" },
+                            set: { UserDefaults.standard.set($0, forKey: "userName") }
+                        ))
+                        .multilineTextAlignment(.trailing)
+                        .foregroundColor(colorScheme == .dark ? .white : .secondary)
+                        .background(colorScheme == .dark ? Color.darkTextInputBackground : Color.clear)
+                        .accessibilityLabel("Name")
+                        .accessibilityHint("Enter your name for personalization")
+                    }
+                    
+                    Button("Replay Onboarding") {
+                        showOnboarding = true
+                    }
+                    .foregroundStyle(.blue)
+                    .accessibilityLabel("Replay Onboarding")
+                    .accessibilityHint("Restart the app introduction and setup process")
                 }
                 
                 Section("Gamification") {
@@ -152,6 +231,18 @@ struct SettingsView: View {
                 }
             }
             .navigationTitle("Settings")
+            .background(
+                Color.appBackground
+                    .ignoresSafeArea(.all)
+            )
+            .scrollContentBackground(.hidden)
+            .scrollDismissesKeyboard(.immediately)
+            .onTapGesture {
+                hideKeyboard()
+            }
+        }
+        .fullScreenCover(isPresented: $showOnboarding) {
+            OnboardingView(isPresented: $showOnboarding)
         }
     }
     
@@ -173,6 +264,10 @@ struct SettingsView: View {
     
     private func clearAllData() {
         // TODO: Show confirmation dialog and implement data clearing
+    }
+    
+    private func hideKeyboard() {
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
     }
 }
 

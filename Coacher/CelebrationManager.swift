@@ -39,6 +39,20 @@ class CelebrationManager: ObservableObject {
         "That's how champions roll."
     ]
     
+    // Personalized encouraging phrases (used ~10% of the time)
+    private let personalizedPhrases = [
+        "Way to go, {name}!",
+        "You're crushing it, {name}!",
+        "Keep it up, {name}!",
+        "That's the spirit, {name}!",
+        "You've got this, {name}!",
+        "Amazing work, {name}!",
+        "You're on fire, {name}!",
+        "Rock star move, {name}!",
+        "You're unstoppable, {name}!",
+        "Fantastic choice, {name}!"
+    ]
+    
     // Get the streak manager for external access
     var streakTracker: StreakManager {
         return streakManager
@@ -53,7 +67,17 @@ class CelebrationManager: ObservableObject {
     }
     
     func randomEncouragingPhrase() -> String {
-        encouragingPhrases.randomElement() ?? encouragingPhrases[0]
+        // Use personalized messages ~10% of the time
+        if Int.random(in: 1...10) == 1 {
+            let userName = UserDefaults.standard.string(forKey: "userName") ?? ""
+            if !userName.isEmpty {
+                let personalizedPhrase = personalizedPhrases.randomElement() ?? personalizedPhrases[0]
+                return personalizedPhrase.replacingOccurrences(of: "{name}", with: userName)
+            }
+        }
+        
+        // Use regular encouraging phrases 90% of the time
+        return encouragingPhrases.randomElement() ?? encouragingPhrases[0]
     }
     
     func shouldCelebrate() -> Bool {

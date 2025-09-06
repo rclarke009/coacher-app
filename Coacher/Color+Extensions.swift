@@ -8,32 +8,60 @@
 import SwiftUI
 
 extension Color {
-    // MARK: - Brand Colors
+    // MARK: - Brand Colors (Static - consistent across modes)
     static let brandBlue = Color(hex: "0C2F89")
     static let leafGreen = Color(hex: "5CB85C")
     static let leafYellow = Color(hex: "FFD54F")
-    static let brightYellow = Color(hex: "FFC107") // Brighter yellow for better visibility in light mode
-    static let stressOrange = Color(hex: "FF8C00") // Orange color for stress/emotional cards
+    static let brightYellow = Color(hex: "FFC107")
+    static let stressOrange = Color(hex: "FF8C00")
+    static let helpButtonBlue = Color(hex: "4DA6FF")
+    static let brightBlue = Color(hex: "007AFF")
     
-    // MARK: - Light Mode Colors
-    static let lightBackground = Color(hex: "FAFAFA")
-    static let textLight = Color(hex: "1C1C1E")
+    // MARK: - App Background Colors (Dynamic)
+    static let appBackground = Color(UIColor { traitCollection in
+        traitCollection.userInterfaceStyle == .dark ? UIColor.black : UIColor(red: 0.9, green: 0.95, blue: 1.0, alpha: 1.0)
+    })
     
-    // MARK: - Dark Mode Colors
-    static let darkBackground = Color(hex: "0A1B3D")
-    static let textDarkPrimary = Color.white
-    static let textDarkSecondary = Color(hex: "B0BEC5")
+    // MARK: - Card Background Colors (Dynamic)
+    static let cardBackground = Color(UIColor { traitCollection in
+        traitCollection.userInterfaceStyle == .dark ? UIColor.secondarySystemBackground : UIColor.white
+    })
     
-    // MARK: - Semantic Colors
+    // MARK: - Text Colors (Dynamic - following Apple's semantic approach)
+    static let primaryText = Color(.label)
+    static let secondaryText = Color(.secondaryLabel)
+    static let tertiaryText = Color(.tertiaryLabel)
+    
+    // MARK: - Morning Focus Card Colors (Preserved - your beautiful existing colors)
+    static let morningFocusBackground = Color(UIColor { traitCollection in
+        if traitCollection.userInterfaceStyle == .dark {
+            return UIColor(red: 0.30, green: 0.65, blue: 1.0, alpha: 1.0) // #4DA6FF - same as help button
+        } else {
+            return UIColor(red: 0.72, green: 0.88, blue: 0.94, alpha: 1.0) // #b8e0f0
+        }
+    })
+    
+    // MARK: - Semantic Colors (Dynamic)
     static let success = leafGreen
     static let highlight = leafYellow
     static let primary = brandBlue
     
-    // MARK: - Dynamic Colors (adapts to light/dark mode)
+    // MARK: - Legacy Support (for backward compatibility)
     static let dynamicBackground = Color(.systemBackground)
     static let dynamicCardBackground = Color(.secondarySystemBackground)
     static let dynamicText = Color(.label)
     static let dynamicSecondaryText = Color(.secondaryLabel)
+    
+    // MARK: - Coach Screen Colors (Legacy - now using appBackground)
+    static let coachBackgroundLight = Color(hex: "E6F3FF")
+    static let coachBackgroundDark = Color.black
+    static let coachBackground = appBackground
+    
+    // MARK: - Dark Mode Specific Colors
+    static let darkTextInputBackground = Color(hex: "2C2C2E")
+    static let darkTextInputText = Color.white
+    static let brightMorningFocusBlue = Color(hex: "00BFFF")
+    static let brightMorningFocusText = Color.white
     
     // MARK: - Hex Initializer
     init(hex: String) {

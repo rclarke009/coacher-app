@@ -25,7 +25,7 @@ struct CoacherApp: App {
                     setupNotifications()
                 }
         }
-        .modelContainer(for: [DailyEntry.self, Achievement.self, LLMMessage.self, CravingNote.self, EveningPrepItem.self, UserSettings.self, AudioRecording.self])
+        .modelContainer(for: [DailyEntry.self, Achievement.self, LLMMessage.self, CravingNote.self, SuccessNote.self, EveningPrepItem.self, UserSettings.self, AudioRecording.self])
     }
     
     private func setupNotifications() {

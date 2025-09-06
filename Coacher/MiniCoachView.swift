@@ -16,6 +16,7 @@ struct MiniCoachView: View {
     
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.colorScheme) private var colorScheme
     @State private var currentStep: MiniCoachStep = .introduction
     @State private var voiceText = ""
     @State private var isRecording = false
@@ -25,6 +26,8 @@ struct MiniCoachView: View {
     @State private var transcribedText = ""
     @State private var showingTextEditor = false
     @State private var savedAudioURL: URL?
+    @State private var showRecordingError = false
+    @State private var showingTextCapture = false
     
     enum MiniCoachStep: Int, CaseIterable {
         case introduction = 0, action = 1, capture = 2, save = 3
@@ -58,7 +61,8 @@ struct MiniCoachView: View {
                         recordingTimer: $recordingTimer,
                         transcribedText: $transcribedText,
                         showingTextEditor: $showingTextEditor,
-                        savedAudioURL: $savedAudioURL
+                        savedAudioURL: $savedAudioURL,
+                        showRecordingError: $showRecordingError
                     ) {
                         currentStep = .save
                     }
@@ -67,32 +71,40 @@ struct MiniCoachView: View {
                         type: type,
                         text: transcribedText.isEmpty ? voiceText : transcribedText
                     ) {
-                        // Save audio recording to database if we have one
+                        // Save audio recording to database if we have one and meaningful content
                         if let audioURL = savedAudioURL {
                             let transcription = transcribedText.isEmpty ? voiceText : transcribedText
-                            let recording = AudioRecording(
-                                transcription: transcription,
-                                type: type,
-                                duration: recordingTime
-                            )
                             
-                            print("🔍 DEBUG: Creating AudioRecording with transcription: '\(transcription)'")
-                            print("🔍 DEBUG: AudioRecording type: \(type.displayName)")
-                            print("🔍 DEBUG: AudioRecording duration: \(recordingTime)")
+                            // Only save if we have meaningful transcription content
+                            if !transcription.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                                let recording = AudioRecording(
+                                    transcription: transcription,
+                                    type: type,
+                                    duration: recordingTime
+                                )
                             
-                            modelContext.insert(recording)
-                            
-                            do {
-                                try modelContext.save()
-                                print("🔍 DEBUG: Successfully saved audio recording to database")
-                                print("🔍 DEBUG: Recording ID: \(recording.id)")
-                                print("🔍 DEBUG: Recording date: \(recording.date)")
+                                print("🔍 DEBUG: Creating AudioRecording with transcription: '\(transcription)'")
+                                print("🔍 DEBUG: AudioRecording type: \(type.displayName)")
+                                print("🔍 DEBUG: AudioRecording duration: \(recordingTime)")
                                 
-                                // Clean up the audio file after successful transcription
-                                try FileManager.default.removeItem(at: audioURL)
-                                print("🔍 DEBUG: Cleaned up audio file: \(audioURL.lastPathComponent)")
-                            } catch {
-                                print("🔍 DEBUG: Failed to save audio recording: \(error)")
+                                modelContext.insert(recording)
+                                
+                                do {
+                                    try modelContext.save()
+                                    print("🔍 DEBUG: Successfully saved audio recording to database")
+                                    print("🔍 DEBUG: Recording ID: \(recording.id)")
+                                    print("🔍 DEBUG: Recording date: \(recording.date)")
+                                    
+                                    // Clean up the audio file after successful transcription
+                                    try FileManager.default.removeItem(at: audioURL)
+                                    print("🔍 DEBUG: Cleaned up audio file: \(audioURL.lastPathComponent)")
+                                } catch {
+                                    print("🔍 DEBUG: Failed to save audio recording: \(error)")
+                                }
+                            } else {
+                                print("🔍 DEBUG: No meaningful transcription to save, cleaning up audio file")
+                                // Clean up the audio file even if we don't save the recording
+                                try? FileManager.default.removeItem(at: audioURL)
                             }
                         } else {
                             print("🔍 DEBUG: No savedAudioURL to save")
@@ -117,6 +129,7 @@ struct MiniCoachView: View {
                                 currentStep = MiniCoachStep.allCases[currentIndex - 1]
                             }
                         }
+                        .foregroundColor(colorScheme == .dark ? .white : .blue)
                     }
                     
                     Spacer()
@@ -132,6 +145,21 @@ struct MiniCoachView: View {
             .navigationBarTitleDisplayMode(.inline)
             .sheet(isPresented: $showingTextEditor) {
                 TextEditorView(text: $transcribedText, originalText: voiceText)
+            }
+            .alert("Recording Issue", isPresented: $showRecordingError) {
+                Button("Try Text Instead") {
+                    showingTextCapture = true
+                }
+                Button("Try Recording Again") {
+                    // Reset recording state
+                    voiceText = ""
+                    transcribedText = ""
+                    savedAudioURL = nil
+                }
+                Button("Cancel", role: .cancel) { }
+            } message: {
+                Text("We couldn't process your recording. You can try typing instead, or try recording again.")
+                    .foregroundColor(colorScheme == .dark ? .white : .primary)
             }
 
         }
@@ -260,7 +288,10 @@ struct CaptureStep: View {
     @Binding var transcribedText: String
     @Binding var showingTextEditor: Bool
     @Binding var savedAudioURL: URL?
+    @Binding var showRecordingError: Bool
     let onNext: () -> Void
+    
+    @State private var showingTextCapture = false
     
     var body: some View {
         VStack(spacing: 24) {
@@ -269,44 +300,80 @@ struct CaptureStep: View {
                 .bold()
             
             if voiceText.isEmpty && transcribedText.isEmpty {
-                // Voice recording interface
+                // Capture options
                 VStack(spacing: 20) {
-                    Image(systemName: isRecording ? "stop.circle.fill" : "mic.circle.fill")
-                        .font(.system(size: 80))
-                        .foregroundStyle(isRecording ? .red : .blue)
+                    Text("How would you like to capture this moment?")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
                     
-                    if isRecording {
-                        Text("Recording... \(Int(recordingTime))s")
-                            .font(.title3)
-                            .foregroundStyle(.red)
-                        
-                        Text("Keep it under 20 seconds")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    } else {
-                        Text("Tap to start recording")
-                            .font(.title3)
-                            .foregroundStyle(.primary)
-                        
-                        Text("Describe what's happening")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-                    
-                    Button(action: toggleRecording) {
-                        Text(isRecording ? "Stop Recording" : "Start Recording")
-                            .font(.headline)
-                            .padding()
+                    HStack(spacing: 16) {
+                        // Voice Recording Button
+                        Button(action: toggleRecording) {
+                            VStack(spacing: 12) {
+                                Image(systemName: isRecording ? "stop.circle.fill" : "mic.circle.fill")
+                                    .font(.system(size: 50))
+                                    .foregroundStyle(isRecording ? .red : .blue)
+                                
+                                Text(isRecording ? "Stop Recording" : "Voice Note")
+                                    .font(.headline)
+                                
+                                if isRecording {
+                                    Text("\(Int(recordingTime))s")
+                                        .font(.caption)
+                                        .foregroundStyle(.red)
+                                } else {
+                                    Text("Tap to record")
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                }
+                            }
                             .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .fill(Color(.secondarySystemBackground))
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 12)
+                                            .stroke(isRecording ? .red : .blue, lineWidth: 2)
+                                    )
+                            )
+                        }
+                        .buttonStyle(.plain)
+                        
+                        // Text Input Button
+                        Button(action: { showingTextCapture = true }) {
+                            VStack(spacing: 12) {
+                                Image(systemName: "text.bubble.fill")
+                                    .font(.system(size: 50))
+                                    .foregroundStyle(.green)
+                                
+                                Text("Text Note")
+                                    .font(.headline)
+                                
+                                Text("Type it out")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .fill(Color(.secondarySystemBackground))
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 12)
+                                            .stroke(.green, lineWidth: 2)
+                                    )
+                            )
+                        }
+                        .buttonStyle(.plain)
                     }
-                    .buttonStyle(.borderedProminent)
-                    .tint(isRecording ? .red : .blue)
                     .padding(.horizontal)
                 }
             } else {
-                // Show transcribed text
+                // Show captured content
                 VStack(spacing: 16) {
-                    Text("Your Recording:")
+                    Text("Your Experience:")
                         .font(.headline)
                         .frame(maxWidth: .infinity, alignment: .leading)
                     
@@ -334,6 +401,15 @@ struct CaptureStep: View {
         }
         .onDisappear {
             stopRecording()
+        }
+        .sheet(isPresented: $showingTextCapture) {
+            MiniCoachTextCaptureView(
+                type: type,
+                onSave: { text in
+                    transcribedText = text
+                    voiceText = text
+                }
+            )
         }
     }
     
@@ -435,9 +511,9 @@ struct CaptureStep: View {
         
         guard let recognizer = recognizer, recognizer.isAvailable else {
             print("🔍 DEBUG: Speech recognition not available")
-            // Fallback to placeholder text
-            if voiceText.isEmpty {
-                voiceText = "I was feeling \(type.displayName.lowercased()) and needed support. Speech recognition not available."
+            // Don't fill in confusing default text - let user know recording didn't work
+            DispatchQueue.main.async {
+                self.showRecordingError = true
             }
             return
         }
@@ -449,9 +525,9 @@ struct CaptureStep: View {
             DispatchQueue.main.async {
                 if let error = error {
                     print("🔍 DEBUG: Speech recognition error: \(error)")
-                    // Fallback to placeholder text
+                    // Don't fill in confusing default text - let user know recording didn't work
                     if self.voiceText.isEmpty {
-                        self.voiceText = "I was feeling \(self.type.displayName.lowercased()) and needed support. Speech recognition failed."
+                        self.showRecordingError = true
                     }
                 } else if let result = result, result.isFinal {
                     let transcription = result.bestTranscription.formattedString
@@ -514,11 +590,14 @@ struct TextEditorView: View {
     @Binding var text: String
     let originalText: String
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.colorScheme) private var colorScheme
     
     var body: some View {
         NavigationView {
             VStack {
                 TextEditor(text: $text)
+                    .foregroundColor(colorScheme == .dark ? .white : .primary)
+                    .background(colorScheme == .dark ? Color.darkTextInputBackground : Color.clear)
                     .padding()
                     .overlay(
                         RoundedRectangle(cornerRadius: 8)
@@ -549,6 +628,109 @@ struct TextEditorView: View {
                 text = originalText
             }
         }
+        .scrollDismissesKeyboard(.immediately)
+        .onTapGesture {
+            hideKeyboard()
+        }
+    }
+    
+    private func hideKeyboard() {
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+    }
+}
+
+struct MiniCoachTextCaptureView: View {
+    let type: CravingType
+    let onSave: (String) -> Void
+    @Environment(\.dismiss) private var dismiss
+    @Environment(\.colorScheme) private var colorScheme
+    @State private var textInput = ""
+    
+    var body: some View {
+        NavigationView {
+            VStack(spacing: 24) {
+                // Header
+                VStack(spacing: 12) {
+                    Image(systemName: "text.bubble.fill")
+                        .font(.system(size: 60))
+                        .foregroundStyle(.green)
+                        .accessibilityLabel("Text input")
+                        .accessibilityHidden(false)
+                    
+                    Text("Describe Your Experience")
+                        .font(.title2)
+                        .bold()
+                    
+                    Text("What's happening with this \(type.displayName.lowercased()) craving?")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                        .lineLimit(nil)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .padding(.horizontal)
+                }
+                .padding(.top)
+                
+                // Text Input
+                VStack(alignment: .leading, spacing: 16) {
+                    Text("Your thoughts:")
+                        .font(.headline)
+                    
+                    TextEditor(text: $textInput)
+                        .foregroundColor(colorScheme == .dark ? .white : .primary)
+                        .background(colorScheme == .dark ? Color.darkTextInputBackground : Color.clear)
+                        .frame(minHeight: 120)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(.quaternary, lineWidth: 1)
+                        )
+                        .padding(.horizontal, 4)
+                        .accessibilityLabel("Your thoughts")
+                        .accessibilityHint("Describe what's happening with your \(type.displayName.lowercased()) craving")
+                    
+                    Text("\(textInput.count) characters")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                .padding(.horizontal)
+                
+                Spacer()
+                
+                // Action Buttons
+                VStack(spacing: 12) {
+                    Button(action: {
+                        onSave(textInput)
+                        dismiss()
+                    }) {
+                        Text("Save & Continue")
+                            .font(.headline)
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .disabled(textInput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                    
+                    Button("Cancel", action: { dismiss() })
+                        .foregroundStyle(.secondary)
+                }
+                .padding(.horizontal)
+            }
+            .navigationTitle("Text Capture")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Done") { dismiss() }
+                }
+            }
+            .scrollDismissesKeyboard(.immediately)
+            .onTapGesture {
+                hideKeyboard()
+            }
+        }
+    }
+    
+    private func hideKeyboard() {
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
     }
 }
 
