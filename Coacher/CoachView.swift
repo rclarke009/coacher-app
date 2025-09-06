@@ -94,15 +94,20 @@ struct CoachView: View {
                 
                 // Message Input
                 VStack(spacing: 12) {
-                    // Model Loading State
+                    // Model Loading State - Simple indicator in input area
                     if hybridManager.isLoading {
-                        VStack(spacing: 12) {
-                            SparkleProgressView(isLoading: true)
+                        HStack {
+                            ProgressView()
+                                .scaleEffect(0.8)
+                            Text("Loading AI model...")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                            Spacer()
                         }
                         .padding(.horizontal)
-                        .padding(.vertical, 12)
-                        .background(Color.cardBackground.opacity(0.8))
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .padding(.vertical, 8)
+                        .background(Color.cardBackground.opacity(0.5))
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
                     }
                     
                     // Input Field (disabled when model not ready)
