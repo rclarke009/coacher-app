@@ -14,6 +14,7 @@ struct CoacherApp: App {
     @StateObject private var celebrationManager = CelebrationManager()
     @StateObject private var reminderManager = ReminderManager.shared
     @StateObject private var notificationHandler = NotificationHandler.shared
+    @StateObject private var hybridManager = HybridLLMManager()
     
     var body: some Scene {
         WindowGroup {
@@ -21,8 +22,10 @@ struct CoacherApp: App {
                 .environmentObject(celebrationManager)
                 .environmentObject(reminderManager)
                 .environmentObject(notificationHandler)
+                .environmentObject(hybridManager)
                 .onAppear {
                     setupNotifications()
+                    startBackgroundModelLoading()
                 }
         }
         .modelContainer(for: [DailyEntry.self, Achievement.self, LLMMessage.self, CravingNote.self, SuccessNote.self, EveningPrepItem.self, UserSettings.self, AudioRecording.self])
@@ -34,6 +37,14 @@ struct CoacherApp: App {
             if granted {
                 await reminderManager.scheduleReminders()
             }
+        }
+    }
+    
+    private func startBackgroundModelLoading() {
+        // Start loading the AI model in the background immediately
+        // Users won't see this happening - it's completely invisible
+        Task {
+            await hybridManager.loadModel()
         }
     }
 }

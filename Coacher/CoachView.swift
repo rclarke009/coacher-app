@@ -10,7 +10,7 @@ import UIKit
 
 struct CoachView: View {
     @Environment(\.colorScheme) private var colorScheme
-    @StateObject private var hybridManager = HybridLLMManager()
+    @EnvironmentObject private var hybridManager: HybridLLMManager
     @State private var userMessage = ""
     @State private var isGenerating = false
     // Removed isUserAtBottom - no automatic scrolling
@@ -194,9 +194,8 @@ struct CoachView: View {
                     .ignoresSafeArea(.all)
             )
                 .onAppear {
-                    Task {
-                        await hybridManager.loadModel()
-                    }
+                    // Model loading is now handled globally in CoacherApp
+                    // No need to load here as it's already started in background
                 }
                 .onChange(of: hybridManager.isUsingCloudAI) { _ in
                     Task {

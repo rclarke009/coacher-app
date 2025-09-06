@@ -10,6 +10,7 @@ import SwiftData
 
 struct ContentView: View {
     @EnvironmentObject private var notificationHandler: NotificationHandler
+    @EnvironmentObject private var hybridManager: HybridLLMManager
     @State private var selectedTab = 0
     @State private var showOnboarding = !UserDefaults.standard.bool(forKey: "hasCompletedOnboarding")
     @Environment(\.colorScheme) private var colorScheme
@@ -20,6 +21,7 @@ struct ContentView: View {
                 .tabItem { Label("Today", systemImage: "calendar") }
                 .tag(0)
             CoachView()
+                .environmentObject(hybridManager)
                 .tabItem { Label("Coach", systemImage: "message") }
                 .tag(1)
             HistoryView()
