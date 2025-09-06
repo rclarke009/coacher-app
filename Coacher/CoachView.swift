@@ -13,7 +13,6 @@ struct CoachView: View {
     @EnvironmentObject private var hybridManager: HybridLLMManager
     @State private var userMessage = ""
     @State private var isGenerating = false
-    // Removed isUserAtBottom - no automatic scrolling
     
     var body: some View {
         NavigationView {
@@ -36,13 +35,7 @@ struct CoachView: View {
                                             .foregroundColor(.dynamicText)
                                         
                                         if hybridManager.isLoading {
-                                            VStack(spacing: 12) {
-                                                ProgressView()
-                                                    .scaleEffect(1.2)
-                                                Text("Loading AI model...")
-                                                    .font(.body)
-                                                    .foregroundColor(.dynamicSecondaryText)
-                                            }
+                                            SparkleProgressView(isLoading: true)
                                         } else if hybridManager.isModelLoaded {
                                             Text("I'm here to help you build healthier habits and achieve your goals. What would you like to work on today?")
                                                 .font(.body)
@@ -89,24 +82,27 @@ struct CoachView: View {
                         
                         // Removed floating scroll button - no automatic scrolling
                     }
+                    .onChange(of: hybridManager.chatHistory.count) { _ in
+                        // Auto-scroll to show the latest message when new messages are added
+                        if let lastMessage = hybridManager.chatHistory.last {
+                            withAnimation(.easeInOut(duration: 0.5)) {
+                                proxy.scrollTo(lastMessage.id, anchor: .top)
+                            }
+                        }
+                    }
                 }
                 
                 // Message Input
                 VStack(spacing: 12) {
                     // Model Loading State
                     if hybridManager.isLoading {
-                        HStack {
-                            ProgressView()
-                                .scaleEffect(0.8)
-                            Text("Loading AI model...")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                            Spacer()
+                        VStack(spacing: 12) {
+                            SparkleProgressView(isLoading: true)
                         }
                         .padding(.horizontal)
-                        .padding(.vertical, 8)
-                        .background(Color.cardBackground.opacity(0.5))
-                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                        .padding(.vertical, 12)
+                        .background(Color.cardBackground.opacity(0.8))
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
                     }
                     
                     // Input Field (disabled when model not ready)
@@ -215,6 +211,8 @@ struct CoachView: View {
         userMessage = ""
         isGenerating = true
         hideKeyboard() // Dismiss keyboard when sending
+        
+        // Auto-scroll will be handled by the ScrollViewReader in the view
         
         Task {
             _ = await hybridManager.generateResponse(for: message)
