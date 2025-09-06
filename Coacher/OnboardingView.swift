@@ -128,7 +128,10 @@ struct OnboardingView: View {
             .padding(.horizontal, 30)
             .padding(.bottom, 30)
         }
-        .background(Color(.systemBackground))
+        .background(
+            Color.appBackground
+                .ignoresSafeArea(.all)
+        )
         .scrollDismissesKeyboard(.immediately)
         .onTapGesture {
             hideKeyboard()

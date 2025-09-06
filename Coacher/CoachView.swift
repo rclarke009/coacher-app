@@ -144,6 +144,7 @@ struct CoachView: View {
                             hybridManager.isLoading
                         )
                     }
+                    .clipShape(RoundedRectangle(cornerRadius: 16))
                     
                     // AI Mode Indicator
                     if hybridManager.isModelLoaded {
