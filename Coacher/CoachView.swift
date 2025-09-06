@@ -35,7 +35,7 @@ struct CoachView: View {
                                             .foregroundColor(.dynamicText)
                                         
                                         if hybridManager.isLoading {
-                                            SparkleProgressView(isLoading: true)
+                                            SparkleProgressView(isLoading: true, progressValue: 0.0)
                                         } else if hybridManager.isModelLoaded {
                                             Text("I'm here to help you build healthier habits and achieve your goals. What would you like to work on today?")
                                                 .font(.body)

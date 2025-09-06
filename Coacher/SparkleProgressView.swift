@@ -83,7 +83,8 @@ struct SparkleProgressView: View {
                 startProgressAnimation()
                 startSparkleAnimation()
             } else {
-                stopAnimations()
+                // Model finished loading - show completion
+                completeProgress()
             }
         }
         .onChange(of: progressValue) { newValue in
@@ -96,10 +97,22 @@ struct SparkleProgressView: View {
     private func startProgressAnimation() {
         // Simulate progress if no real progress value provided
         if progressValue == 0.0 {
-            animationTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { _ in
-                withAnimation(.easeInOut(duration: 0.3)) {
-                    if progress < 0.9 {
-                        progress += 0.02
+            animationTimer = Timer.scheduledTimer(withTimeInterval: 0.3, repeats: true) { _ in
+                withAnimation(.easeInOut(duration: 0.6)) {
+                    if progress < 0.98 {
+                        // More realistic progress pattern:
+                        // - Quick initial progress (0-30%)
+                        // - Slower middle phase (30-80%) 
+                        // - Quick finish (80-98%)
+                        let increment: Double
+                        if progress < 0.3 {
+                            increment = 0.015  // Quick start
+                        } else if progress < 0.8 {
+                            increment = 0.008  // Slower middle
+                        } else {
+                            increment = 0.012  // Quick finish
+                        }
+                        progress += increment
                     }
                 }
             }
@@ -141,6 +154,24 @@ struct SparkleProgressView: View {
         DispatchQueue.main.asyncAfter(deadline: .now() + sparkle.duration) {
             withAnimation(.easeIn(duration: 0.3)) {
                 sparkles.removeAll { $0.id == sparkle.id }
+            }
+        }
+    }
+    
+    private func completeProgress() {
+        // Animate to 100% completion
+        withAnimation(.easeInOut(duration: 0.8)) {
+            progress = 1.0
+        }
+        
+        // Stop the timer but keep sparkles for a moment
+        animationTimer?.invalidate()
+        animationTimer = nil
+        
+        // Clear sparkles after a short delay
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            withAnimation(.easeOut(duration: 0.5)) {
+                sparkles.removeAll()
             }
         }
     }
