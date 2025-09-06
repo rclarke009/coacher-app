@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import UIKit
 
 struct CoachView: View {
     @Environment(\.colorScheme) private var colorScheme
@@ -34,11 +35,25 @@ struct CoachView: View {
                                             .bold()
                                             .foregroundColor(.dynamicText)
                                         
-                                        Text("I'm here to help you build healthier habits and achieve your goals. What would you like to work on today?")
-                                            .font(.body)
-                                            .multilineTextAlignment(.center)
-                                            .foregroundColor(.dynamicSecondaryText)
-                                            .padding(.horizontal, 20)
+                                        if hybridManager.isLoading {
+                                            VStack(spacing: 12) {
+                                                ProgressView()
+                                                    .scaleEffect(1.2)
+                                                Text("Loading AI model...")
+                                                    .font(.body)
+                                                    .foregroundColor(.dynamicSecondaryText)
+                                            }
+                                        } else if hybridManager.isModelLoaded {
+                                            Text("I'm here to help you build healthier habits and achieve your goals. What would you like to work on today?")
+                                                .font(.body)
+                                                .multilineTextAlignment(.center)
+                                                .foregroundColor(.dynamicSecondaryText)
+                                                .padding(.horizontal, 20)
+                                        } else {
+                                            Text("Preparing your AI coach...")
+                                                .font(.body)
+                                                .foregroundColor(.dynamicSecondaryText)
+                                        }
                                     }
                                     .padding(.top, 40)
                                         } else {
@@ -78,41 +93,91 @@ struct CoachView: View {
                 
                 // Message Input
                 VStack(spacing: 12) {
+                    // Model Loading State
+                    if hybridManager.isLoading {
+                        HStack {
+                            ProgressView()
+                                .scaleEffect(0.8)
+                            Text("Loading AI model...")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                            Spacer()
+                        }
+                        .padding(.horizontal)
+                        .padding(.vertical, 8)
+                        .background(Color.cardBackground.opacity(0.5))
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                    }
+                    
+                    // Input Field (disabled when model not ready)
                     HStack(spacing: 12) {
-                        TextField("Ask your AI coach...", text: $userMessage, axis: .vertical)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                            .lineLimit(1...4)
-                            .onSubmit {
+                        TextField(
+                            hybridManager.isModelLoaded ? "Ask your AI coach..." : "AI model loading...",
+                            text: $userMessage,
+                            axis: .vertical
+                        )
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .lineLimit(1...4)
+                        .disabled(!hybridManager.isModelLoaded || hybridManager.isLoading)
+                        .opacity(hybridManager.isModelLoaded ? 1.0 : 0.6)
+                        .onSubmit {
+                            if hybridManager.isModelLoaded && !hybridManager.isLoading {
                                 sendMessage()
                             }
-                            .onTapGesture {
-                                // Don't dismiss keyboard when tapping text field
-                            }
+                        }
+                        .onTapGesture {
+                            // Don't dismiss keyboard when tapping text field
+                        }
                         
                         Button(action: sendMessage) {
                             Image(systemName: "paperplane.fill")
                                 .foregroundColor(.white)
                                 .frame(width: 36, height: 36)
-                                .background(Color.brandBlue)
+                                .background(hybridManager.isModelLoaded ? Color.brandBlue : Color.gray)
                                 .clipShape(Circle())
                         }
-                        .disabled(userMessage.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isGenerating)
+                        .disabled(
+                            userMessage.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || 
+                            isGenerating || 
+                            !hybridManager.isModelLoaded || 
+                            hybridManager.isLoading
+                        )
                     }
                     
-                            // AI Mode Indicator
-                            if hybridManager.isModelLoaded {
-                                HStack {
-                                    Text(hybridManager.modelStatus)
-                                        .font(.caption)
-                                        .foregroundColor(.secondary)
-                                    Spacer()
-                                    if hybridManager.isUsingCloudAI {
-                                        Text("Tokens: \(hybridManager.getCurrentTokenUsage())")
-                                            .font(.caption)
-                                            .foregroundColor(.secondary)
-                                    }
+                    // AI Mode Indicator
+                    if hybridManager.isModelLoaded {
+                        HStack {
+                            Text(hybridManager.modelStatus)
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                            Spacer()
+                            if hybridManager.isUsingCloudAI {
+                                Text("Tokens: \(hybridManager.getCurrentTokenUsage())")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+                    } else if !hybridManager.isLoading {
+                        // Show error state if not loading and not loaded
+                        VStack(spacing: 8) {
+                            HStack {
+                                Image(systemName: "exclamationmark.triangle")
+                                    .foregroundColor(.orange)
+                                Text("AI model not ready.")
+                                    .font(.caption)
+                                    .foregroundColor(.orange)
+                                Spacer()
+                            }
+                            
+                            Button("Retry Loading") {
+                                Task {
+                                    await hybridManager.loadModel()
                                 }
                             }
+                            .font(.caption)
+                            .foregroundColor(.brandBlue)
+                        }
+                    }
                 }
                 .padding()
                 .background(Color.cardBackground)

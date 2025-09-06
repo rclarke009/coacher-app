@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import UIKit
 
 struct OnboardingView: View {
     @Binding var isPresented: Bool
@@ -14,6 +15,21 @@ struct OnboardingView: View {
     @State private var userName = ""
     @State private var morningTime = Calendar.current.date(from: DateComponents(hour: 8, minute: 0)) ?? Date()
     @State private var eveningTime = Calendar.current.date(from: DateComponents(hour: 21, minute: 0)) ?? Date()
+    
+    // Model preloading state
+    @StateObject private var hybridManager = HybridLLMManager()
+    @State private var isModelPreloading = false
+    @State private var modelPreloadProgress: Double = 0.0
+    
+    private var buttonText: String {
+        if currentPage == pages.count - 1 {
+            return "Get Started"
+        } else if currentPage == pages.count - 2 && isModelPreloading {
+            return "Preparing..."
+        } else {
+            return "Next"
+        }
+    }
     
     private let pages = [
         OnboardingPage(
@@ -52,6 +68,14 @@ struct OnboardingView: View {
             content: "🤖 Local Coach: Fast, private, offline\n\n☁️ Enhanced Cloud Coach: Richer conversations (optional)\n\nYou can switch between modes anytime in Settings.",
             icon: "brain.head.profile",
             color: .blue
+        ),
+        OnboardingPage(
+            title: "Preparing Your Coach",
+            subtitle: "Setting up your AI assistant for the best experience",
+            content: "",
+            icon: "gear.badge.checkmark",
+            color: .green,
+            showModelLoading: true
         )
     ]
     
@@ -75,7 +99,10 @@ struct OnboardingView: View {
                         page: pages[index],
                         userName: $userName,
                         morningTime: $morningTime,
-                        eveningTime: $eveningTime
+                        eveningTime: $eveningTime,
+                        hybridManager: hybridManager,
+                        isModelPreloading: $isModelPreloading,
+                        modelPreloadProgress: $modelPreloadProgress
                     )
                     .tag(index)
                 }
@@ -108,15 +135,21 @@ struct OnboardingView: View {
                 
                 Spacer()
                 
-                Button(currentPage == pages.count - 1 ? "Get Started" : "Next") {
+                Button(buttonText) {
                     if currentPage == pages.count - 1 {
                         completeOnboarding()
                     } else {
                         withAnimation {
                             currentPage += 1
                         }
+                        
+                        // Start model preloading when user reaches AI Coach page (second to last)
+                        if currentPage == pages.count - 2 {
+                            startModelPreloading()
+                        }
                     }
                 }
+                .disabled(isModelPreloading)
                 .buttonStyle(.borderedProminent)
                 .tint(pages[currentPage].color)
             }
@@ -132,6 +165,34 @@ struct OnboardingView: View {
     
     private func hideKeyboard() {
         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+    }
+    
+    private func startModelPreloading() {
+        guard !isModelPreloading && !hybridManager.isModelLoaded else { return }
+        
+        isModelPreloading = true
+        modelPreloadProgress = 0.0
+        
+        Task {
+            // Simulate progress updates during loading
+            let progressTask = Task {
+                while isModelPreloading && modelPreloadProgress < 0.9 {
+                    try await Task.sleep(nanoseconds: 100_000_000) // 0.1 seconds
+                    await MainActor.run {
+                        modelPreloadProgress += 0.05
+                    }
+                }
+            }
+            
+            await hybridManager.loadModel()
+            
+            progressTask.cancel()
+            
+            await MainActor.run {
+                isModelPreloading = false
+                modelPreloadProgress = 1.0
+            }
+        }
     }
     
     private func completeOnboarding() {
@@ -158,8 +219,9 @@ struct OnboardingPage {
     let color: Color
     let showNameInput: Bool
     let showTimeInputs: Bool
+    let showModelLoading: Bool
     
-    init(title: String, subtitle: String, content: String, icon: String, color: Color, showNameInput: Bool = false, showTimeInputs: Bool = false) {
+    init(title: String, subtitle: String, content: String, icon: String, color: Color, showNameInput: Bool = false, showTimeInputs: Bool = false, showModelLoading: Bool = false) {
         self.title = title
         self.subtitle = subtitle
         self.content = content
@@ -167,6 +229,7 @@ struct OnboardingPage {
         self.color = color
         self.showNameInput = showNameInput
         self.showTimeInputs = showTimeInputs
+        self.showModelLoading = showModelLoading
     }
 }
 
@@ -175,6 +238,9 @@ struct OnboardingPageView: View {
     @Binding var userName: String
     @Binding var morningTime: Date
     @Binding var eveningTime: Date
+    @ObservedObject var hybridManager: HybridLLMManager
+    @Binding var isModelPreloading: Bool
+    @Binding var modelPreloadProgress: Double
     @Environment(\.colorScheme) private var currentColorScheme
     
     var body: some View {
@@ -236,6 +302,64 @@ struct OnboardingPageView: View {
                             .foregroundColor(currentColorScheme == .dark ? .white : .primary)
                         DatePicker("Time", selection: $eveningTime, displayedComponents: .hourAndMinute)
                             .labelsHidden()
+                    }
+                }
+                .padding(.horizontal, 40)
+            }
+            
+            // Model loading
+            if page.showModelLoading {
+                VStack(spacing: 20) {
+                    if isModelPreloading {
+                        VStack(spacing: 16) {
+                            ProgressView()
+                                .scaleEffect(1.5)
+                                .tint(page.color)
+                            
+                            Text("Downloading AI model...")
+                                .font(.headline)
+                                .foregroundColor(currentColorScheme == .dark ? .white : .primary)
+                            
+                            Text("This may take a few minutes on first launch")
+                                .font(.caption)
+                                .foregroundColor(currentColorScheme == .dark ? Color.white.opacity(0.8) : .secondary)
+                                .multilineTextAlignment(.center)
+                            
+                            // Progress bar
+                            ProgressView(value: modelPreloadProgress)
+                                .progressViewStyle(LinearProgressViewStyle(tint: page.color))
+                                .frame(width: 200)
+                        }
+                    } else if hybridManager.isModelLoaded {
+                        VStack(spacing: 12) {
+                            Image(systemName: "checkmark.circle.fill")
+                                .font(.system(size: 40))
+                                .foregroundColor(.green)
+                            
+                            Text("AI Coach Ready!")
+                                .font(.headline)
+                                .foregroundColor(currentColorScheme == .dark ? .white : .primary)
+                            
+                            Text("Your personal AI coach is ready to help you on your journey")
+                                .font(.caption)
+                                .foregroundColor(currentColorScheme == .dark ? Color.white.opacity(0.8) : .secondary)
+                                .multilineTextAlignment(.center)
+                        }
+                    } else {
+                        VStack(spacing: 12) {
+                            Image(systemName: "exclamationmark.triangle")
+                                .font(.system(size: 40))
+                                .foregroundColor(.orange)
+                            
+                            Text("Model Loading Failed")
+                                .font(.headline)
+                                .foregroundColor(currentColorScheme == .dark ? .white : .primary)
+                            
+                            Text("Don't worry, you can still use the app and try loading again later")
+                                .font(.caption)
+                                .foregroundColor(currentColorScheme == .dark ? Color.white.opacity(0.8) : .secondary)
+                                .multilineTextAlignment(.center)
+                        }
                     }
                 }
                 .padding(.horizontal, 40)
