@@ -107,7 +107,7 @@ struct CoachView: View {
                         .padding(.horizontal)
                         .padding(.vertical, 8)
                         .background(Color.cardBackground.opacity(0.5))
-                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                        .clipShape(RoundedRectangle(cornerRadius: 14))
                     }
                     
                     // Input Field (disabled when model not ready)
@@ -283,7 +283,7 @@ struct ChatBubble: View {
                     Text(message.content)
                         .padding(12)
                         .background(Color.cardBackground)
-                        .foregroundColor(.primary)
+                        .foregroundColor(.primary) // Use semantic color that adapts to dark mode
                         .clipShape(RoundedRectangle(cornerRadius: 16))
                     Text(message.timestamp, style: .time)
                         .font(.caption2)
