@@ -46,7 +46,7 @@ struct CoachView: View {
                                         } else {
                                             Text("Preparing your AI coach...")
                                                 .font(.body)
-                                                .foregroundColor(.dynamicSecondaryText)
+                                                .foregroundColor(.helpButtonBlue)
                                         }
                                     }
                                     .padding(.top, 40)

@@ -62,7 +62,7 @@ struct SparkleProgressView: View {
             // Loading text
             Text("Preparing your AI coach...")
                 .font(.headline)
-                .foregroundColor(.primary)
+                .foregroundColor(.helpButtonBlue)
             
             Text("This may take a few minutes on first launch")
                 .font(.caption)
