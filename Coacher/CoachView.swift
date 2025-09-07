@@ -12,7 +12,6 @@ struct CoachView: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var hybridManager: HybridLLMManager
     @State private var userMessage = ""
-    @State private var isGenerating = false
     
     var body: some View {
         NavigationView {
@@ -57,7 +56,7 @@ struct CoachView: View {
                                             }
                                         }
                                 
-                                if isGenerating {
+                                if hybridManager.isGeneratingResponse {
                                     HStack {
                                         ProgressView()
                                             .scaleEffect(0.8)
@@ -139,7 +138,7 @@ struct CoachView: View {
                         }
                         .disabled(
                             userMessage.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || 
-                            isGenerating || 
+                            hybridManager.isGeneratingResponse || 
                             !hybridManager.isModelLoaded || 
                             hybridManager.isLoading
                         )
@@ -215,16 +214,12 @@ struct CoachView: View {
         guard !message.isEmpty else { return }
         
         userMessage = ""
-        isGenerating = true
         hideKeyboard() // Dismiss keyboard when sending
         
         // Auto-scroll will be handled by the ScrollViewReader in the view
         
         Task {
             _ = await hybridManager.generateResponse(for: message)
-            await MainActor.run {
-                isGenerating = false
-            }
         }
     }
     

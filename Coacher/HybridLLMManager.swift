@@ -7,6 +7,7 @@ import SwiftData
 class HybridLLMManager: ObservableObject {
     @Published var isModelLoaded = false
     @Published var isLoading = false
+    @Published var isGeneratingResponse = false
     @Published var errorMessage: String?
     @Published var chatHistory: [LLMMessage] = []
     @Published var isUsingCloudAI = false
@@ -59,7 +60,7 @@ class HybridLLMManager: ObservableObject {
         }
         
         await MainActor.run {
-            isLoading = true
+            isGeneratingResponse = true
         }
         
         let response: String
@@ -75,7 +76,7 @@ class HybridLLMManager: ObservableObject {
         await saveMessage(response, isUser: false)
         
         await MainActor.run {
-            isLoading = false
+            isGeneratingResponse = false
         }
         
         return response
