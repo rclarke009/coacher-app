@@ -31,6 +31,7 @@ class MLXLLMManager: ObservableObject {
         LMModel(name: "llama3.2:1b", configuration: LLMRegistry.llama3_2_1B_4bit, type: LMModel.ModelType.llm),
         LMModel(name: "phi3.5", configuration: LLMRegistry.phi3_5_4bit, type: LMModel.ModelType.llm),
         LMModel(name: "qwen2.5:1.5b", configuration: LLMRegistry.qwen2_5_1_5b, type: LMModel.ModelType.llm),
+        LMModel(name: "smolLM:135m", configuration: LLMRegistry.smolLM_135M_4bit, type: LMModel.ModelType.llm),
     ]
     
     // Currently selected model (default to smallest for mobile)
@@ -59,21 +60,28 @@ class MLXLLMManager: ObservableObject {
 
     /// Load the local AI model
     func loadModel() async {
+        print("🤖 MLXLLMManager: Starting model loading...")
         await MainActor.run {
             isLoading = true
             errorMessage = nil
+            print("🤖 MLXLLMManager: isLoading set to true")
         }
 
         do {
             if !isInitialized {
+                print("🤖 Initializing MLX...")
                 try await initializeMLX()
+                print("🤖 MLX initialized successfully")
             }
             try await loadRealModel()
             await MainActor.run {
                 isModelLoaded = true
                 isLoading = false
+                print("🤖 MLXLLMManager: Model loaded successfully!")
             }
         } catch {
+            print("🤖 MLXLLMManager: Model loading failed: \(error)")
+            print("🤖 Error details: \(error.localizedDescription)")
             await MainActor.run {
                 errorMessage = "Failed to load MLX model: \(error.localizedDescription)"
                 isModelLoaded = false
@@ -93,7 +101,7 @@ class MLXLLMManager: ObservableObject {
         let factory = LLMModelFactory.shared
         let model = selectedModel
         
-        print("Loading MLX model: \(model.name)")
+        print("🤖 Loading MLX model: \(model.name)")
         
         // Load model from hub with progress tracking
         let hub = HubApi()
@@ -103,11 +111,11 @@ class MLXLLMManager: ObservableObject {
         ) { progress in
             Task { @MainActor in
                 // Update progress if needed
-                print("Model download progress: \(progress.fractionCompleted * 100)%")
+                print("🤖 Model download progress: \(progress.fractionCompleted * 100)%")
             }
         }
         
-        print("MLX model loaded successfully: \(model.name)")
+        print("🤖 MLX model loaded successfully: \(model.name)")
     }
 
     /// Generate a response using MLX local AI

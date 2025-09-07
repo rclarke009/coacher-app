@@ -29,9 +29,11 @@ class HybridLLMManager: ObservableObject {
     
     /// Load the appropriate AI model based on user preference
     func loadModel() async {
+        print("🔄 HybridLLMManager: Starting model loading...")
         await MainActor.run {
             isLoading = true
             errorMessage = nil
+            print("🔄 HybridLLMManager: isLoading set to true")
         }
         
         if isUsingCloudAI {
@@ -50,6 +52,7 @@ class HybridLLMManager: ObservableObject {
         
         await MainActor.run {
             isLoading = false
+            print("🔄 HybridLLMManager: isLoading set to false, isModelLoaded: \(isModelLoaded)")
         }
     }
     
