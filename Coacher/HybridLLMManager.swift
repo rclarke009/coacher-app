@@ -15,7 +15,7 @@ class HybridLLMManager: ObservableObject {
     
     // Managers
     private let localManager = MLXLLMManager()
-    private let cloudManager = BackendLLMManager()
+    private let cloudManager = OpenAIManager()
     
     // Configuration
     private let maxTokens = 2000

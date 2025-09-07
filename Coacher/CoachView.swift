@@ -12,6 +12,8 @@ struct CoachView: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var hybridManager: HybridLLMManager
     @State private var userMessage = ""
+    @State private var showConversationHistory = false
+    @State private var showOnlineAIConfirmation = false
     
     var body: some View {
         NavigationView {
@@ -189,15 +191,40 @@ struct CoachView: View {
             .padding()
             .navigationTitle("Coach")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button(action: { showConversationHistory = true }) {
+                        Image(systemName: "line.3.horizontal")
+                            .font(.system(size: 18, weight: .medium))
+                            .foregroundColor(.primary)
+                    }
+                }
+                
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: { showOnlineAIConfirmation = true }) {
+                        Image(systemName: hybridManager.isUsingCloudAI ? "sparkles" : "sparkles")
+                            .font(.system(size: 18, weight: .medium))
+                            .foregroundColor(hybridManager.isUsingCloudAI ? .brandBlue : .secondary)
+                    }
+                }
+            }
             //.background(Color(.systemBackground))
             .background(
                 Color.appBackground
                     .ignoresSafeArea(.all)
             )
-                .onAppear {
-                    // Model loading is now handled globally in CoacherApp
-                    // No need to load here as it's already started in background
-                }
+            .sheet(isPresented: $showConversationHistory) {
+                ConversationHistoryView()
+                    .environmentObject(hybridManager)
+            }
+            .sheet(isPresented: $showOnlineAIConfirmation) {
+                OnlineAIConfirmationView()
+                    .environmentObject(hybridManager)
+            }
+            .onAppear {
+                // Model loading is now handled globally in CoacherApp
+                // No need to load here as it's already started in background
+            }
                 .onChange(of: hybridManager.isUsingCloudAI) { _ in
                     Task {
                         await hybridManager.updateAIMode()
