@@ -305,7 +305,9 @@ struct ChatBubble: View {
                     Text(message.content)
                         .padding(12)
                         .background(Color.cardBackground)
-                        .foregroundColor(.primary) // Use semantic color that adapts to dark mode
+                        .foregroundColor(Color(UIColor { traitCollection in
+                            traitCollection.userInterfaceStyle == .dark ? UIColor.white : UIColor.black
+                        }))
                         .clipShape(RoundedRectangle(cornerRadius: 16))
                     Text(message.timestamp, style: .time)
                         .font(.caption2)
