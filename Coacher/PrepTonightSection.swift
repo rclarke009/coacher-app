@@ -11,7 +11,9 @@ import SwiftData
 struct PrepTonightSection: View {
     @Environment(\.modelContext) private var context
     @Binding var entry: DailyEntry
+    @Binding var todayEntry: DailyEntry // Add today's entry to access whatGotInTheWay
     @Environment(\.colorScheme) private var colorScheme
+    @StateObject private var reminderManager = ReminderManager.shared
     
     @State private var newOtherItem = ""
     @State private var refreshTrigger = false
@@ -36,10 +38,36 @@ struct PrepTonightSection: View {
             
             // Default prep items (reordered as requested)
             VStack(alignment: .leading, spacing: 12) {
+
+                // Show reflection-based encouragement if user wrote about what got in the way
+                if !todayEntry.whatGotInTheWay.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text(getReflectionEncouragement())
+                            .font(.subheadline)
+                            .foregroundColor(.primary)
+                            .multilineTextAlignment(.leading)
+                            .lineLimit(nil)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    .padding(.bottom, 4)
+                } else {
+                    // Show generic encouragement when no reflection text
+                    Text("Let's do a prep to make tomorrow better.")
+                        .font(.subheadline)
+                        .foregroundColor(.primary)
+                        .multilineTextAlignment(.leading)
+                        .lineLimit(nil)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .padding(.bottom, 4)
+                }
+
+
+
+
                 // Water bottle first (everyone needs water)
                 HStack {
                     Image(systemName: entry.waterReady ? "checkmark.square.fill" : "square")
-                        .foregroundColor(.leafGreen)
+                        .foregroundColor(colorScheme == .dark ? .white : .black)
                         .onTapGesture {
                             entry.waterReady.toggle()
                         }
@@ -52,7 +80,7 @@ struct PrepTonightSection: View {
                 // Prep easy breakfast/snack second
                 HStack {
                     Image(systemName: entry.breakfastPrepped ? "checkmark.square.fill" : "square")
-                        .foregroundColor(.leafGreen)
+                        .foregroundColor(colorScheme == .dark ? .white : .black)
                         .onTapGesture {
                             entry.breakfastPrepped.toggle()
                         }
@@ -65,7 +93,7 @@ struct PrepTonightSection: View {
                 // Other default items
                 HStack {
                     Image(systemName: entry.stickyNotes ? "checkmark.square.fill" : "square")
-                        .foregroundColor(.leafGreen)
+                        .foregroundColor(colorScheme == .dark ? .white : .black)
                         .onTapGesture {
                             entry.stickyNotes.toggle()
                         }
@@ -77,7 +105,7 @@ struct PrepTonightSection: View {
                 
                 HStack {
                     Image(systemName: entry.preppedProduce ? "checkmark.square.fill" : "square")
-                        .foregroundColor(.leafGreen)
+                        .foregroundColor(colorScheme == .dark ? .white : .black)
                         .onTapGesture {
                             entry.preppedProduce.toggle()
                         }
@@ -99,7 +127,7 @@ struct PrepTonightSection: View {
                     ForEach(entry.safeCustomPrepItems, id: \.self) { item in
                         HStack {
                             Image(systemName: entry.safeCompletedCustomPrepItems.contains(item) ? "checkmark.square.fill" : "square")
-                                .foregroundColor(.leafGreen)
+                                .foregroundColor(colorScheme == .dark ? .white : .black)
                                 .onTapGesture {
                                     toggleCustomItem(item)
                                 }
@@ -150,13 +178,32 @@ struct PrepTonightSection: View {
 
                 Button(action: addCustomItem) {
                     Image(systemName: "plus.circle.fill")
-                        .foregroundColor(colorScheme == .dark ? .brightBlue : .leafGreen)
+                        .foregroundColor(colorScheme == .dark ? .brightBlue : .white)
                         .font(.title2)
                 }
                 .disabled(newOtherItem.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
             }
+            
+            // Show reflection-based encouragement if user wrote about what got in the way
+            if !entry.whatGotInTheWay.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                VStack(alignment: .leading, spacing: 8) {
+                    Divider()
+                        .padding(.vertical, 4)
+                    
+                    Text(getReflectionEncouragement())
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.leading)
+                        .lineLimit(nil)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
         }
         .id(refreshTrigger) // Force UI refresh when needed
+        .onChange(of: todayEntry.whatGotInTheWay) { _, _ in 
+            // Force UI refresh when user types in the "what got in the way" box
+            refreshTrigger.toggle()
+        }
         .sheet(isPresented: $showingPrepSuggestions) {
             NightPrepSuggestionsView()
         }
@@ -234,10 +281,32 @@ struct PrepTonightSection: View {
         // Force UI refresh
         refreshTrigger.toggle()
     }
+    
+    private func getReflectionEncouragement() -> String {
+        let reflectionText = todayEntry.whatGotInTheWay.trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        let encouragementTemplates = [
+            "You wrote: '\(reflectionText)'. Let's do a prep to make that better tomorrow.",
+            "You mentioned: '\(reflectionText)'. Let's set up something tomorrow to help with that.",
+            "Today you noticed: '\(reflectionText)'. What might make tomorrow smoother?",
+            "You identified: '\(reflectionText)'. Let's prepare for a smoother day tomorrow.",
+            "You reflected on: '\(reflectionText)'. Time to set yourself up for success!",
+            "You recognized: '\(reflectionText)'. Let's make tomorrow different."
+        ]
+        
+        // Use a simple hash of the reflection text to consistently pick the same template
+        let hash = reflectionText.hashValue
+        let templateIndex = abs(hash) % encouragementTemplates.count
+        
+        return encouragementTemplates[templateIndex]
+    }
 }
 
 
 #Preview {
-    PrepTonightSection(entry: .constant(DailyEntry()))
-        .padding()
+    PrepTonightSection(
+        entry: .constant(DailyEntry()),
+        todayEntry: .constant(DailyEntry())
+    )
+    .padding()
 }

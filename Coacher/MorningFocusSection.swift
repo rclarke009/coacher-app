@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct MorningFocusSection: View {
     @Binding var entry: DailyEntry
@@ -47,6 +48,9 @@ struct MorningFocusSection: View {
                     .accessibilityHint("Enter your personal motivation for making healthy choices today")
             }
             
+            Spacer()
+                .frame(height: 16)
+            
             // Step 2 – Identify a Challenge
             VStack(alignment: .leading, spacing: 8) {
                 HStack(spacing: 12) {
@@ -59,18 +63,36 @@ struct MorningFocusSection: View {
                             .fontWeight(.bold)
                             .foregroundColor(.white)
                     }
-                    Text("Identify a Challenge (3 minutes)")
+                    Text("Focus on a Challenge (3 minutes)")
                         .font(.headline)
                         .fontWeight(.semibold)
                 }
                 
                 Menu {
-                    Button("Skipping meals") { entry.challenge = .skippingMeals }
-                    Button("Late-night snacking") { entry.challenge = .lateNightSnacking }
-                    Button("Sugary drinks") { entry.challenge = .sugaryDrinks }
-                    Button("Eating on the go / fast food") { entry.challenge = .onTheGo }
-                    Button("Emotional eating") { entry.challenge = .emotionalEating }
-                    Button("Other") { entry.challenge = .other }
+                    Button("Skipping meals") { 
+                        entry.challenge = .skippingMeals
+                        UserDefaults.standard.set("skippingMeals", forKey: "lastSelectedChallenge")
+                    }
+                    Button("Late-night snacking") { 
+                        entry.challenge = .lateNightSnacking
+                        UserDefaults.standard.set("lateNightSnacking", forKey: "lastSelectedChallenge")
+                    }
+                    Button("Sugary drinks") { 
+                        entry.challenge = .sugaryDrinks
+                        UserDefaults.standard.set("sugaryDrinks", forKey: "lastSelectedChallenge")
+                    }
+                    Button("Eating on the go / fast food") { 
+                        entry.challenge = .onTheGo
+                        UserDefaults.standard.set("onTheGo", forKey: "lastSelectedChallenge")
+                    }
+                    Button("Emotional eating") { 
+                        entry.challenge = .emotionalEating
+                        UserDefaults.standard.set("emotionalEating", forKey: "lastSelectedChallenge")
+                    }
+                    Button("Other") { 
+                        entry.challenge = .other
+                        UserDefaults.standard.set("other", forKey: "lastSelectedChallenge")
+                    }
                 } label: {
                     HStack {
                         Text(entry.challenge == .none ? "Select…" : entry.challenge.displayName)
@@ -104,6 +126,9 @@ struct MorningFocusSection: View {
                 }
             }
             
+            Spacer()
+                .frame(height: 16)
+            
             // Step 3 – My Better Choice (Swap)
             VStack(alignment: .leading, spacing: 8) {
                 HStack(spacing: 12) {
@@ -124,7 +149,7 @@ struct MorningFocusSection: View {
                 if entry.challenge != .none {
                     Text("In step 2, you mentioned \(entry.challenge.displayName.lowercased()), let's choose a healthy swap.")
                         .font(.subheadline)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(.primary)
                         .padding(.bottom, 4)
                 }
                 
@@ -176,6 +201,16 @@ HStack(spacing: 16) {
             
             
         }
+        .onAppear {
+            // Only load if the current entry doesn't have a challenge selected
+            guard entry.challenge == .none else { return }
+            
+            let savedChallengeRaw = UserDefaults.standard.string(forKey: "lastSelectedChallenge")
+            guard let savedChallengeRaw = savedChallengeRaw,
+                  let savedChallenge = Challenge(rawValue: savedChallengeRaw) else { return }
+            
+            entry.challenge = savedChallenge
+        }
         .onChange(of: entry.commitTo) { _, newValue in
             // Check if morning focus is completed (both commit fields filled)
             if !newValue.isEmpty && !entry.commitFrom.isEmpty {
@@ -202,12 +237,8 @@ HStack(spacing: 16) {
             
     }
 
-
 #Preview {
-    EndOfDaySection(
-        entry: .constant(DailyEntry()),
-        onCelebrationTrigger: { _, _ in }
-    )
+    MorningFocusSection(entry: .constant(DailyEntry()))
 }
 
 

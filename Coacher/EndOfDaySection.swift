@@ -21,7 +21,7 @@ struct EndOfDaySection: View {
             
             HStack {
                 Image(systemName: (entry.followedSwap ?? false) ? "checkmark.square.fill" : "square")
-                    .foregroundColor(.leafGreen)
+                    .foregroundColor(colorScheme == .dark ? .white : .black)
                     .onTapGesture {
                         let wasUnchecked = entry.followedSwap != true
                         entry.followedSwap?.toggle()
@@ -63,27 +63,50 @@ struct EndOfDaySection: View {
                     }
             }
             
-            TextEditor(text: $entry.feelAboutIt)
-                .frame(minHeight: 60)
-                .foregroundColor(colorScheme == .dark ? .white : .primary)
-                .background(colorScheme == .dark ? Color.darkTextInputBackground : Color.clear)
-                .padding(0)
-                .clipShape(RoundedRectangle(cornerRadius: 14))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 14)
-                            .strokeBorder(Color(.systemGray2), lineWidth: 0.5)
-                    )
+            ZStack(alignment: .topLeading) {
+                TextEditor(text: $entry.feelAboutIt)
+                    .frame(minHeight: 60)
+                    .foregroundColor(colorScheme == .dark ? .white : .primary)
+                    .background(colorScheme == .dark ? Color.darkTextInputBackground : Color.clear)
+                    .padding(0)
+                
+                if entry.feelAboutIt.isEmpty {
+                    Text("How do you feel about today?")
+                        .foregroundColor(.secondary)
+                        .padding(.top, 8)
+                        .padding(.leading, 4)
+                        .allowsHitTesting(false)
+                }
+            }
+            .clipShape(RoundedRectangle(cornerRadius: 14))
+            .overlay(
+                RoundedRectangle(cornerRadius: 14)
+                    .strokeBorder(Color(.systemGray2), lineWidth: 0.5)
+            )
             
-            TextEditor(text: $entry.whatGotInTheWay)
-                .frame(minHeight: 60)
-                .foregroundColor(colorScheme == .dark ? .white : .primary)
-                .background(colorScheme == .dark ? Color.darkTextInputBackground : Color.clear)
-                .padding(0)
-                .clipShape(RoundedRectangle(cornerRadius: 14))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 14)
-                            .strokeBorder(Color(.systemGray2), lineWidth: 0.5)
-                    )
+            ZStack(alignment: .topLeading) {
+                TextEditor(text: $entry.whatGotInTheWay)
+                    .frame(minHeight: 60)
+                    .foregroundColor(colorScheme == .dark ? .white : .primary)
+                    .background(colorScheme == .dark ? Color.darkTextInputBackground : Color.clear)
+                    .padding(0)
+                
+                if entry.whatGotInTheWay.isEmpty {
+                    Text("What got in the way today?")
+                        .foregroundColor(.secondary)
+                        .padding(.top, 8)
+                        .padding(.leading, 4)
+                        .allowsHitTesting(false)
+                }
+            }
+            .clipShape(RoundedRectangle(cornerRadius: 14))
+            .overlay(
+                RoundedRectangle(cornerRadius: 14)
+                    .strokeBorder(Color(.systemGray2), lineWidth: 0.5)
+            )
+        }
+        .onChange(of: entry.whatGotInTheWay) { _, _ in
+            // This triggers UI updates in other views that depend on whatGotInTheWay
         }
     }
 }

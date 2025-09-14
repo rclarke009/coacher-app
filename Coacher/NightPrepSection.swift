@@ -11,6 +11,7 @@ import SwiftData
 struct NightPrepSection: View {
     @Binding var entry: DailyEntry
     @Environment(\.modelContext) private var context
+    @Environment(\.colorScheme) private var colorScheme
     @StateObject private var reminderManager = ReminderManager.shared
     
     @State private var newOtherItem = ""
@@ -38,7 +39,7 @@ struct NightPrepSection: View {
                 // Water bottle first (everyone needs water)
                 HStack {
                     Image(systemName: entry.waterReady ? "checkmark.square.fill" : "square")
-                        .foregroundColor(.leafGreen)
+                        .foregroundColor(colorScheme == .dark ? .white : .black)
                         .onTapGesture {
                             entry.waterReady.toggle()
                         }
@@ -51,7 +52,7 @@ struct NightPrepSection: View {
                 // Prep easy breakfast/snack second
                 HStack {
                     Image(systemName: entry.breakfastPrepped ? "checkmark.square.fill" : "square")
-                        .foregroundColor(.leafGreen)
+                        .foregroundColor(colorScheme == .dark ? .white : .black)
                         .onTapGesture {
                             entry.breakfastPrepped.toggle()
                         }
@@ -64,7 +65,7 @@ struct NightPrepSection: View {
                 // Other default items
                 HStack {
                     Image(systemName: entry.stickyNotes ? "checkmark.square.fill" : "square")
-                        .foregroundColor(.leafGreen)
+                        .foregroundColor(colorScheme == .dark ? .white : .black)
                         .onTapGesture {
                             entry.stickyNotes.toggle()
                         }
@@ -76,7 +77,7 @@ struct NightPrepSection: View {
                 
                 HStack {
                     Image(systemName: entry.preppedProduce ? "checkmark.square.fill" : "square")
-                        .foregroundColor(.leafGreen)
+                        .foregroundColor(colorScheme == .dark ? .white : .black)
                         .onTapGesture {
                             entry.preppedProduce.toggle()
                         }
@@ -98,7 +99,7 @@ struct NightPrepSection: View {
                     ForEach(entry.safeCustomPrepItems, id: \.self) { item in
                         HStack {
                             Image(systemName: entry.safeCompletedCustomPrepItems.contains(item) ? "checkmark.square.fill" : "square")
-                                .foregroundColor(.leafGreen)
+                                .foregroundColor(colorScheme == .dark ? .white : .black)
                                 .onTapGesture {
                                     toggleCustomItem(item)
                                 }
@@ -119,10 +120,25 @@ struct NightPrepSection: View {
                 
                 Button(action: addCustomItem) {
                     Image(systemName: "plus.circle.fill")
-                        .foregroundColor(.brightBlue)
+                        .foregroundColor(colorScheme == .dark ? .brightBlue : .white)
                         .font(.title2)
                 }
                 .disabled(newOtherItem.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+            }
+            
+            // Show reflection-based encouragement if user wrote about what got in the way
+            if !entry.whatGotInTheWay.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                VStack(alignment: .leading, spacing: 8) {
+                    Divider()
+                        .padding(.vertical, 4)
+                    
+                    Text(getReflectionEncouragement())
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.leading)
+                        .lineLimit(nil)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
             }
         }
         .padding()
@@ -136,6 +152,10 @@ struct NightPrepSection: View {
         .onChange(of: entry.stickyNotes) { _, _ in checkNightPrepCompletion() }
         .onChange(of: entry.preppedProduce) { _, _ in checkNightPrepCompletion() }
         .onChange(of: entry.completedCustomPrepItems) { _, _ in checkNightPrepCompletion() }
+        .onChange(of: entry.whatGotInTheWay) { _, _ in 
+            // Force UI refresh when user types in the "what got in the way" box
+            refreshTrigger.toggle()
+        }
         .sheet(isPresented: $showingPrepSuggestions) {
             NightPrepSuggestionsView()
         }
@@ -232,6 +252,24 @@ struct NightPrepSection: View {
                 await reminderManager.rescheduleNightPrepReminderForTomorrow()
             }
         }
+    }
+    
+    private func getReflectionEncouragement() -> String {
+        let reflectionText = entry.whatGotInTheWay.trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        let encouragementTemplates = [
+            "You wrote: '\(reflectionText)'. Let's set up something tomorrow to help with that.",
+            "Today you noticed: '\(reflectionText)'. What will make tomorrow better?",
+            "You identified: '\(reflectionText)'. Let's prepare for a smoother day tomorrow.",
+            "You reflected on: '\(reflectionText)'. Time to set yourself up for success!",
+            "You recognized: '\(reflectionText)'. Let's make tomorrow different."
+        ]
+        
+        // Use a simple hash of the reflection text to consistently pick the same template
+        let hash = reflectionText.hashValue
+        let templateIndex = abs(hash) % encouragementTemplates.count
+        
+        return encouragementTemplates[templateIndex]
     }
 }
 
@@ -342,6 +380,8 @@ struct NightPrepSuggestionsView: View {
                                             .font(.caption)
                                             .foregroundColor(.secondary)
                                             .multilineTextAlignment(.leading)
+                                            .lineLimit(nil)
+                                            .fixedSize(horizontal: false, vertical: true)
                                     }
                                     .frame(maxWidth: .infinity, alignment: .leading)
                                     .padding()

@@ -23,7 +23,7 @@ struct OnboardingView: View {
     private let pages = [
         OnboardingPage(
             title: "Welcome to Lighter Tomorrow! 👋",
-            subtitle: "Let's get you set up in just a minute",
+            subtitle: "Let's get you set up - takes about two minutes",
             content: "I'll help you build healthy habits with simple daily routines.",
             icon: "heart.fill",
             color: .blue
@@ -37,6 +37,13 @@ struct OnboardingView: View {
             showNameInput: true
         ),
         OnboardingPage(
+            title: "Here's how it works",
+            subtitle: "Two daily routines",
+            content: "🌅 Morning Focus: Set your intentions and choose your healthy swap\n\n🌙 Night Prep: Prepare for tomorrow's success",
+            icon: "sun.max.fill",
+            color: .purple
+        ),
+        OnboardingPage(
             title: "When would you like reminders?",
             subtitle: "We'll send gentle nudges to help you stay on track",
             content: "",
@@ -44,13 +51,7 @@ struct OnboardingView: View {
             color: .orange,
             showTimeInputs: true
         ),
-        OnboardingPage(
-            title: "Here's how it works",
-            subtitle: "Two simple daily routines",
-            content: "🌅 Morning Focus: Set your intentions and choose your healthy swap\n\n🌙 Night Prep: Prepare for tomorrow's success",
-            icon: "sun.max.fill",
-            color: .purple
-        ),
+        
         OnboardingPage(
             title: "Your AI Coach",
             subtitle: "Private by default. Your coach works even without internet.",
@@ -114,6 +115,7 @@ struct OnboardingView: View {
                 Spacer()
                 
                 Button(buttonText) {
+                    hideKeyboard() // Dismiss keyboard when navigating
                     if currentPage == pages.count - 1 {
                         completeOnboarding()
                     } else {
@@ -135,6 +137,9 @@ struct OnboardingView: View {
         .scrollDismissesKeyboard(.immediately)
         .onTapGesture {
             hideKeyboard()
+        }
+        .onAppear {
+            print("🔄 DEBUG: OnboardingView appeared")
         }
     }
     
@@ -196,7 +201,7 @@ struct OnboardingPageView: View {
             // Title and subtitle
             VStack(spacing: 8) {
                 Text(page.title)
-                    .font(.largeTitle)
+                    .font(.title)
                     .fontWeight(.bold)
                     .multilineTextAlignment(.center)
                 
@@ -204,6 +209,8 @@ struct OnboardingPageView: View {
                     .font(.title3)
                     .foregroundColor(currentColorScheme == .dark ? Color.white.opacity(0.8) : .secondary)
                     .multilineTextAlignment(.center)
+                    .lineLimit(nil)
+                    .fixedSize(horizontal: false, vertical: true)
             }
             
             // Content

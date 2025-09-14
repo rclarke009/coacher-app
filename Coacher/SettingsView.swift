@@ -12,6 +12,7 @@ struct SettingsView: View {
     @Environment(\.modelContext) private var context
     @EnvironmentObject private var celebrationManager: CelebrationManager
     @EnvironmentObject private var reminderManager: ReminderManager
+    @EnvironmentObject private var hybridManager: HybridLLMManager
     @Environment(\.colorScheme) private var colorScheme
     @Query private var achievements: [Achievement]
     @StateObject private var mlcManager = SimplifiedMLCManager()
@@ -74,6 +75,11 @@ struct SettingsView: View {
                             Spacer()
                             Toggle("", isOn: $useCloudAI)
                                 .labelsHidden()
+                                .onChange(of: useCloudAI) { _ in
+                                    Task {
+                                        await hybridManager.updateAIMode()
+                                    }
+                                }
                         }
                         
                         VStack(alignment: .leading, spacing: 8) {
@@ -129,10 +135,15 @@ struct SettingsView: View {
                         .accessibilityHint("Enter your name for personalization")
                     }
                     
-                    Button("Replay Onboarding") {
+                    Button(action: {
+                        print("🔄 DEBUG: Replay Onboarding button tapped")
                         showOnboarding = true
+                        print("🔄 DEBUG: showOnboarding set to true")
+                    }) {
+                        Text("Replay Onboarding")
+                            .foregroundStyle(.blue)
                     }
-                    .foregroundStyle(.blue)
+                    .buttonStyle(PlainButtonStyle())
                     .accessibilityLabel("Replay Onboarding")
                     .accessibilityHint("Restart the app introduction and setup process")
                 }
@@ -283,6 +294,9 @@ struct SettingsView: View {
         }
         .fullScreenCover(isPresented: $showOnboarding) {
             OnboardingView(isPresented: $showOnboarding)
+                .onAppear {
+                    print("🔄 DEBUG: OnboardingView fullScreenCover appeared")
+                }
         }
     }
     
