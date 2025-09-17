@@ -97,21 +97,25 @@ struct SparkleProgressView: View {
     private func startProgressAnimation() {
         // Simulate progress if no real progress value provided
         if progressValue == 0.0 {
-            animationTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { _ in
-                withAnimation(.easeInOut(duration: 0.8)) {
-                    if progress < 0.85 {
-                        // Much slower, more realistic progress pattern:
-                        // - Very slow progress that should take 2-3 minutes to reach 85%
-                        // - This way it won't finish before the actual model loads
-                        let increment: Double
-                        if progress < 0.2 {
-                            increment = 0.003  // Very slow start
-                        } else if progress < 0.6 {
-                            increment = 0.002  // Even slower middle
-                        } else {
-                            increment = 0.001  // Very slow finish
-                        }
-                        progress += increment
+            // Reset progress to 0 when starting
+            progress = 0.0
+            
+            animationTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { _ in
+                if self.isLoading && self.progress < 0.85 {
+                    // Much slower, more realistic progress pattern:
+                    // - Very slow progress that should take 2-3 minutes to reach 85%
+                    // - This way it won't finish before the actual model loads
+                    let increment: Double
+                    if self.progress < 0.2 {
+                        increment = 0.001  // Very slow start
+                    } else if self.progress < 0.6 {
+                        increment = 0.0008  // Even slower middle
+                    } else {
+                        increment = 0.0005  // Very slow finish
+                    }
+                    
+                    withAnimation(.easeInOut(duration: 0.3)) {
+                        self.progress += increment
                     }
                 }
             }
@@ -122,9 +126,9 @@ struct SparkleProgressView: View {
     
     private func startSparkleAnimation() {
         // Create sparkles periodically
-        Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { _ in
-            if isLoading {
-                addSparkle()
+        Timer.scheduledTimer(withTimeInterval: 0.3, repeats: true) { _ in
+            if self.isLoading {
+                self.addSparkle()
             }
         }
     }

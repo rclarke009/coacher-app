@@ -35,9 +35,11 @@ class OpenAIManager: ObservableObject {
         if let apiKey = KeychainManager.shared.getOpenAIKey(), !apiKey.isEmpty {
             openAI = OpenAI(apiToken: apiKey)
             isModelLoaded = true
+            print("🌐 OpenAIManager: API key found, model ready")
         } else {
             errorMessage = "OpenAI API key not found. Please add your API key in Settings."
             isModelLoaded = false
+            print("🌐 OpenAIManager: No API key found")
         }
     }
     
@@ -48,12 +50,18 @@ class OpenAIManager: ObservableObject {
         await MainActor.run {
             isLoading = true
             errorMessage = nil
+            print("🌐 OpenAIManager: Starting model loading...")
         }
+        
+        // Simulate a realistic loading time for online AI
+        // This gives users feedback that something is happening
+        try? await Task.sleep(nanoseconds: 2_000_000_000) // 2 seconds
         
         setupOpenAI()
         
         await MainActor.run {
             isLoading = false
+            print("🌐 OpenAIManager: Model loading complete, isModelLoaded: \(isModelLoaded)")
         }
     }
     

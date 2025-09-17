@@ -16,8 +16,9 @@ struct CoachView: View {
     @State private var showOnlineAIConfirmation = false
     
     var body: some View {
-        NavigationView {
-            VStack(spacing: 0) {
+        GeometryReader { geometry in
+            ZStack {
+                VStack(spacing: 0) {
                 // Chat Messages
                 ScrollViewReader { proxy in
                     ZStack {
@@ -147,40 +148,6 @@ struct CoachView: View {
                     }
                     .clipShape(RoundedRectangle(cornerRadius: 16))
                     
-                    // AI Mode Indicator
-                    if hybridManager.isModelLoaded {
-                        HStack {
-                            Text(hybridManager.modelStatus)
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                            Spacer()
-                            if hybridManager.isUsingCloudAI {
-                                Text("Tokens: \(hybridManager.getCurrentTokenUsage())")
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                            }
-                        }
-                    } else if !hybridManager.isLoading {
-                        // Show error state if not loading and not loaded
-                        VStack(spacing: 8) {
-                            HStack {
-                                Image(systemName: "exclamationmark.triangle")
-                                    .foregroundColor(.orange)
-                                Text("AI model not ready.")
-                                    .font(.caption)
-                                    .foregroundColor(.orange)
-                                Spacer()
-                            }
-                            
-                            Button("Retry Loading") {
-                                Task {
-                                    await hybridManager.loadModel()
-                                }
-                            }
-                            .font(.caption)
-                            .foregroundColor(.brandBlue)
-                        }
-                    }
                 }
                 .padding()
                 .background(Color.cardBackground)
@@ -189,48 +156,130 @@ struct CoachView: View {
                 }
             }
             .padding()
-            .navigationTitle("Coach")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button(action: { showConversationHistory = true }) {
-                        Image(systemName: "line.3.horizontal")
-                            .font(.system(size: 18, weight: .medium))
-                            .foregroundColor(.primary)
-                    }
-                }
-                
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: { showOnlineAIConfirmation = true }) {
-                        Image(systemName: hybridManager.isUsingCloudAI ? "sparkles" : "sparkles")
-                            .font(.system(size: 18, weight: .medium))
-                            .foregroundColor(hybridManager.isUsingCloudAI ? .brandBlue : .secondary)
-                    }
-                }
-            }
             //.background(Color(.systemBackground))
             .background(
                 Color.appBackground
                     .ignoresSafeArea(.all)
             )
-            .sheet(isPresented: $showConversationHistory) {
-                ConversationHistoryView()
-                    .environmentObject(hybridManager)
-            }
-            .sheet(isPresented: $showOnlineAIConfirmation) {
-                OnlineAIConfirmationView()
-                    .environmentObject(hybridManager)
-            }
-            .onAppear {
-                // Model loading is now handled globally in CoacherApp
-                // No need to load here as it's already started in background
-            }
-                .onChange(of: hybridManager.isUsingCloudAI) { _ in
-                    Task {
-                        await hybridManager.updateAIMode()
+            
+            // Floating Controls - positioned with proper safe area
+            VStack(spacing: 0) {
+                HStack {
+                    // AI Mode Toggle Button (Top Left)
+                    Button(action: { 
+                        showOnlineAIConfirmation = true
+                    }) {
+                        HStack(spacing: 6) {
+                            Image(systemName: hybridManager.isUsingCloudAI ? "cloud.fill" : "iphone")
+                                .font(.caption)
+                                .foregroundColor(.white)
+                            Text(hybridManager.isUsingCloudAI ? "Online" : "Local")
+                                .font(.caption)
+                                .fontWeight(.medium)
+                                .foregroundColor(.white)
+                            if hybridManager.isUsingCloudAI {
+                                Text("• \(hybridManager.getCurrentTokenUsage())")
+                                    .font(.caption2)
+                                    .foregroundColor(.white.opacity(0.8))
+                            }
+                        }
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 8)
+                        .background(
+                            RoundedRectangle(cornerRadius: 20)
+                                .fill(hybridManager.isUsingCloudAI ? Color.blue : Color.green)
+                        )
+                    }
+                    
+                    Spacer()
+                    
+                    // History Button (Top Right)
+                    Button(action: { showConversationHistory = true }) {
+                        Image(systemName: "line.3.horizontal")
+                            .font(.system(size: 18, weight: .medium))
+                            .foregroundColor(.primary)
+                            .frame(width: 44, height: 44)
+                            .background(
+                                Circle()
+                                    .fill(Color.cardBackground)
+                                    .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
+                            )
                     }
                 }
-
+                .padding(.horizontal, 16)
+                .padding(.top, geometry.safeAreaInsets.top + 8)
+                .padding(.bottom, 8)
+                
+                Spacer()
+            }
+            
+            // AI Status Indicator (Top Center)
+            if hybridManager.isLoading {
+                VStack {
+                    HStack {
+                        Spacer()
+                        HStack(spacing: 6) {
+                            ProgressView()
+                                .scaleEffect(0.7)
+                            Text("Loading AI...")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(
+                            RoundedRectangle(cornerRadius: 16)
+                                .fill(Color.cardBackground)
+                                .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
+                        )
+                        Spacer()
+                    }
+                    .padding(.top, geometry.safeAreaInsets.top + 60)
+                    Spacer()
+                }
+            } else if !hybridManager.isModelLoaded {
+                VStack {
+                    HStack {
+                        Spacer()
+                        HStack(spacing: 6) {
+                            Image(systemName: "exclamationmark.triangle")
+                                .font(.caption)
+                                .foregroundColor(.orange)
+                            Text("AI not ready")
+                                .font(.caption)
+                                .foregroundColor(.orange)
+                        }
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(
+                            RoundedRectangle(cornerRadius: 16)
+                                .fill(Color.cardBackground)
+                                .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
+                        )
+                        Spacer()
+                    }
+                    .padding(.top, geometry.safeAreaInsets.top + 60)
+                    Spacer()
+                }
+            }
+            }
+        }
+        .sheet(isPresented: $showConversationHistory) {
+            ConversationHistoryView()
+                .environmentObject(hybridManager)
+        }
+        .sheet(isPresented: $showOnlineAIConfirmation) {
+            OnlineAIConfirmationView()
+                .environmentObject(hybridManager)
+        }
+        .onAppear {
+            // Model loading is now handled globally in CoacherApp
+            // No need to load here as it's already started in background
+        }
+        .onChange(of: hybridManager.isUsingCloudAI) { _ in
+            Task {
+                await hybridManager.updateAIMode()
+            }
         }
     }
     

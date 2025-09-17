@@ -44,7 +44,7 @@ struct TonightBucket: View {
                 accent: .teal,
                 collapsed: $prepTonightCollapsed
             ) {
-                PrepTonightSection(entry: $tomorrowEntry)
+                PrepTonightSection(entry: $tomorrowEntry, todayEntry: $entryToday)
                     .onChange(of: tomorrowEntry.stickyNotes) { _, _ in hasUnsavedChanges = true }
                     .onChange(of: tomorrowEntry.preppedProduce) { _, _ in hasUnsavedChanges = true }
                     .onChange(of: tomorrowEntry.waterReady) { _, _ in hasUnsavedChanges = true }
@@ -72,6 +72,14 @@ struct TonightBucket: View {
         } else {
             tomorrowEntry = DailyEntry()
             tomorrowEntry.date = startOfTomorrow
+            
+            // Inherit custom prep items from today's entry
+            if !entryToday.safeCustomPrepItems.isEmpty {
+                tomorrowEntry.customPrepItems = entryToday.customPrepItems
+                // Reset completion status for tomorrow
+                tomorrowEntry.completedCustomPrepItems = []
+            }
+            
             try? context.insert(tomorrowEntry)
         }
     }

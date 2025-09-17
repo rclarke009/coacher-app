@@ -276,7 +276,7 @@ struct SettingsView: View {
                     HStack {
                         Text("Build")
                         Spacer()
-                        Text("1")
+                        Text("8")
                             .foregroundStyle(.secondary)
                     }
                 }

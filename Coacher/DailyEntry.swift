@@ -20,6 +20,9 @@ final class DailyEntry {
     var breakfastPrepped: Bool
     var nightOther: String
     
+    // Track which default prep items are hidden/deleted
+    var hiddenDefaultPrepItems: [String]?
+    
     // New flexible evening prep system
     var eveningPrepItems: [EveningPrepItem]?
     var customPrepItems: [String]? // All custom prep items (regardless of completion status)
@@ -52,6 +55,7 @@ final class DailyEntry {
         self.waterReady = false
         self.breakfastPrepped = false
         self.nightOther = ""
+        self.hiddenDefaultPrepItems = nil
         self.eveningPrepItems = nil
         self.customPrepItems = nil
         self.completedCustomPrepItems = nil
@@ -106,6 +110,10 @@ final class DailyEntry {
         cravingNotes ?? []
     }
     
+    var safeHiddenDefaultPrepItems: [String] {
+        hiddenDefaultPrepItems ?? []
+    }
+    
     // MARK: - Array Management Helpers
     func ensureArraysInitialized() {
         if eveningPrepItems == nil {
@@ -116,6 +124,9 @@ final class DailyEntry {
         }
         if completedCustomPrepItems == nil {
             completedCustomPrepItems = []
+        }
+        if hiddenDefaultPrepItems == nil {
+            hiddenDefaultPrepItems = []
         }
         if voiceNotes == nil {
             voiceNotes = []

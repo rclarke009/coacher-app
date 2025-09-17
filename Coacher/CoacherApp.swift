@@ -40,11 +40,17 @@ struct CoacherApp: App {
         }
     }
     
-    private func startBackgroundModelLoading() {
-        // Start loading the AI model in the background immediately
-        // Users won't see this happening - it's completely invisible
-        Task {
-            await hybridManager.loadModel()
-        }
+private func startBackgroundModelLoading() {
+    // Skip AI loading on simulator to prevent crashes
+    #if targetEnvironment(simulator)
+    print("📱 Running on simulator - skipping AI model loading for App Store screenshots")
+    return
+    #endif
+    
+    // Start loading the AI model in the background immediately
+    // Users won't see this happening - it's completely invisible
+    Task {
+        await hybridManager.loadModel()
     }
+}
 }

@@ -34,87 +34,59 @@ struct PrepTonightSection: View {
                         .font(.title3)
                         .foregroundColor(colorScheme == .dark ? .brightBlue : .brandBlue)
                 }
+                
             }
             
-            // Default prep items (reordered as requested)
-            VStack(alignment: .leading, spacing: 12) {
-
-                // Show reflection-based encouragement if user wrote about what got in the way
-                if !todayEntry.whatGotInTheWay.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text(getReflectionEncouragement())
-                            .font(.subheadline)
-                            .foregroundColor(.primary)
-                            .multilineTextAlignment(.leading)
-                            .lineLimit(nil)
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
-                    .padding(.bottom, 4)
-                } else {
-                    // Show generic encouragement when no reflection text
-                    Text("Let's do a prep to make tomorrow better.")
+            // Show reflection-based encouragement if user wrote about what got in the way
+            if !todayEntry.whatGotInTheWay.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text(getReflectionEncouragement())
                         .font(.subheadline)
                         .foregroundColor(.primary)
                         .multilineTextAlignment(.leading)
                         .lineLimit(nil)
                         .fixedSize(horizontal: false, vertical: true)
-                        .padding(.bottom, 4)
                 }
+                .padding(.bottom, 4)
+            } else {
+                // Show generic encouragement when no reflection text
+                Text("Let's do a prep to make tomorrow better.")
+                    .font(.subheadline)
+                    .foregroundColor(.primary)
+                    .multilineTextAlignment(.leading)
+                    .lineLimit(nil)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.bottom, 4)
+            }
 
-
-
-
-                // Water bottle first (everyone needs water)
-                HStack {
-                    Image(systemName: entry.waterReady ? "checkmark.square.fill" : "square")
-                        .foregroundColor(colorScheme == .dark ? .white : .black)
-                        .onTapGesture {
-                            entry.waterReady.toggle()
+            // Default prep items (reordered as requested)
+            VStack(alignment: .leading, spacing: 12) {
+                ForEach(visibleDefaultPrepItems, id: \.key) { item in
+                    HStack {
+                        Image(systemName: getDefaultItemCompletion(item.key) ? "checkmark.square.fill" : "square")
+                            .foregroundColor(colorScheme == .dark ? .white : .black)
+                            .onTapGesture {
+                                toggleDefaultItem(item.key)
+                            }
+                        Text(item.text)
+                            .onTapGesture {
+                                toggleDefaultItem(item.key)
+                            }
+                        
+                        Spacer()
+                        
+                        Button(action: { 
+                            hideDefaultItem(item.key)
+                        }) {
+                            Image(systemName: "minus.circle.fill")
+                                .foregroundColor(.blue)
+                                .font(.title3)
                         }
-                    Text("Water bottle ready")
-                        .onTapGesture {
-                            entry.waterReady.toggle()
-                        }
-                }
-                
-                // Prep easy breakfast/snack second
-                HStack {
-                    Image(systemName: entry.breakfastPrepped ? "checkmark.square.fill" : "square")
-                        .foregroundColor(colorScheme == .dark ? .white : .black)
-                        .onTapGesture {
-                            entry.breakfastPrepped.toggle()
-                        }
-                    Text("Prep easy breakfast/snack")
-                        .onTapGesture {
-                            entry.breakfastPrepped.toggle()
-                        }
-                }
-                
-                // Other default items
-                HStack {
-                    Image(systemName: entry.stickyNotes ? "checkmark.square.fill" : "square")
-                        .foregroundColor(colorScheme == .dark ? .white : .black)
-                        .onTapGesture {
-                            entry.stickyNotes.toggle()
-                        }
-                    Text("Sticky notes for tomorrow")
-                        .onTapGesture {
-                            entry.stickyNotes.toggle()
-                        }
-                }
-                
-                HStack {
-                    Image(systemName: entry.preppedProduce ? "checkmark.square.fill" : "square")
-                        .foregroundColor(colorScheme == .dark ? .white : .black)
-                        .onTapGesture {
-                            entry.preppedProduce.toggle()
-                        }
-                    Text("Prepped produce")
-                        .onTapGesture {
-                            entry.preppedProduce.toggle()
-                        }
+                        .buttonStyle(.plain)
+                    }
                 }
             }
+            
             
             // Custom prep items
             if !entry.safeCustomPrepItems.isEmpty {
@@ -135,9 +107,19 @@ struct PrepTonightSection: View {
                                 .onTapGesture {
                                     toggleCustomItem(item)
                                 }
+                            
+                            Spacer()
+                            
+                            Button(action: { 
+                                deleteCustomItem(item)
+                            }) {
+                                Image(systemName: "minus.circle.fill")
+                                    .foregroundColor(.blue)
+                                    .font(.title3)
+                            }
+                            .buttonStyle(.plain)
                         }
                     }
-                    .onDelete(perform: deleteCustomItems)
                 }
             }
             
@@ -209,6 +191,87 @@ struct PrepTonightSection: View {
         }
     }
     
+    // MARK: - Default Prep Items Management
+    
+    private var visibleDefaultPrepItems: [(key: String, text: String)] {
+        let allDefaultItems: [(key: String, text: String)] = [
+            (key: "waterReady", text: "Water bottle ready"),
+            (key: "breakfastPrepped", text: "Prep easy breakfast/snack"),
+            (key: "stickyNotes", text: "Sticky notes for tomorrow"),
+            (key: "preppedProduce", text: "Prepped produce")
+        ]
+        
+        let hiddenItems = entry.safeHiddenDefaultPrepItems
+        
+        return allDefaultItems.filter { item in
+            !hiddenItems.contains(item.key)
+        }
+    }
+    
+    private func getDefaultItemCompletion(_ key: String) -> Bool {
+        switch key {
+        case "waterReady": return entry.waterReady
+        case "breakfastPrepped": return entry.breakfastPrepped
+        case "stickyNotes": return entry.stickyNotes
+        case "preppedProduce": return entry.preppedProduce
+        default: return false
+        }
+    }
+    
+    private func toggleDefaultItem(_ key: String) {
+        switch key {
+        case "waterReady":
+            entry.waterReady.toggle()
+        case "breakfastPrepped":
+            entry.breakfastPrepped.toggle()
+        case "stickyNotes":
+            entry.stickyNotes.toggle()
+        case "preppedProduce":
+            entry.preppedProduce.toggle()
+        default:
+            break
+        }
+        
+        // Save the context
+        try? context.save()
+        
+        // Force UI refresh
+        refreshTrigger.toggle()
+    }
+    
+    private func hideDefaultItem(_ key: String) {
+        if entry.hiddenDefaultPrepItems == nil {
+            entry.hiddenDefaultPrepItems = []
+        }
+        entry.hiddenDefaultPrepItems?.append(key)
+        
+        // Save the context
+        try? context.save()
+        
+        // Force UI refresh
+        refreshTrigger.toggle()
+    }
+    
+    private func getDefaultItemText(_ key: String) -> String {
+        switch key {
+        case "waterReady": return "Water bottle ready"
+        case "breakfastPrepped": return "Prep easy breakfast/snack"
+        case "stickyNotes": return "Sticky notes for tomorrow"
+        case "preppedProduce": return "Prepped produce"
+        default: return key
+        }
+    }
+    
+    private func restoreDefaultItem(_ key: String) {
+        entry.hiddenDefaultPrepItems?.removeAll { $0 == key }
+        
+        // Save the context
+        try? context.save()
+        
+        // Force UI refresh
+        refreshTrigger.toggle()
+    }
+    
     // MARK: - Custom Item Management
     
     private func addCustomItem() {
@@ -272,11 +335,20 @@ struct PrepTonightSection: View {
             entry.completedCustomPrepItems?.removeAll { $0 == item }
         }
         
-
+        // Save the context
+        try? context.save()
+        
+        // Force UI refresh
+        refreshTrigger.toggle()
+    }
+    
+    private func deleteCustomItem(_ item: String) {
+        // Remove from both arrays
+        entry.customPrepItems?.removeAll { $0 == item }
+        entry.completedCustomPrepItems?.removeAll { $0 == item }
         
         // Save the context
         try? context.save()
-
         
         // Force UI refresh
         refreshTrigger.toggle()

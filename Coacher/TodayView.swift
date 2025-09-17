@@ -87,7 +87,7 @@ struct TodayView: View {
                             collapsed: $prepTonightExpanded,
                             dimmed: false
                         ) {
-                            PrepTonightSection(entry: $tomorrowEntry)
+                            PrepTonightSection(entry: $tomorrowEntry, todayEntry: $entry)
                                 .onChange(of: tomorrowEntry.stickyNotes) { _, _ in hasUnsavedChanges = true }
                                 .onChange(of: tomorrowEntry.preppedProduce) { _, _ in hasUnsavedChanges = true }
                                 .onChange(of: tomorrowEntry.waterReady) { _, _ in hasUnsavedChanges = true }
@@ -181,6 +181,14 @@ struct TodayView: View {
         } else {
             tomorrowEntry = DailyEntry()
             tomorrowEntry.date = startOfTomorrow
+            
+            // Inherit custom prep items from today's entry
+            if !entry.safeCustomPrepItems.isEmpty {
+                tomorrowEntry.customPrepItems = entry.customPrepItems
+                // Reset completion status for tomorrow
+                tomorrowEntry.completedCustomPrepItems = []
+            }
+            
             context.insert(tomorrowEntry)
             try? context.save()
         }

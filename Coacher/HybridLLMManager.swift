@@ -15,7 +15,7 @@ class HybridLLMManager: ObservableObject {
     
     // Managers
     private let localManager = MLXLLMManager()
-    private let cloudManager = OpenAIManager()
+    private let cloudManager = BackendLLMManager()
     
     // Configuration
     private let maxTokens = 2000
@@ -31,28 +31,58 @@ class HybridLLMManager: ObservableObject {
     func loadModel() async {
         print("🔄 HybridLLMManager: Starting model loading...")
         await MainActor.run {
-            isLoading = true
             errorMessage = nil
-            print("🔄 HybridLLMManager: isLoading set to true")
+            // Reset loading state when switching modes
+            isModelLoaded = false
         }
         
-        if isUsingCloudAI {
-            await cloudManager.loadModel()
+        if self.isUsingCloudAI {
+            print("🔄 HybridLLMManager: Loading ONLINE AI mode...")
+            print("🔄 HybridLLMManager: Checking cloud AI connectivity...")
+            // No loading state for online AI - just check connectivity
+            await self.cloudManager.loadModel()
             await MainActor.run {
-                isModelLoaded = cloudManager.isModelLoaded
-                errorMessage = cloudManager.errorMessage
+                self.isModelLoaded = self.cloudManager.isModelLoaded
+                self.errorMessage = self.cloudManager.errorMessage
+                print("🔄 HybridLLMManager: Cloud AI ready - isModelLoaded: \(self.isModelLoaded)")
             }
         } else {
-            await localManager.loadModel()
+            print("🔄 HybridLLMManager: Loading LOCAL AI mode...")
             await MainActor.run {
-                isModelLoaded = localManager.isModelLoaded
-                errorMessage = localManager.errorMessage
+                self.isLoading = true
+                print("🔄 HybridLLMManager: isLoading set to true for local AI")
+            }
+            
+            // Add timeout handling for local AI model loading
+            await withTimeout(seconds: 30) {
+                await self.localManager.loadModel()
+                await MainActor.run {
+                    self.isModelLoaded = self.localManager.isModelLoaded
+                    self.errorMessage = self.localManager.errorMessage
+                    print("🔄 HybridLLMManager: Local AI loaded - isModelLoaded: \(self.isModelLoaded)")
+                }
+            }
+            
+            await MainActor.run {
+                self.isLoading = false
+                print("🔄 HybridLLMManager: isLoading set to false, isModelLoaded: \(self.isModelLoaded)")
             }
         }
-        
-        await MainActor.run {
-            isLoading = false
-            print("🔄 HybridLLMManager: isLoading set to false, isModelLoaded: \(isModelLoaded)")
+    }
+    
+    /// Helper function to add timeout to async operations
+    private func withTimeout<T>(seconds: TimeInterval, operation: @escaping () async -> T) async -> T? {
+        return await withTaskGroup(of: T?.self) { group in
+            group.addTask {
+                await operation()
+            }
+            
+            group.addTask {
+                try? await Task.sleep(nanoseconds: UInt64(seconds * 1_000_000_000))
+                return nil
+            }
+            
+            return await group.first { $0 != nil } ?? nil
         }
     }
     

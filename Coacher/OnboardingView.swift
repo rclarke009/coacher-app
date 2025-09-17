@@ -23,8 +23,8 @@ struct OnboardingView: View {
     private let pages = [
         OnboardingPage(
             title: "Welcome to Lighter Tomorrow! 👋",
-            subtitle: "Let's get you set up - takes about two minutes",
-            content: "I'll help you build healthy habits with simple daily routines.",
+            subtitle: "Private by default — setup takes about two minutes",
+            content: "Bite by bite, you'll build healthy habits with simple daily routines.",
             icon: "heart.fill",
             color: .blue
         ),
@@ -39,7 +39,7 @@ struct OnboardingView: View {
         OnboardingPage(
             title: "Here's how it works",
             subtitle: "Two daily routines",
-            content: "🌅 Morning Focus: Set your intentions and choose your healthy swap\n\n🌙 Night Prep: Prepare for tomorrow's success",
+            content: "🌅 Morning Focus: Reconnect with your reason for making healthier choices, set your intention, and pick one simple plan for today\n\n🌙 Night Prep: Prepare tonight for tomorrow's success",
             icon: "sun.max.fill",
             color: .purple
         ),
@@ -55,7 +55,7 @@ struct OnboardingView: View {
         OnboardingPage(
             title: "Your AI Coach",
             subtitle: "Private by default. Your coach works even without internet.",
-            content: "🤖 Local Coach: Fast, private, offline\n\n☁️ Enhanced Cloud Coach: Richer conversations (optional)\n\nYou can switch between modes anytime in Settings.",
+            content: "Local Coach: Fast, private, offline\n\nEnhanced Cloud Coach: Richer conversations (optional)\n\nYou can switch between modes anytime in Settings.",
             icon: "brain.head.profile",
             color: .blue
         )
@@ -226,11 +226,18 @@ struct OnboardingPageView: View {
             if page.showNameInput {
                 VStack(spacing: 16) {
                     TextField("Your name", text: $userName)
-                        .textFieldStyle(.roundedBorder)
                         .font(.title2)
                         .multilineTextAlignment(.center)
                         .foregroundColor(currentColorScheme == .dark ? .white : .primary)
-                        .background(currentColorScheme == .dark ? Color.darkTextInputBackground : Color.clear)
+                        .padding()
+                        .background(
+                            RoundedRectangle(cornerRadius: 14)
+                                .fill(currentColorScheme == .dark ? Color.darkTextInputBackground : Color.white)
+                        )
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 14)
+                                .strokeBorder(Color(.systemGray2), lineWidth: 0.5)
+                        )
                         .padding(.horizontal, 40)
                 }
             }

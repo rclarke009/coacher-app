@@ -39,19 +39,23 @@ class BackendLLMManager: ObservableObject {
     /// Load the backend model (always ready)
     func loadModel() async {
         await MainActor.run {
-            isLoading = true
             errorMessage = nil
+            print("🌐 BackendLLMManager: Starting backend connectivity check...")
+            print("🌐 BackendLLMManager: Backend URL: \(backendURL)")
         }
         
-        // Test backend connectivity
+        // Test backend connectivity (no loading state needed for online AI)
         let isBackendAvailable = await testBackendConnection()
         
         await MainActor.run {
             isModelLoaded = isBackendAvailable
             if !isBackendAvailable {
                 errorMessage = "Backend service unavailable. Please check your internet connection."
+                print("🌐 BackendLLMManager: Backend connection failed - API key may not be configured in Netlify environment variables")
+            } else {
+                print("🌐 BackendLLMManager: Backend connection successful - API key found in Netlify environment variables")
             }
-            isLoading = false
+            print("🌐 BackendLLMManager: Backend ready, isModelLoaded: \(isModelLoaded)")
         }
     }
     
@@ -94,15 +98,25 @@ class BackendLLMManager: ObservableObject {
     // MARK: - Backend API Communication
     
     private func testBackendConnection() async -> Bool {
-        guard let url = URL(string: "\(backendURL)/.netlify/functions/health") else { return false }
+        guard let url = URL(string: "\(backendURL)/.netlify/functions/health") else { 
+            print("🌐 BackendLLMManager: Invalid health check URL: \(backendURL)/.netlify/functions/health")
+            return false 
+        }
+        
+        print("🌐 BackendLLMManager: Testing backend connection to: \(url)")
         
         do {
-            let (_, response) = try await URLSession.shared.data(from: url)
+            let (data, response) = try await URLSession.shared.data(from: url)
             if let httpResponse = response as? HTTPURLResponse {
+                print("🌐 BackendLLMManager: Health check response status: \(httpResponse.statusCode)")
+                if let responseString = String(data: data, encoding: .utf8) {
+                    print("🌐 BackendLLMManager: Health check response body: \(responseString)")
+                }
                 return httpResponse.statusCode == 200
             }
         } catch {
-            print("Backend connection test failed: \(error)")
+            print("🌐 BackendLLMManager: Backend connection test failed: \(error)")
+            print("🌐 BackendLLMManager: Error details: \(error.localizedDescription)")
         }
         
         return false
@@ -112,6 +126,8 @@ class BackendLLMManager: ObservableObject {
         guard let url = URL(string: "\(backendURL)/.netlify/functions/chat") else {
             throw BackendError.invalidURL
         }
+        
+        print("🌐 BackendLLMManager: Calling chat API at: \(url)")
         
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
@@ -137,21 +153,37 @@ class BackendLLMManager: ObservableObject {
             throw BackendError.invalidResponse
         }
         
+        print("🌐 BackendLLMManager: Chat API response status: \(httpResponse.statusCode)")
+        
         switch httpResponse.statusCode {
         case 200:
             let chatResponse = try JSONDecoder().decode(ChatResponse.self, from: data)
+            print("🌐 BackendLLMManager: Chat API success - tokens used: \(chatResponse.usage.totalTokens)")
             return chatResponse.response
             
         case 429:
+            print("🌐 BackendLLMManager: Rate limited by OpenAI API")
             throw BackendError.rateLimited
             
         case 400:
+            print("🌐 BackendLLMManager: Bad request - check API key configuration")
+            if let errorData = String(data: data, encoding: .utf8) {
+                print("🌐 BackendLLMManager: Error response: \(errorData)")
+            }
             throw BackendError.badRequest
             
         case 500:
+            print("🌐 BackendLLMManager: Server error - API key may be missing or invalid")
+            if let errorData = String(data: data, encoding: .utf8) {
+                print("🌐 BackendLLMManager: Error response: \(errorData)")
+            }
             throw BackendError.serverError
             
         default:
+            print("🌐 BackendLLMManager: Unknown error status: \(httpResponse.statusCode)")
+            if let errorData = String(data: data, encoding: .utf8) {
+                print("🌐 BackendLLMManager: Error response: \(errorData)")
+            }
             throw BackendError.unknownError(httpResponse.statusCode)
         }
     }

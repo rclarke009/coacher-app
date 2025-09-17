@@ -21,7 +21,7 @@ struct NightPrepSection: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack {
-                Text("Night Prep (5 minutes)")
+                Text("Night Prep")
                     .font(.title3)
                     .bold()
                 
@@ -32,59 +32,55 @@ struct NightPrepSection: View {
                         .font(.title3)
                         .foregroundColor(.brightBlue)
                 }
+                
+                // Debug button to test hide function
+                Button(action: { 
+                    print("🔍 DEBUG: Test button tapped - hiding waterReady")
+                    hideDefaultItem("waterReady") 
+                }) {
+                    Text("TEST HIDE")
+                        .font(.caption)
+                        .fontWeight(.bold)
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(Color.red)
+                        .cornerRadius(6)
+                }
             }
             
             // Default prep items (reordered as requested)
-            VStack(alignment: .leading, spacing: 12) {
-                // Water bottle first (everyone needs water)
-                HStack {
-                    Image(systemName: entry.waterReady ? "checkmark.square.fill" : "square")
-                        .foregroundColor(colorScheme == .dark ? .white : .black)
-                        .onTapGesture {
-                            entry.waterReady.toggle()
+            if !visibleDefaultPrepItems.isEmpty {
+                List {
+                    ForEach(visibleDefaultPrepItems, id: \.key) { item in
+                        HStack {
+                            Image(systemName: getDefaultItemCompletion(item.key) ? "checkmark.square.fill" : "square")
+                                .foregroundColor(colorScheme == .dark ? .white : .black)
+                                .onTapGesture {
+                                    print("🔍 DEBUG: Tapped checkbox for: \(item.key)")
+                                    toggleDefaultItem(item.key)
+                                }
+                            Text(item.text)
+                                .onTapGesture {
+                                    print("🔍 DEBUG: Tapped text for: \(item.key)")
+                                    toggleDefaultItem(item.key)
+                                }
                         }
-                    Text("Water bottle ready")
-                        .onTapGesture {
-                            entry.waterReady.toggle()
+                        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                            Button("Delete", role: .destructive) {
+                                print("🔍 DEBUG: Swipe delete button tapped for item: \(item.key)")
+                                hideDefaultItem(item.key)
+                            }
                         }
+                    }
                 }
-                
-                // Prep easy breakfast/snack second
-                HStack {
-                    Image(systemName: entry.breakfastPrepped ? "checkmark.square.fill" : "square")
-                        .foregroundColor(colorScheme == .dark ? .white : .black)
-                        .onTapGesture {
-                            entry.breakfastPrepped.toggle()
-                        }
-                    Text("Prep easy breakfast/snack")
-                        .onTapGesture {
-                            entry.breakfastPrepped.toggle()
-                        }
-                }
-                
-                // Other default items
-                HStack {
-                    Image(systemName: entry.stickyNotes ? "checkmark.square.fill" : "square")
-                        .foregroundColor(colorScheme == .dark ? .white : .black)
-                        .onTapGesture {
-                            entry.stickyNotes.toggle()
-                        }
-                    Text("Sticky notes for tomorrow")
-                        .onTapGesture {
-                            entry.stickyNotes.toggle()
-                        }
-                }
-                
-                HStack {
-                    Image(systemName: entry.preppedProduce ? "checkmark.square.fill" : "square")
-                        .foregroundColor(colorScheme == .dark ? .white : .black)
-                        .onTapGesture {
-                            entry.preppedProduce.toggle()
-                        }
-                    Text("Prepped produce")
-                        .onTapGesture {
-                            entry.preppedProduce.toggle()
-                        }
+                .listStyle(.plain)
+                .scrollDisabled(true)
+                .onAppear {
+                    print("🔍 DEBUG: Rendering \(visibleDefaultPrepItems.count) visible items")
+                    for item in visibleDefaultPrepItems {
+                        print("🔍 DEBUG: Rendering item: \(item.key) - \(item.text)")
+                    }
                 }
             }
             
@@ -110,6 +106,32 @@ struct NightPrepSection: View {
                         }
                     }
                     .onDelete(perform: deleteCustomItems)
+                }
+            }
+            
+            // Show hidden items section if any are hidden
+            if !entry.safeHiddenDefaultPrepItems.isEmpty {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Hidden Items")
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                        .foregroundStyle(.secondary)
+                    
+                    ForEach(entry.safeHiddenDefaultPrepItems, id: \.self) { hiddenKey in
+                        HStack {
+                            Text(getDefaultItemText(hiddenKey))
+                                .foregroundStyle(.secondary)
+                            
+                            Spacer()
+                            
+                            Button(action: { restoreDefaultItem(hiddenKey) }) {
+                                Image(systemName: "plus.circle")
+                                    .foregroundColor(.brightBlue)
+                                    .font(.caption)
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
                 }
             }
             
@@ -152,6 +174,10 @@ struct NightPrepSection: View {
         .onChange(of: entry.stickyNotes) { _, _ in checkNightPrepCompletion() }
         .onChange(of: entry.preppedProduce) { _, _ in checkNightPrepCompletion() }
         .onChange(of: entry.completedCustomPrepItems) { _, _ in checkNightPrepCompletion() }
+        .onChange(of: entry.hiddenDefaultPrepItems) { _, _ in 
+            // Force UI refresh when items are hidden
+            refreshTrigger.toggle()
+        }
         .onChange(of: entry.whatGotInTheWay) { _, _ in 
             // Force UI refresh when user types in the "what got in the way" box
             refreshTrigger.toggle()
@@ -159,6 +185,118 @@ struct NightPrepSection: View {
         .sheet(isPresented: $showingPrepSuggestions) {
             NightPrepSuggestionsView()
         }
+    }
+    
+    // MARK: - Default Prep Items Management
+    
+    private var visibleDefaultPrepItems: [(key: String, text: String)] {
+        let allDefaultItems: [(key: String, text: String)] = [
+            (key: "waterReady", text: "Water bottle ready"),
+            (key: "breakfastPrepped", text: "Prep easy breakfast/snack"),
+            (key: "stickyNotes", text: "Sticky notes for tomorrow"),
+            (key: "preppedProduce", text: "Prepped produce")
+        ]
+        
+        let hiddenItems = entry.safeHiddenDefaultPrepItems
+        print("🔍 DEBUG: All default items: \(allDefaultItems.map { $0.key })")
+        print("🔍 DEBUG: Hidden items: \(hiddenItems)")
+        
+        let visible = allDefaultItems.filter { item in
+            !hiddenItems.contains(item.key)
+        }
+        
+        print("🔍 DEBUG: Visible items: \(visible.map { $0.key })")
+        return visible
+    }
+    
+    private func getDefaultItemCompletion(_ key: String) -> Bool {
+        switch key {
+        case "waterReady": return entry.waterReady
+        case "breakfastPrepped": return entry.breakfastPrepped
+        case "stickyNotes": return entry.stickyNotes
+        case "preppedProduce": return entry.preppedProduce
+        default: return false
+        }
+    }
+    
+    private func toggleDefaultItem(_ key: String) {
+        switch key {
+        case "waterReady":
+            entry.waterReady.toggle()
+        case "breakfastPrepped":
+            entry.breakfastPrepped.toggle()
+        case "stickyNotes":
+            entry.stickyNotes.toggle()
+        case "preppedProduce":
+            entry.preppedProduce.toggle()
+        default:
+            break
+        }
+        
+        // Save the context
+        try? context.save()
+        
+        // Force UI refresh
+        refreshTrigger.toggle()
+    }
+    
+    private func hideDefaultItem(_ key: String) {
+        print("🔍 DEBUG: hideDefaultItem called with key: \(key)")
+        print("🔍 DEBUG: Current hidden items before: \(entry.safeHiddenDefaultPrepItems)")
+        
+        if entry.hiddenDefaultPrepItems == nil {
+            entry.hiddenDefaultPrepItems = []
+        }
+        entry.hiddenDefaultPrepItems?.append(key)
+        
+        print("🔍 DEBUG: Current hidden items after: \(entry.safeHiddenDefaultPrepItems)")
+        
+        // Save the context
+        try? context.save()
+        print("🔍 DEBUG: Context saved after hiding item")
+        
+        // Force UI refresh
+        refreshTrigger.toggle()
+        print("🔍 DEBUG: Refresh triggered: \(refreshTrigger)")
+    }
+    
+    private func getDefaultItemText(_ key: String) -> String {
+        switch key {
+        case "waterReady": return "Water bottle ready"
+        case "breakfastPrepped": return "Prep easy breakfast/snack"
+        case "stickyNotes": return "Sticky notes for tomorrow"
+        case "preppedProduce": return "Prepped produce"
+        default: return key
+        }
+    }
+    
+    private func restoreDefaultItem(_ key: String) {
+        entry.hiddenDefaultPrepItems?.removeAll { $0 == key }
+        
+        // Save the context
+        try? context.save()
+        
+        // Force UI refresh
+        refreshTrigger.toggle()
+    }
+    
+    private func deleteDefaultItems(at offsets: IndexSet) {
+        let itemsToDelete = offsets.map { visibleDefaultPrepItems[$0].key }
+        
+        // Add to hidden items
+        if entry.hiddenDefaultPrepItems == nil {
+            entry.hiddenDefaultPrepItems = []
+        }
+        entry.hiddenDefaultPrepItems?.append(contentsOf: itemsToDelete)
+        
+        print("🔍 DEBUG: NightPrepSection - Hidden default items: \(itemsToDelete)")
+        
+        // Save the context
+        try? context.save()
+        print("🔍 DEBUG: NightPrepSection - Context saved after delete")
+        
+        // Force UI refresh
+        refreshTrigger.toggle()
     }
     
     // MARK: - Custom Item Management
@@ -237,12 +375,12 @@ struct NightPrepSection: View {
     }
     
     private func checkNightPrepCompletion() {
-        // Check if any night prep items are completed
-        let hasCompletedItems = entry.waterReady || 
-                               entry.breakfastPrepped || 
-                               entry.stickyNotes || 
-                               entry.preppedProduce || 
-                               !entry.safeCompletedCustomPrepItems.isEmpty
+        // Check if any visible night prep items are completed
+        let hasCompletedDefaultItems = visibleDefaultPrepItems.contains { item in
+            getDefaultItemCompletion(item.key)
+        }
+        let hasCompletedCustomItems = !entry.safeCompletedCustomPrepItems.isEmpty
+        let hasCompletedItems = hasCompletedDefaultItems || hasCompletedCustomItems
         
         // If any items are completed, cancel today's reminder and reschedule for tomorrow
         if hasCompletedItems {

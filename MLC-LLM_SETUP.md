@@ -1,23 +1,96 @@
-# MLC-LLM Setup Guide for Coacher App
+# AI Setup Guide for Coacher App
 
 ## Overview
 
-This guide will help you integrate MLC-LLM (Machine Learning Compilation for Large Language Models) into your Coacher weight loss app to provide local, on-device AI coaching.
+This guide covers the setup for the Coacher app's hybrid AI approach, supporting both online (GPT-4o) and private (Apple Foundation Models) AI modes for flexible, privacy-conscious coaching.
+
+## AI Options Available
+
+### Option 1: Online Mode (GPT-4o via OpenAI API) - **Recommended for Development**
+- **Setup Time**: 10-20 minutes + API key
+- **Dependencies**: OpenAI Swift Package
+- **Performance**: 1-2 second response time
+- **Privacy**: Data sent to OpenAI servers
+- **Cost**: Usage-based
+- **Requirements**: Internet + API key
+
+### Option 2: Private Mode (Apple Foundation Models) - **Recommended for Production**
+- **Setup Time**: 5-10 minutes (built-in)
+- **Dependencies**: None (iOS 18+ native)
+- **Performance**: 2-5 second on-device
+- **Privacy**: Complete on-device processing
+- **Cost**: Free
+- **Requirements**: iPhone 15 Pro+
+
+### Option 3: MLC-LLM (Legacy) - **Alternative Private Option**
+- **Setup Time**: 30-60 minutes
+- **Dependencies**: MLC-LLM Swift Package
+- **Performance**: Variable based on model size
+- **Privacy**: Complete on-device processing
+- **Cost**: Free
+- **Requirements**: iOS 17+, Metal support
 
 ## What We've Set Up
 
 ### ✅ Completed Setup
-1. **MLCLLMManager.swift** - Core manager class for handling local LLM operations
-2. **CoachView Integration** - Updated to use MLC-LLM instead of mock responses
-3. **Settings Integration** - Added AI Coach section in Settings for model management
-4. **Model Status Indicators** - Visual feedback for model loading and status
-5. **Prompt Engineering** - Structured prompts for weight loss coaching context
+1. **HybridLLMManager.swift** - Core manager coordinating both AI modes
+2. **OnlineCoachingService.swift** - GPT-4o integration for advanced reasoning
+3. **PrivateCoachingService.swift** - Apple Foundation Models integration
+4. **MLCLLMManager.swift** - Alternative private option (legacy)
+5. **CoachView Integration** - Updated to use hybrid AI manager
+6. **Settings Integration** - Added AI Coach section for mode management
+7. **Model Status Indicators** - Visual feedback for model loading and status
+8. **Prompt Engineering** - Structured prompts for weight loss coaching context
 
 ### 🔄 Current Status
-- **Mock Implementation**: Currently using simulated responses while MLC-LLM is being set up
-- **Ready for Integration**: All infrastructure is in place for real MLC-LLM
+- **Hybrid Implementation**: Ready for both online and private modes
+- **Seamless Switching**: Users can toggle between modes in Settings
+- **Privacy Controls**: Clear consent flows and data handling policies
 
-## Next Steps: Adding MLC-LLM Swift Package
+## Quick Start Guide
+
+### Recommended: Start with Online Mode (GPT-4o)
+
+**For fastest setup and development:**
+
+1. **Add OpenAI Package**
+   ```bash
+   # In Xcode: File → Add Package Dependencies
+   # URL: https://github.com/MacPaw/OpenAI
+   ```
+
+2. **Get API Key**
+   - Visit [OpenAI API](https://platform.openai.com/api-keys)
+   - Create new API key
+   - Store securely in Keychain (see AI_Implementation_Guide.md)
+
+3. **Test Integration**
+   - Run app in Online mode
+   - Verify API connectivity
+   - Test basic conversations
+
+### Alternative: Private Mode (Apple Foundation Models)
+
+**For production privacy-first approach:**
+
+1. **Update Deployment Target**
+   ```swift
+   // Set minimum iOS version to 18.0
+   // Requires iPhone 15 Pro+ for optimal performance
+   ```
+
+2. **Import Frameworks**
+   ```swift
+   import FoundationModels
+   import CoreML
+   ```
+
+3. **Test on Device**
+   - Private mode requires physical device
+   - Simulator may not support Neural Engine
+   - Test performance and response quality
+
+## Legacy: MLC-LLM Setup (Alternative Private Option)
 
 ### Step 1: Add MLC-LLM Package to Xcode
 
