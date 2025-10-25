@@ -33,20 +33,6 @@ struct NightPrepSection: View {
                         .foregroundColor(.brightBlue)
                 }
                 
-                // Debug button to test hide function
-                Button(action: { 
-                    print("🔍 DEBUG: Test button tapped - hiding waterReady")
-                    hideDefaultItem("waterReady") 
-                }) {
-                    Text("TEST HIDE")
-                        .font(.caption)
-                        .fontWeight(.bold)
-                        .foregroundColor(.white)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(Color.red)
-                        .cornerRadius(6)
-                }
             }
             
             // Default prep items (reordered as requested)
@@ -87,10 +73,6 @@ struct NightPrepSection: View {
             // Custom prep items
             if !entry.safeCustomPrepItems.isEmpty {
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("Custom Items")
-                        .font(.subheadline)
-                        .fontWeight(.medium)
-                        .foregroundStyle(.secondary)
                     
                     ForEach(entry.safeCustomPrepItems, id: \.self) { item in
                         HStack {
@@ -305,8 +287,8 @@ struct NightPrepSection: View {
         let trimmedItem = newOtherItem.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedItem.isEmpty else { return }
         
-        print("🔍 DEBUG: NightPrepSection - Adding custom item: '\(trimmedItem)'")
-                    print("🔍 DEBUG: NightPrepSection - Current custom items: \(entry.safeCustomPrepItems.count)")
+        // print("🔍 DEBUG: NightPrepSection - Adding custom item: '\(trimmedItem)'")
+        //             print("🔍 DEBUG: NightPrepSection - Current custom items: \(entry.safeCustomPrepItems.count)")
         
         // Add to DailyEntry's custom prep items (so it stays visible)
         if entry.customPrepItems == nil {
@@ -323,16 +305,16 @@ struct NightPrepSection: View {
         // Clear the input
         newOtherItem = ""
         
-        print("🔍 DEBUG: NightPrepSection - After adding, custom items: \(entry.safeCustomPrepItems.count)")
-        print("🔍 DEBUG: NightPrepSection - Custom items array: \(entry.safeCustomPrepItems)")
+        // print("🔍 DEBUG: NightPrepSection - After adding, custom items: \(entry.safeCustomPrepItems.count)")
+        // print("🔍 DEBUG: NightPrepSection - Custom items array: \(entry.safeCustomPrepItems)")
         
         // Save the context
         try? context.save()
-        print("🔍 DEBUG: NightPrepSection - Context saved")
+        // print("🔍 DEBUG: NightPrepSection - Context saved")
         
         // Force UI refresh
         refreshTrigger.toggle()
-        print("🔍 DEBUG: NightPrepSection - Refresh triggered: \(refreshTrigger)")
+        // print("🔍 DEBUG: NightPrepSection - Refresh triggered: \(refreshTrigger)")
     }
     
     private func toggleCustomItem(_ item: String) {
@@ -364,11 +346,11 @@ struct NightPrepSection: View {
             entry.completedCustomPrepItems?.removeAll { $0 == item }
         }
         
-        print("🔍 DEBUG: NightPrepSection - Deleted custom items: \(itemsToDelete)")
+        // print("🔍 DEBUG: NightPrepSection - Deleted custom items: \(itemsToDelete)")
         
         // Save the context
         try? context.save()
-        print("🔍 DEBUG: NightPrepSection - Context saved after delete")
+        // print("🔍 DEBUG: NightPrepSection - Context saved after delete")
         
         // Force UI refresh
         refreshTrigger.toggle()

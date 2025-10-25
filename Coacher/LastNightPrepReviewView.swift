@@ -75,7 +75,7 @@ struct LastNightPrepReviewView: View {
                 
                 // Read-only form structure preview
                 VStack(alignment: .leading, spacing: 12) {
-                    Text("Night Prep (5 minutes)")
+                    Text("Night Prep")
                         .font(.subheadline)
                         .bold()
                         .foregroundStyle(.secondary)

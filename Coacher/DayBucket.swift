@@ -16,6 +16,7 @@ struct DayBucket: View {
     
     @StateObject private var timeManager = TimeManager()
     @State private var lastNightPrepCollapsed = true
+    @State private var hasCompletedMorningToday = false
     
     // Separate state for past days to allow expansion
     @State private var pastLastNightPrepCollapsed = true
@@ -83,18 +84,17 @@ struct DayBucket: View {
                 
                 MorningFocusCard(
                     title: "Morning Focus (Today)",
-                    icon: "sun.max.fill"
+                    icon: "sun.max.fill",
+                    isCompleted: hasCompletedMorningToday
                 ) {
                     if let entryToday = entryToday, let hasUnsavedChanges = hasUnsavedChanges {
-                        MorningFocusSection(entry: entryToday)
-                            .onChange(of: entryToday.wrappedValue.myWhy) { _, _ in hasUnsavedChanges.wrappedValue = true }
-                            .onChange(of: entryToday.wrappedValue.challenge) { _, _ in hasUnsavedChanges.wrappedValue = true }
-                            .onChange(of: entryToday.wrappedValue.challengeOther) { _, _ in hasUnsavedChanges.wrappedValue = true }
-                            .onChange(of: entryToday.wrappedValue.chosenSwap) { _, _ in hasUnsavedChanges.wrappedValue = true }
-                            .onChange(of: entryToday.wrappedValue.commitFrom) { _, _ in hasUnsavedChanges.wrappedValue = true }
-                            .onChange(of: entryToday.wrappedValue.commitTo) { _, _ in hasUnsavedChanges.wrappedValue = true }
+                        CareFirstMorningFocusSection(entry: entryToday)
+                            .onChange(of: entryToday.wrappedValue.identityStatement) { _, _ in hasUnsavedChanges.wrappedValue = true }
+                            .onChange(of: entryToday.wrappedValue.todaysFocus) { _, _ in hasUnsavedChanges.wrappedValue = true }
+                            .onChange(of: entryToday.wrappedValue.stressResponse) { _, _ in hasUnsavedChanges.wrappedValue = true }
+                            .onChange(of: entryToday.wrappedValue.optionalSupportiveSnack) { _, _ in hasUnsavedChanges.wrappedValue = true }
                     } else {
-                        MorningFocusSection(entry: .constant(DailyEntry()))
+                        CareFirstMorningFocusSection(entry: .constant(DailyEntry()))
                     }
                 }
 //                .onTapGesture {
@@ -106,6 +106,7 @@ struct DayBucket: View {
         }
         .onAppear {
             setDefaultCollapsedStates()
+            checkMorningCompletionToday()
         }
     }
     
@@ -126,6 +127,17 @@ struct DayBucket: View {
         let f = DateFormatter()
         f.dateFormat = "EEE • MMM d"
         return f.string(from: date)
+    }
+    
+    private func checkMorningCompletionToday() {
+        let today = Calendar.current.startOfDay(for: Date())
+        let savedDate = UserDefaults.standard.object(forKey: "morningCompletedDate") as? Date
+        
+        if let savedDate = savedDate, Calendar.current.isDate(savedDate, inSameDayAs: today) {
+            hasCompletedMorningToday = true
+        } else {
+            hasCompletedMorningToday = false
+        }
     }
     
     private func getLastNightEntry() -> DailyEntry? {

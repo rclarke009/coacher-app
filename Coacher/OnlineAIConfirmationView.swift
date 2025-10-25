@@ -9,6 +9,7 @@ import SwiftUI
 
 struct OnlineAIConfirmationView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var hybridManager: HybridLLMManager
     @State private var isEnabling = false
     @State private var showLocalAIConfirmation = false
@@ -21,13 +22,13 @@ struct OnlineAIConfirmationView: View {
                     // Blue Sparkle Icon
                     Image(systemName: hybridManager.isUsingCloudAI ? "sparkles" : "sparkles")
                         .font(.system(size: 48, weight: .medium))
-                        .foregroundColor(hybridManager.isUsingCloudAI ? .secondary : .brandBlue)
+                        .foregroundColor(hybridManager.isUsingCloudAI ? .secondary : (colorScheme == .dark ? .white : .brandBlue))
                         .symbolEffect(.pulse, options: .repeating)
                     
                     Text(hybridManager.isUsingCloudAI ? "Switch to Local AI" : "Upgrade to Online AI")
                         .font(.largeTitle)
                         .fontWeight(.bold)
-                        .foregroundColor(.primary)
+                        .foregroundColor(colorScheme == .dark ? .white : .primary)
                     
                     Text(hybridManager.isUsingCloudAI ? 
                          "Switch back to your local AI model for complete privacy" :
@@ -47,50 +48,58 @@ struct OnlineAIConfirmationView: View {
                         FeatureRow(
                             icon: "lock.fill",
                             title: "Complete Privacy",
-                            description: "All data stays on your device"
+                            description: "All data stays on your device",
+                            iconColor: colorScheme == .dark ? .white : .brandBlue
                         )
                         
                         FeatureRow(
                             icon: "wifi.slash",
                             title: "No Internet Required",
-                            description: "Works offline anytime"
+                            description: "Works offline anytime",
+                            iconColor: colorScheme == .dark ? .white : .brandBlue
                         )
                         
                         FeatureRow(
                             icon: "battery.100",
                             title: "Battery Efficient",
-                            description: "Optimized for mobile devices"
+                            description: "Optimized for mobile devices",
+                            iconColor: colorScheme == .dark ? .white : .brandBlue
                         )
                         
                         FeatureRow(
                             icon: "checkmark.shield",
                             title: "Always Available",
-                            description: "No server dependencies"
+                            description: "No server dependencies",
+                            iconColor: colorScheme == .dark ? .white : .brandBlue
                         )
                     } else {
                         // Online AI features
                         FeatureRow(
                             icon: "brain.head.profile",
                             title: "Advanced AI Model",
-                            description: "More intelligent and contextual responses"
+                            description: "More intelligent and contextual responses",
+                            iconColor: colorScheme == .dark ? .white : .brandBlue
                         )
                         
                         FeatureRow(
                             icon: "bolt.fill",
                             title: "Faster Responses",
-                            description: "Quick and efficient conversation flow"
+                            description: "Quick and efficient conversation flow",
+                            iconColor: colorScheme == .dark ? .white : .brandBlue
                         )
                         
                         FeatureRow(
                             icon: "globe",
                             title: "Always Updated",
-                            description: "Latest AI capabilities and improvements"
+                            description: "Latest AI capabilities and improvements",
+                            iconColor: colorScheme == .dark ? .white : .brandBlue
                         )
                         
                         FeatureRow(
                             icon: "lock.fill",
                             title: "Secure & Private",
-                            description: "Your data is encrypted and protected"
+                            description: "Your data is encrypted and protected",
+                            iconColor: colorScheme == .dark ? .white : .brandBlue
                         )
                     }
                 }
@@ -103,10 +112,10 @@ struct OnlineAIConfirmationView: View {
                 VStack(spacing: 8) {
                     HStack {
                         Image(systemName: "info.circle.fill")
-                            .foregroundColor(hybridManager.isUsingCloudAI ? .green : .blue)
+                            .foregroundColor(hybridManager.isUsingCloudAI ? .green : (colorScheme == .dark ? .white : .blue))
                         Text(hybridManager.isUsingCloudAI ? "Privacy Benefits" : "Privacy Notice")
                             .font(.headline)
-                            .foregroundColor(.primary)
+                            .foregroundColor(colorScheme == .dark ? .white : .primary)
                     }
                     
                     Text(hybridManager.isUsingCloudAI ? 
@@ -167,6 +176,7 @@ struct OnlineAIConfirmationView: View {
                     Button("Cancel") {
                         dismiss()
                     }
+                    .foregroundColor(colorScheme == .dark ? .white : .blue)
                 }
             }
         }
@@ -203,18 +213,20 @@ struct FeatureRow: View {
     let icon: String
     let title: String
     let description: String
+    let iconColor: Color
+    @Environment(\.colorScheme) private var colorScheme
     
     var body: some View {
         HStack(spacing: 12) {
             Image(systemName: icon)
                 .font(.system(size: 20, weight: .medium))
-                .foregroundColor(.brandBlue)
+                .foregroundColor(iconColor)
                 .frame(width: 24, height: 24)
             
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
                     .font(.headline)
-                    .foregroundColor(.primary)
+                    .foregroundColor(colorScheme == .dark ? .white : .primary)
                 
                 Text(description)
                     .font(.caption)

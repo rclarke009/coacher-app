@@ -7,15 +7,35 @@ class ReminderManager: ObservableObject {
     
     @AppStorage("nightPrepReminder") private var nightPrepReminder = true
     @AppStorage("morningFocusReminder") private var morningFocusReminder = true
-    @AppStorage("nightPrepTime") private var nightPrepTime = Calendar.current.date(from: DateComponents(hour: 21, minute: 0)) ?? Date()
-    @AppStorage("morningFocusTime") private var morningFocusTime = Calendar.current.date(from: DateComponents(hour: 8, minute: 0)) ?? Date()
+    private var nightPrepTime: Date {
+        get { UserDefaults.standard.object(forKey: "nightPrepTime") as? Date ?? Date() }
+        set { UserDefaults.standard.set(newValue, forKey: "nightPrepTime") }
+    }
+    
+    private var morningFocusTime: Date {
+        get { UserDefaults.standard.object(forKey: "morningFocusTime") as? Date ?? Date() }
+        set { UserDefaults.standard.set(newValue, forKey: "morningFocusTime") }
+    }
     
     // Get user's name from onboarding
     var userName: String {
         UserDefaults.standard.string(forKey: "userName") ?? "there"
     }
     
-    private init() {}
+    private init() {
+        // Set default times if they haven't been set yet
+        if UserDefaults.standard.object(forKey: "nightPrepTime") == nil {
+            let calendar = Calendar.current
+            let nightTime = calendar.date(from: DateComponents(hour: 21, minute: 0)) ?? Date()
+            UserDefaults.standard.set(nightTime, forKey: "nightPrepTime")
+        }
+        
+        if UserDefaults.standard.object(forKey: "morningFocusTime") == nil {
+            let calendar = Calendar.current
+            let morningTime = calendar.date(from: DateComponents(hour: 8, minute: 0)) ?? Date()
+            UserDefaults.standard.set(morningTime, forKey: "morningFocusTime")
+        }
+    }
     
     func requestNotificationPermissions() async -> Bool {
         let center = UNUserNotificationCenter.current()

@@ -158,37 +158,37 @@ struct VoiceCaptureView: View {
     
     var body: some View {
         VStack(spacing: 20) {
-            Image(systemName: isRecording ? "stop.circle.fill" : "mic.circle.fill")
-                .font(.system(size: 80))
-                .foregroundStyle(isRecording ? .red : .blue)
-            
-            if isRecording {
-                Text("Recording... \(Int(recordingTime))s")
-                    .font(.title2)
-                    .foregroundStyle(.red)
-                
-                Text("Keep it under 20 seconds")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            } else {
-                Text("Tap to start recording")
-                    .font(.title2)
-                    .foregroundStyle(.primary)
-                
-                Text("20-second limit for quick capture")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-            
             Button(action: toggleRecording) {
-                Text(isRecording ? "Stop Recording" : "Start Recording")
-                    .font(.headline)
-                    .padding()
-                    .frame(maxWidth: .infinity)
+                VStack(spacing: 12) {
+                    Image(systemName: isRecording ? "stop.circle.fill" : "mic.circle.fill")
+                        .font(.system(size: 50))
+                        .foregroundStyle(isRecording ? .red : .blue)
+                    
+                    Text(isRecording ? "Stop Recording" : "Voice Note")
+                        .font(.headline)
+                    
+                    if isRecording {
+                        Text("\(Int(recordingTime))s")
+                            .font(.caption)
+                            .foregroundStyle(.red)
+                    } else {
+                        Text("Tap to record")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                .frame(maxWidth: .infinity)
+                .padding()
+                .background(
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(Color(.secondarySystemBackground))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(isRecording ? .red : .blue, lineWidth: 2)
+                        )
+                )
             }
-            .buttonStyle(.borderedProminent)
-            .tint(isRecording ? .red : .blue)
-            .padding(.horizontal)
+            .buttonStyle(.plain)
         }
         .onAppear {
             requestMicrophonePermission()
@@ -207,12 +207,25 @@ struct VoiceCaptureView: View {
     }
     
     private func requestMicrophonePermission() {
-        AVAudioSession.sharedInstance().requestRecordPermission { granted in
-            DispatchQueue.main.async {
-                if granted {
-
-                } else {
-
+        if #available(iOS 17.0, *) {
+            AVAudioApplication.requestRecordPermission { granted in
+                DispatchQueue.main.async {
+                    if granted {
+                        // Permission granted, ready to record
+                    } else {
+                        // Permission denied
+                    }
+                }
+            }
+        } else {
+            // Fallback for iOS 16 and earlier
+            AVAudioSession.sharedInstance().requestRecordPermission { granted in
+                DispatchQueue.main.async {
+                    if granted {
+                        // Permission granted, ready to record
+                    } else {
+                        // Permission denied
+                    }
                 }
             }
         }

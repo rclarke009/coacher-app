@@ -62,12 +62,20 @@ struct NeedHelpView: View {
     }
     
     private func saveCravingNote(_ note: CravingNote) {
-        // TODO: Get current day's entry and add the craving note
-        context.insert(note)
-        try? context.save()
-        
-        // Record activity for milestone tracking
-        celebrationManager.recordActivity()
+        // Save on main queue to prevent SwiftData threading issues
+        DispatchQueue.main.async {
+            self.context.insert(note)
+            
+            do {
+                try self.context.save()
+                print("✅ Successfully saved craving note: \(note.type.displayName)")
+                
+                // Record activity for milestone tracking
+                self.celebrationManager.recordActivity()
+            } catch {
+                print("❌ Failed to save craving note: \(error)")
+            }
+        }
     }
 }
 
@@ -118,5 +126,5 @@ struct CategoryButton: View {
 
 #Preview {
     NeedHelpView()
-        .modelContainer(for: [DailyEntry.self, Achievement.self, LLMMessage.self, CravingNote.self], inMemory: true)
+        .modelContainer(for: [DailyEntry.self, Achievement.self, LLMMessage.self, CravingNote.self, EmotionalTakeoverNote.self, HabitHelperNote.self], inMemory: true)
 }

@@ -181,7 +181,7 @@ enum SectionAccent: CaseIterable {
             dimmed: false
         ) {
             VStack(alignment: .leading, spacing: 12) {
-                Text("Step 1 – My Why (2 minutes)").font(.subheadline).bold()
+                Text("Step 1 – My Why").font(.subheadline).bold()
                 TextEditor(text: .constant("Sample why text"))
                     .frame(minHeight: 80)
                     .overlay(RoundedRectangle(cornerRadius: 8).stroke(.quaternary))
@@ -224,16 +224,19 @@ struct MorningFocusCard<Content: View>: View {
     let title: String
     let icon: String
     let content: Content
+    let isCompleted: Bool
     
     @Environment(\.colorScheme) private var colorScheme
     
     init(
         title: String,
         icon: String,
+        isCompleted: Bool = false,
         @ViewBuilder content: () -> Content
     ) {
         self.title = title
         self.icon = icon
+        self.isCompleted = isCompleted
         self.content = content()
     }
     
@@ -253,6 +256,14 @@ struct MorningFocusCard<Content: View>: View {
                     .foregroundStyle(colorScheme == .dark ? .white : .black)
                 
                 Spacer()
+                
+                // Show checkmark when completed
+                if isCompleted {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.title3)
+                        .foregroundColor(.green)
+                        .accessibilityLabel("Completed")
+                }
             }
             .padding(.horizontal, 14).padding(.vertical, 6)
             .background(

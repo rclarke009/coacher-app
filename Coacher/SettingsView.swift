@@ -22,8 +22,8 @@ struct SettingsView: View {
     @AppStorage("showStreakWidgets") private var showStreakWidgets = true
     @AppStorage("nightPrepReminder") private var nightPrepReminder = true
     @AppStorage("morningFocusReminder") private var morningFocusReminder = true
-    @AppStorage("nightPrepTime") private var nightPrepTime = Calendar.current.date(from: DateComponents(hour: 21, minute: 0)) ?? Date()
-    @AppStorage("morningFocusTime") private var morningFocusTime = Calendar.current.date(from: DateComponents(hour: 8, minute: 0)) ?? Date()
+    @State private var nightPrepTime: Date = Date()
+    @State private var morningFocusTime: Date = Date()
     
     var body: some View {
         NavigationView {
@@ -75,7 +75,7 @@ struct SettingsView: View {
                             Spacer()
                             Toggle("", isOn: $useCloudAI)
                                 .labelsHidden()
-                                .onChange(of: useCloudAI) { _ in
+                                .onChange(of: useCloudAI) { _, _ in
                                     Task {
                                         await hybridManager.updateAIMode()
                                     }
@@ -269,14 +269,14 @@ struct SettingsView: View {
                     HStack {
                         Text("Version")
                         Spacer()
-                        Text("1.0.0")
+                        Text("2.0.0")
                             .foregroundStyle(.secondary)
                     }
                     
                     HStack {
                         Text("Build")
                         Spacer()
-                        Text("8")
+                        Text("1")
                             .foregroundStyle(.secondary)
                     }
                 }
@@ -290,6 +290,32 @@ struct SettingsView: View {
             .scrollDismissesKeyboard(.immediately)
             .onTapGesture {
                 hideKeyboard()
+            }
+            .onAppear {
+                // Load saved times from UserDefaults
+                if let savedNightTime = UserDefaults.standard.object(forKey: "nightPrepTime") as? Date {
+                    nightPrepTime = savedNightTime
+                } else {
+                    // Set default time if not saved
+                    let calendar = Calendar.current
+                    let defaultNightTime = calendar.date(from: DateComponents(hour: 21, minute: 0)) ?? Date()
+                    nightPrepTime = defaultNightTime
+                }
+                
+                if let savedMorningTime = UserDefaults.standard.object(forKey: "morningFocusTime") as? Date {
+                    morningFocusTime = savedMorningTime
+                } else {
+                    // Set default time if not saved
+                    let calendar = Calendar.current
+                    let defaultMorningTime = calendar.date(from: DateComponents(hour: 8, minute: 0)) ?? Date()
+                    morningFocusTime = defaultMorningTime
+                }
+            }
+            .onChange(of: nightPrepTime) { _, newValue in
+                UserDefaults.standard.set(newValue, forKey: "nightPrepTime")
+            }
+            .onChange(of: morningFocusTime) { _, newValue in
+                UserDefaults.standard.set(newValue, forKey: "morningFocusTime")
             }
         }
         .fullScreenCover(isPresented: $showOnboarding) {

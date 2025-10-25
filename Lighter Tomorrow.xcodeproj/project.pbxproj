@@ -24,8 +24,10 @@
 		A92391722E6CF1CA00BB7B8E /* Transformers in Frameworks */ = {isa = PBXBuildFile; productRef = A92391712E6CF1CA00BB7B8E /* Transformers */; };
 		A92391742E6CF1CA00BB7B8E /* hub-cli in Frameworks */ = {isa = PBXBuildFile; productRef = A92391732E6CF1CA00BB7B8E /* hub-cli */; };
 		A98275FF2E65EE3B006F3DA5 /* MarkdownUI in Frameworks */ = {isa = PBXBuildFile; productRef = A9ACE9002E6530A800BB3ADD /* MarkdownUI */; };
-		A98276E32E692BBA006F3DA5 /* widget.txt in Sources */ = {isa = PBXBuildFile; fileRef = A98276E22E692BB5006F3DA5 /* widget.txt */; };
 		A98276E52E693076006F3DA5 /* night prep additional.txt in Resources */ = {isa = PBXBuildFile; fileRef = A98276E42E693076006F3DA5 /* night prep additional.txt */; };
+		A99BF8EB2E91D29100CE8411 /* requirement tweaks.md in Resources */ = {isa = PBXBuildFile; fileRef = A99BF8EA2E91D27C00CE8411 /* requirement tweaks.md */; };
+		A99BFB092EA488C300CE8411 /* emotion pattern feature.md in Resources */ = {isa = PBXBuildFile; fileRef = A99BFB082EA488A900CE8411 /* emotion pattern feature.md */; };
+		A99BFB0B2EA48A5000CE8411 /* habit fix.md in Resources */ = {isa = PBXBuildFile; fileRef = A99BFB0A2EA48A5000CE8411 /* habit fix.md */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -45,9 +47,24 @@
 		};
 /* End PBXContainerItemProxy section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		A99BFAFB2EA47B9E00CE8411 /* Embed Watch Content */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
+			dstSubfolderSpec = 16;
+			files = (
+			);
+			name = "Embed Watch Content";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
-		A98276E22E692BB5006F3DA5 /* widget.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = widget.txt; sourceTree = "<group>"; };
 		A98276E42E693076006F3DA5 /* night prep additional.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "night prep additional.txt"; sourceTree = "<group>"; };
+		A99BF8EA2E91D27C00CE8411 /* requirement tweaks.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "requirement tweaks.md"; sourceTree = "<group>"; };
+		A99BFB082EA488A900CE8411 /* emotion pattern feature.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "emotion pattern feature.md"; sourceTree = "<group>"; };
+		A99BFB0A2EA48A5000CE8411 /* habit fix.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "habit fix.md"; sourceTree = "<group>"; };
 		A9ACE3AE2E63EB0A00BB3ADD /* Lighter Tomorrow.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Lighter Tomorrow.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		A9ACE3C02E63EB0B00BB3ADD /* Lighter TomorrowTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Lighter TomorrowTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		A9ACE3CA2E63EB0B00BB3ADD /* Lighter TomorrowUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Lighter TomorrowUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -120,8 +137,10 @@
 				A9ACE3C32E63EB0B00BB3ADD /* CoacherTests */,
 				A9ACE3CD2E63EB0B00BB3ADD /* CoacherUITests */,
 				A9ACE3AF2E63EB0A00BB3ADD /* Products */,
-				A98276E22E692BB5006F3DA5 /* widget.txt */,
 				A98276E42E693076006F3DA5 /* night prep additional.txt */,
+				A99BF8EA2E91D27C00CE8411 /* requirement tweaks.md */,
+				A99BFB082EA488A900CE8411 /* emotion pattern feature.md */,
+				A99BFB0A2EA48A5000CE8411 /* habit fix.md */,
 			);
 			sourceTree = "<group>";
 		};
@@ -145,6 +164,7 @@
 				A9ACE3AA2E63EB0A00BB3ADD /* Sources */,
 				A9ACE3AB2E63EB0A00BB3ADD /* Frameworks */,
 				A9ACE3AC2E63EB0A00BB3ADD /* Resources */,
+				A99BFAFB2EA47B9E00CE8411 /* Embed Watch Content */,
 			);
 			buildRules = (
 			);
@@ -279,6 +299,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A99BFB092EA488C300CE8411 /* emotion pattern feature.md in Resources */,
+				A99BF8EB2E91D29100CE8411 /* requirement tweaks.md in Resources */,
+				A99BFB0B2EA48A5000CE8411 /* habit fix.md in Resources */,
 				A98276E52E693076006F3DA5 /* night prep additional.txt in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -304,7 +327,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A98276E32E692BBA006F3DA5 /* widget.txt in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -467,7 +489,7 @@
 				CODE_SIGN_ENTITLEMENTS = Coacher/Coacher.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 8;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_TEAM = Q3CS4DPG9Y;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -479,12 +501,12 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.RestRiseGrow.LighterTomorrow;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -502,7 +524,7 @@
 				CODE_SIGN_ENTITLEMENTS = Coacher/Coacher.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 8;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_TEAM = Q3CS4DPG9Y;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -514,12 +536,12 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.RestRiseGrow.LighterTomorrow;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";

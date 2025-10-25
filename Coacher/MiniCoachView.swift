@@ -7,6 +7,7 @@
 
 import SwiftUI
 import AVFoundation
+import AVKit
 import Speech
 import SwiftData
 
@@ -17,6 +18,7 @@ struct MiniCoachView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
     @Environment(\.colorScheme) private var colorScheme
+    @EnvironmentObject private var celebrationManager: CelebrationManager
     @State private var currentStep: MiniCoachStep = .introduction
     @State private var voiceText = ""
     @State private var isRecording = false
@@ -28,6 +30,8 @@ struct MiniCoachView: View {
     @State private var savedAudioURL: URL?
     @State private var showRecordingError = false
     @State private var showingTextCapture = false
+    @State private var showingEmotionalTakeover = false
+    @State private var showingHabitHelper = false
     
     enum MiniCoachStep: Int, CaseIterable {
         case introduction = 0, action = 1, capture = 2, save = 3
@@ -44,9 +48,13 @@ struct MiniCoachView: View {
                 // Content based on current step
                 switch currentStep {
                 case .introduction:
-                    IntroductionStep(type: type) {
+                    IntroductionStep(type: type, onNext: {
                         currentStep = .action
-                    }
+                    }, onEmotionalTakeover: type == .stress ? {
+                        showingEmotionalTakeover = true
+                    } : nil, onHabitHelper: type == .habit ? {
+                        showingHabitHelper = true
+                    } : nil)
                 case .action:
                     ActionStep(type: type) {
                         currentStep = .capture
@@ -71,43 +79,10 @@ struct MiniCoachView: View {
                         type: type,
                         text: transcribedText.isEmpty ? voiceText : transcribedText
                     ) {
-                        // Save audio recording to database if we have one and meaningful content
+                        // Clean up audio file after transcription
                         if let audioURL = savedAudioURL {
-                            let transcription = transcribedText.isEmpty ? voiceText : transcribedText
-                            
-                            // Only save if we have meaningful transcription content
-                            if !transcription.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                                let recording = AudioRecording(
-                                    transcription: transcription,
-                                    type: type,
-                                    duration: recordingTime
-                                )
-                            
-                                print("🔍 DEBUG: Creating AudioRecording with transcription: '\(transcription)'")
-                                print("🔍 DEBUG: AudioRecording type: \(type.displayName)")
-                                print("🔍 DEBUG: AudioRecording duration: \(recordingTime)")
-                                
-                                modelContext.insert(recording)
-                                
-                                do {
-                                    try modelContext.save()
-                                    print("🔍 DEBUG: Successfully saved audio recording to database")
-                                    print("🔍 DEBUG: Recording ID: \(recording.id)")
-                                    print("🔍 DEBUG: Recording date: \(recording.date)")
-                                    
-                                    // Clean up the audio file after successful transcription
-                                    try FileManager.default.removeItem(at: audioURL)
-                                    print("🔍 DEBUG: Cleaned up audio file: \(audioURL.lastPathComponent)")
-                                } catch {
-                                    print("🔍 DEBUG: Failed to save audio recording: \(error)")
-                                }
-                            } else {
-                                print("🔍 DEBUG: No meaningful transcription to save, cleaning up audio file")
-                                // Clean up the audio file even if we don't save the recording
-                                try? FileManager.default.removeItem(at: audioURL)
-                            }
-                        } else {
-                            print("🔍 DEBUG: No savedAudioURL to save")
+                            try? FileManager.default.removeItem(at: audioURL)
+                            print("🔍 DEBUG: Cleaned up audio file: \(audioURL.lastPathComponent)")
                         }
                         
                         let note = CravingNote(
@@ -161,6 +136,26 @@ struct MiniCoachView: View {
                 Text("We couldn't process your recording. You can try typing instead, or try recording again.")
                     .foregroundColor(colorScheme == .dark ? .white : .primary)
             }
+            .sheet(isPresented: $showingEmotionalTakeover) {
+                EmotionalTakeoverFlow { emotionalNote in
+                    // Convert EmotionalTakeoverNote to CravingNote for compatibility
+                    let cravingNote = CravingNote(
+                        type: .stress,
+                        text: "Emotional Takeover Session - Body Sensation: \(emotionalNote.step2_bodySensation), Need: \(emotionalNote.step5_partNeed ?? "None"), Plan: \(emotionalNote.step6_nextTimePlan)"
+                    )
+                    onComplete(cravingNote)
+                }
+            }
+            .sheet(isPresented: $showingHabitHelper) {
+                HabitHelperFlow { habitNote in
+                    // Convert HabitHelperNote to CravingNote for compatibility
+                    let cravingNote = CravingNote(
+                        type: .habit,
+                        text: "Habit Helper Session - Pattern: \(habitNote.step1_pattern), Rewire: \(habitNote.step4_rewire)"
+                    )
+                    onComplete(cravingNote)
+                }
+            }
 
         }
     }
@@ -169,6 +164,15 @@ struct MiniCoachView: View {
 struct IntroductionStep: View {
     let type: CravingType
     let onNext: () -> Void
+    let onEmotionalTakeover: (() -> Void)?
+    let onHabitHelper: (() -> Void)?
+    
+    init(type: CravingType, onNext: @escaping () -> Void, onEmotionalTakeover: (() -> Void)? = nil, onHabitHelper: (() -> Void)? = nil) {
+        self.type = type
+        self.onNext = onNext
+        self.onEmotionalTakeover = onEmotionalTakeover
+        self.onHabitHelper = onHabitHelper
+    }
     
     var body: some View {
         VStack(spacing: 24) {
@@ -187,9 +191,39 @@ struct IntroductionStep: View {
                 .foregroundStyle(.secondary)
                 .padding(.horizontal)
             
-            Button("Continue", action: onNext)
-                .buttonStyle(.borderedProminent)
+            if type == .stress && onEmotionalTakeover != nil {
+                VStack(spacing: 16) {
+                    Button("Guided Mini-Coach") {
+                        onEmotionalTakeover?()
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(.orange)
+                    
+                    Button("Quick Actions") {
+                        onNext()
+                    }
+                    .buttonStyle(.bordered)
+                }
                 .padding(.top)
+            } else if type == .habit && onHabitHelper != nil {
+                VStack(spacing: 16) {
+                    Button("Habit Helper") {
+                        onHabitHelper?()
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(.blue)
+                    
+                    Button("Quick Actions") {
+                        onNext()
+                    }
+                    .buttonStyle(.bordered)
+                }
+                .padding(.top)
+            } else {
+                Button("Continue", action: onNext)
+                    .buttonStyle(.borderedProminent)
+                    .padding(.top)
+            }
         }
         .padding()
 
@@ -212,6 +246,8 @@ struct IntroductionStep: View {
 struct ActionStep: View {
     let type: CravingType
     let onNext: () -> Void
+    @Environment(\.colorScheme) private var colorScheme
+    @State private var showingBreathingGuide = false
     
     var body: some View {
         VStack(spacing: 24) {
@@ -219,21 +255,7 @@ struct ActionStep: View {
                 .font(.title2)
                 .bold()
             
-            VStack(alignment: .leading, spacing: 16) {
-                ForEach(actionItems, id: \.self) { item in
-                    HStack {
-                        Image(systemName: "checkmark.circle.fill")
-                            .foregroundStyle(.green)
-                        Text(item)
-                            .font(.body)
-                    }
-                }
-            }
-            .padding()
-            .background(
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(Color(.secondarySystemBackground))
-            )
+            actionsContent
             
             Text("Now let's capture what's happening so you can track patterns and get better support.")
                 .font(.subheadline)
@@ -246,13 +268,84 @@ struct ActionStep: View {
                 .padding(.top)
         }
         .padding()
+        .sheet(isPresented: $showingBreathingGuide) {
+            MiniCoachBreathingView()
+        }
+    }
+    
+    private var actionsContent: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            breathingOptionSection
+            otherActionItems
+        }
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color(.secondarySystemBackground))
+        )
+    }
+    
+    private var breathingOptionSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text(breathingIntroText)
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.leading)
+            
+            breathingButton
+        }
+    }
+    
+    private var breathingButton: some View {
+        Button(action: { showingBreathingGuide = true }) {
+            HStack {
+                Image(systemName: "lu   ngs.fill")
+                    .foregroundStyle(colorScheme == .dark ? .white : .blue)
+                Text("Click here to do 3 calming breaths")
+                    .font(.body)
+                    .foregroundStyle(.blue)
+                Spacer()
+                Image(systemName: "arrow.right.circle.fill")
+                    .foregroundStyle(.blue)
+            }
+        }
+        .buttonStyle(.plain)
+        .padding(.vertical, 8)
+        .padding(.horizontal, 12)
+        .background(
+            RoundedRectangle(cornerRadius: 8)
+                .fill(Color.blue.opacity(0.1))
+        )
+    }
+    
+    private var otherActionItems: some View {
+        ForEach(actionItems, id: \.self) { item in
+            HStack {
+                Image(systemName: "checkmark.circle.fill")
+                    .foregroundStyle(.green)
+                Text(item)
+                    .font(.body)
+            }
+        }
+    }
+    
+    private var breathingIntroText: String {
+        switch type {
+        case .stress:
+            return "One option to start down a healthy path is to calm the nervous system."
+        case .habit:
+            return "Before acting on autopilot, take a moment to reset and choose consciously."
+        case .physical:
+            return "Sometimes what feels like hunger is actually stress. Let's check in with your body."
+        case .other:
+            return "When you're not sure what you need, starting with calm can help clarify things."
+        }
     }
     
     private var actionItems: [String] {
         switch type {
         case .stress:
             return [
-                "Take 3 deep breaths",
                 "Drink a glass of water",
                 "Set a 5-minute timer before deciding"
             ]
@@ -422,29 +515,59 @@ struct CaptureStep: View {
     }
     
     private func requestMicrophonePermission() {
-        AVAudioSession.sharedInstance().requestRecordPermission { granted in
-            DispatchQueue.main.async {
-                if granted {
-                    print("🔍 DEBUG: Microphone permission granted")
-                    // Also request speech recognition permission
-                    SFSpeechRecognizer.requestAuthorization { status in
-                        DispatchQueue.main.async {
-                            switch status {
-                            case .authorized:
-                                print("🔍 DEBUG: Speech recognition permission granted")
-                            case .denied:
-                                print("🔍 DEBUG: Speech recognition permission denied")
-                            case .restricted:
-                                print("🔍 DEBUG: Speech recognition permission restricted")
-                            case .notDetermined:
-                                print("🔍 DEBUG: Speech recognition permission not determined")
-                            @unknown default:
-                                print("🔍 DEBUG: Speech recognition permission unknown status")
+        if #available(iOS 17.0, *) {
+            AVAudioApplication.requestRecordPermission { granted in
+                DispatchQueue.main.async {
+                    if granted {
+                        print("🔍 DEBUG: Microphone permission granted")
+                        // Also request speech recognition permission
+                        SFSpeechRecognizer.requestAuthorization { status in
+                            DispatchQueue.main.async {
+                                switch status {
+                                case .authorized:
+                                    print("🔍 DEBUG: Speech recognition permission granted")
+                                case .denied:
+                                    print("🔍 DEBUG: Speech recognition permission denied")
+                                case .restricted:
+                                    print("🔍 DEBUG: Speech recognition permission restricted")
+                                case .notDetermined:
+                                    print("🔍 DEBUG: Speech recognition permission not determined")
+                                @unknown default:
+                                    print("🔍 DEBUG: Speech recognition permission unknown status")
+                                }
                             }
                         }
+                    } else {
+                        print("🔍 DEBUG: Microphone permission denied")
                     }
-                } else {
-                    print("🔍 DEBUG: Microphone permission denied")
+                }
+            }
+        } else {
+            // Fallback for iOS 16 and earlier
+            AVAudioSession.sharedInstance().requestRecordPermission { granted in
+                DispatchQueue.main.async {
+                    if granted {
+                        print("🔍 DEBUG: Microphone permission granted")
+                        // Also request speech recognition permission
+                        SFSpeechRecognizer.requestAuthorization { status in
+                            DispatchQueue.main.async {
+                                switch status {
+                                case .authorized:
+                                    print("🔍 DEBUG: Speech recognition permission granted")
+                                case .denied:
+                                    print("🔍 DEBUG: Speech recognition permission denied")
+                                case .restricted:
+                                    print("🔍 DEBUG: Speech recognition permission restricted")
+                                case .notDetermined:
+                                    print("🔍 DEBUG: Speech recognition permission not determined")
+                                @unknown default:
+                                    print("🔍 DEBUG: Speech recognition permission unknown status")
+                                }
+                            }
+                        }
+                    } else {
+                        print("🔍 DEBUG: Microphone permission denied")
+                    }
                 }
             }
         }
@@ -546,6 +669,7 @@ struct SaveStep: View {
     let type: CravingType
     let text: String
     let onComplete: () -> Void
+    @EnvironmentObject private var celebrationManager: CelebrationManager
     
     var body: some View {
         VStack(spacing: 24) {
@@ -557,7 +681,7 @@ struct SaveStep: View {
                 .font(.title2)
                 .bold()
             
-            Text("Your \(type.displayName.lowercased()) craving has been recorded and tagged for future reference.")
+            Text(celebrationManager.getCelebrationMessage(for: true))
                 .font(.body)
                 .multilineTextAlignment(.center)
                 .foregroundStyle(.secondary)
@@ -734,7 +858,306 @@ struct MiniCoachTextCaptureView: View {
     }
 }
 
+struct MiniCoachBreathingView: View {
+    @Environment(\.dismiss) private var dismiss
+    @Environment(\.colorScheme) private var colorScheme
+    @State private var isBreathingActive = false
+    @State private var showingVideo = false
+    @State private var videoPlayer: AVPlayer?
+    @State private var videoLoopCount = 0
+    @State private var videoObserver: NSObjectProtocol?
+    @State private var breathingPhase: BreathingPhase = .inhale
+    @State private var breathCount = 0
+    @State private var showInhaleText = false
+    @State private var breathingCompleted = false
+    
+    private var breathingPhaseText: String {
+        switch breathingPhase {
+        case .inhale:
+            return "Quick Inhale"
+        case .exhale:
+            return "Long Exhale"
+        }
+    }
+    
+    var body: some View {
+        NavigationView {
+            VStack(alignment: .leading, spacing: 16) {
+                hiddenHeader
+                mainContent
+            }
+            .padding()
+            .navigationTitle("Calming Breaths")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Done") {
+                        dismiss()
+                    }
+                }
+            }
+        }
+    }
+    
+    private var hiddenHeader: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(spacing: 12) {
+                ZStack {
+                    Circle()
+                        .fill(Color.helpButtonBlue)
+                        .frame(width: 24, height: 24)
+                    Text("1")
+                        .font(.headline)
+                        .fontWeight(.bold)
+                        .foregroundColor(.white)
+                }
+                Text("Begin Your Day with Calm")
+                    .font(.headline)
+                    .fontWeight(.semibold)
+            }
+            .opacity(0) // Make header invisible
+            .accessibilityHidden(true)
+        }
+    }
+    
+    private var mainContent: some View {
+        VStack(spacing: 20) {
+            if showingVideo {
+                videoContent
+            } else if isBreathingActive {
+                breathingActiveContent
+            } else {
+                breathingStartContent
+            }
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 20)
+    }
+    
+    private var videoContent: some View {
+        VStack(spacing: 8) {
+            if let player = videoPlayer {
+                VideoPlayer(player: player)
+                    .aspectRatio(16/9, contentMode: .fit)
+                    .frame(maxHeight: 250)
+                    .cornerRadius(12)
+                    .clipped()
+                    .onAppear {
+                        setupVideoLooping()
+                        player.play()
+                    }
+            }
+            
+            VStack(spacing: 8) {
+                Text("Loop \(videoLoopCount)/3")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                
+                Button("Close Video") {
+                    closeVideo()
+                }
+                .buttonStyle(.bordered)
+                .foregroundColor(.helpButtonBlue)
+            }
+        }
+    }
+    
+    private var breathingActiveContent: some View {
+        VStack(spacing: 20) {
+            BreathingRingView(phase: breathingPhase)
+                .frame(height: 120)
+            
+            breathingTextContent
+            
+            Button("Stop") {
+                stopBreathing()
+            }
+            .buttonStyle(.bordered)
+            .foregroundColor(.blue)
+        }
+    }
+    
+    private var breathingTextContent: some View {
+        ZStack {
+            // Invisible placeholder to maintain consistent height
+            Text("Quick Inhale")
+                .font(.title2)
+                .fontWeight(.medium)
+                .opacity(0)
+                .accessibilityHidden(true)
+            
+            // Actual text content
+            if breathingCompleted {
+                Text("Great job!")
+                    .font(.title2)
+                    .fontWeight(.medium)
+                    .foregroundColor(.green)
+                    .transition(.opacity.combined(with: .scale))
+                    .animation(.easeInOut(duration: 0.5), value: breathingCompleted)
+            } else if showInhaleText && breathingPhase == .inhale {
+                Text("Quick Inhale")
+                    .font(.title2)
+                    .fontWeight(.medium)
+                    .foregroundColor(.primary)
+                    .transition(.opacity.combined(with: .scale))
+                    .animation(.easeInOut(duration: 0.3), value: showInhaleText)
+            } else if breathingPhase == .exhale {
+                Text("Long Exhale")
+                    .font(.title2)
+                    .fontWeight(.medium)
+                    .foregroundColor(.primary)
+                    .transition(.opacity.combined(with: .scale))
+                    .animation(.easeInOut(duration: 0.3), value: breathingPhase)
+            }
+        }
+    }
+    
+    private var breathingStartContent: some View {
+        VStack(spacing: 16) {
+            Image(systemName: "wind")
+                .font(.system(size: 40))
+                .foregroundColor(colorScheme == .dark ? .white : .helpButtonBlue)
+            
+            HStack(spacing: 16) {
+                Button("Start Breathing") {
+                    startBreathing()
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(Color.helpButtonBlue)
+                .controlSize(.large)
+                
+                Button("Play Breathing Guide") {
+                    playBreathingVideo()
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(Color.helpButtonBlue)
+                .controlSize(.large)
+            }
+        }
+    }
+    
+    private func startBreathing() {
+        isBreathingActive = true
+        breathingPhase = .inhale
+        breathCount = 0  // Reset breath count
+        showInhaleText = false  // Reset text state
+        breathingCompleted = false  // Reset completion state
+        
+        // Start the breathing cycle
+        startBreathingCycle()
+    }
+    
+    private func startBreathingCycle() {
+        showInhaleText = true
+        
+        // First quick inhale for 2 seconds
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+            if isBreathingActive {
+                // Hide "Quick Inhale" text
+                showInhaleText = false
+                
+                // Wait 0.5 seconds before showing text again
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    if isBreathingActive {
+                        // Show "Quick Inhale" text again for second inhale
+                        showInhaleText = true
+                        
+                        // Second quick inhale for 2 seconds
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                            if isBreathingActive {
+                                // Hide "Quick Inhale" text and switch to exhale
+                                showInhaleText = false
+                                breathingPhase = .exhale
+                                
+                                // Long exhale for 6 seconds
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 6.0) {
+                                    if isBreathingActive {
+                                        // Increment breath count
+                                        breathCount += 1
+                                        
+                                        if breathCount >= 3 {
+                                            // Stop after 3 complete breaths
+                                            stopBreathing()
+                                        } else {
+                                            // Cycle repeats - reset to inhale
+                                            breathingPhase = .inhale
+                                            startBreathingCycle()
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    private func stopBreathing() {
+        isBreathingActive = false
+        breathingPhase = .inhale
+        showInhaleText = false  // Reset text state
+        breathingCompleted = true  // Show completion message
+    }
+    
+    private func playBreathingVideo() {
+        guard let videoURL = Bundle.main.url(forResource: "breathing", withExtension: "mp4") else {
+            print("Breathing video not found in bundle")
+            return
+        }
+        
+        videoPlayer = AVPlayer(url: videoURL)
+        videoLoopCount = 0
+        showingVideo = true
+    }
+    
+    private func setupVideoLooping() {
+        guard let player = videoPlayer else { return }
+        
+        // Remove any existing observer
+        if let observer = videoObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
+        
+        // Add observer for when video finishes
+        videoObserver = NotificationCenter.default.addObserver(
+            forName: .AVPlayerItemDidPlayToEndTime,
+            object: player.currentItem,
+            queue: .main
+        ) { _ in
+            videoLoopCount += 1
+            
+            if videoLoopCount < 3 {
+                // Add a brief pause before restarting video for next loop
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                    // Restart video for next loop (3 loops = 3 complete breathing cycles)
+                    player.seek(to: .zero)
+                    player.play()
+                }
+            } else {
+                // After 3 loops, just close video (don't auto-start breathing)
+                closeVideo()
+            }
+        }
+    }
+    
+    private func closeVideo() {
+        showingVideo = false
+        videoPlayer?.pause()
+        
+        // Remove observer
+        if let observer = videoObserver {
+            NotificationCenter.default.removeObserver(observer)
+            videoObserver = nil
+        }
+        
+        // Mark breathing as completed (same as stopBreathing)
+        breathingCompleted = true
+    }
+}
+
+
 #Preview {
     MiniCoachView(type: .habit) { _ in }
-        .modelContainer(for: [DailyEntry.self, Achievement.self, LLMMessage.self, CravingNote.self], inMemory: true)
+        .modelContainer(for: [DailyEntry.self, Achievement.self, LLMMessage.self, CravingNote.self, EmotionalTakeoverNote.self, HabitHelperNote.self], inMemory: true)
 }

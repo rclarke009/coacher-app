@@ -4,7 +4,10 @@ import SwiftUI
 class StreakManager: ObservableObject {
     @AppStorage("currentStreak") private var currentStreak: Int = 0
     @AppStorage("longestStreak") private var longestStreak: Int = 0
-    @AppStorage("lastActivityDate") private var lastActivityDate: Date = Date.distantPast
+    private var lastActivityDate: Date {
+        get { UserDefaults.standard.object(forKey: "lastActivityDate") as? Date ?? Date.distantPast }
+        set { UserDefaults.standard.set(newValue, forKey: "lastActivityDate") }
+    }
     @AppStorage("lastMilestoneCelebrated") private var lastMilestoneCelebrated: Int = 0
 
     // Milestone thresholds

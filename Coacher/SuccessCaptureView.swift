@@ -129,6 +129,7 @@ struct SuccessCaptureView: View {
                 Spacer()
                 }
             }
+            .scrollIndicators(.hidden)
             .padding()
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
@@ -151,9 +152,10 @@ struct SuccessCaptureView: View {
         .sheet(isPresented: $showingAudioCapture) {
             SuccessAudioCaptureView(
                 type: selectedType ?? .choice,
-                onSave: { audioURL, keptAudio in
+                onSave: { audioURL, keptAudio, transcribedText in
                     capturedAudioURL = audioURL
                     self.keptAudio = keptAudio
+                    capturedText = transcribedText
                     saveSuccess()
                 }
             )
@@ -170,20 +172,24 @@ struct SuccessCaptureView: View {
             audioURL: capturedAudioURL
         )
         
-        context.insert(successNote)
-        
-        do {
-            try context.save()
+        // Save on main queue to prevent SwiftData threading issues
+        DispatchQueue.main.async {
+            self.context.insert(successNote)
             
-            // Trigger celebration
-            if celebrationManager.shouldCelebrate() {
-                celebrationManager.recordActivity()
-                // The celebration will be handled by the parent view
+            do {
+                try self.context.save()
+                
+                // Trigger celebration
+                if self.celebrationManager.shouldCelebrate() {
+                    self.celebrationManager.recordActivity()
+                    // The celebration will be handled by the parent view
+                }
+                
+                self.dismiss()
+            } catch {
+                print("Failed to save success note: \(error)")
+                // Could add user-facing error message here if needed
             }
-            
-            dismiss()
-        } catch {
-            print("Failed to save success note: \(error)")
         }
     }
 }
@@ -303,7 +309,7 @@ struct SuccessTextCaptureView: View {
 
 struct SuccessAudioCaptureView: View {
     let type: SuccessType
-    let onSave: (URL?, Bool) -> Void
+    let onSave: (URL?, Bool, String) -> Void
     @Environment(\.dismiss) private var dismiss
     @Environment(\.colorScheme) private var colorScheme
     @State private var isRecording = false
@@ -368,7 +374,7 @@ struct SuccessAudioCaptureView: View {
                         .buttonStyle(.bordered)
                         
                         Button("Save Success") {
-                            onSave(savedAudioURL, true)
+                            onSave(savedAudioURL, true, transcribedText)
                             dismiss()
                         }
                         .buttonStyle(.borderedProminent)
@@ -422,12 +428,25 @@ struct SuccessAudioCaptureView: View {
     }
     
     private func requestMicrophonePermission() {
-        AVAudioSession.sharedInstance().requestRecordPermission { granted in
-            DispatchQueue.main.async {
-                if granted {
-                    // Permission granted, ready to record
-                } else {
-                    // Permission denied
+        if #available(iOS 17.0, *) {
+            AVAudioApplication.requestRecordPermission { granted in
+                DispatchQueue.main.async {
+                    if granted {
+                        // Permission granted, ready to record
+                    } else {
+                        // Permission denied
+                    }
+                }
+            }
+        } else {
+            // Fallback for iOS 16 and earlier
+            AVAudioSession.sharedInstance().requestRecordPermission { granted in
+                DispatchQueue.main.async {
+                    if granted {
+                        // Permission granted, ready to record
+                    } else {
+                        // Permission denied
+                    }
                 }
             }
         }

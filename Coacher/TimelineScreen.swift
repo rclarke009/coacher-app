@@ -22,9 +22,6 @@ struct TimelineScreen: View {
     @State private var showingSuccessCapture = false
     @State private var hasUnsavedChanges = false
     @State private var autoSaveTimer: Timer?
-    @State private var showingCelebration = false
-    @State private var celebrationTitle = ""
-    @State private var celebrationSubtitle = ""
 
     var body: some View {
         NavigationView {
@@ -50,7 +47,7 @@ struct TimelineScreen: View {
                             entries: entries, 
                             entryToday: $entryToday, 
                             hasUnsavedChanges: $hasUnsavedChanges,
-                            onCelebrationTrigger: triggerCelebration
+                            onCelebrationTrigger: { _, _ in }
                         )
                         .id("tonightBucket")
                         
@@ -130,9 +127,23 @@ struct TimelineScreen: View {
                 .overlay(
                     // Global celebration overlay - truly full screen
                     CelebrationOverlay(
-                        isPresented: $showingCelebration,
-                        title: celebrationTitle,
-                        subtitle: celebrationSubtitle
+                        isPresented: $celebrationManager.showingTinyCelebration,
+                        title: "",
+                        subtitle: celebrationManager.celebrationMessage
+                    )
+                )
+                .overlay(
+                    CelebrationOverlay(
+                        isPresented: $celebrationManager.showingMediumCelebration,
+                        title: "",
+                        subtitle: celebrationManager.celebrationMessage
+                    )
+                )
+                .overlay(
+                    CelebrationOverlay(
+                        isPresented: $celebrationManager.showingBigCelebration,
+                        title: "",
+                        subtitle: celebrationManager.celebrationMessage
                     )
                 )
                 .overlay(
@@ -194,11 +205,6 @@ struct TimelineScreen: View {
         impactFeedback.impactOccurred()
     }
     
-    private func triggerCelebration(title: String, subtitle: String) {
-        celebrationTitle = title
-        celebrationSubtitle = subtitle
-        showingCelebration = true
-    }
     
 
 }

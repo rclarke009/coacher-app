@@ -15,86 +15,69 @@ struct TodayView: View {
     
     @StateObject private var timeManager = TimeManager()
     @State private var entry: DailyEntry = DailyEntry()
-    @State private var tomorrowEntry: DailyEntry = DailyEntry()
     @State private var showingNeedHelp = false
     @State private var showingSuccessCapture = false
     @State private var hasUnsavedChanges = false
     @State private var autoSaveTimer: Timer?
-    @State private var showingCelebration = false
-    @State private var celebrationTitle = ""
-    @State private var celebrationSubtitle = ""
     
     // Section expansion states
     @State private var lastNightPrepExpanded = false
-    @State private var morningFocusExpanded = true
-    @State private var endOfDayExpanded = false
-    @State private var prepTonightExpanded = true
+    @State private var morningFocusCollapsed = false
+    @State private var endOfDayCollapsed = true
+    @State private var hasCompletedMorningToday = false
+    @State private var shouldResetMorningFlow = false
     
     var body: some View {
         NavigationView {
-            ScrollView {
-                VStack(spacing: 14) {
-                    // Last Night's Prep (for Today) - Day Phase only
-                    if timeManager.isDayPhase {
-                        SectionCard(
-                            title: "Last Night's Prep (for Today)",
-                            icon: "moon.stars.fill",
-                            accent: .dimmedGreen,
-                            collapsed: $lastNightPrepExpanded,
-                            dimmed: true
-                        ) {
-                            LastNightPrepReviewView(entry: getLastNightEntry())
-                        }
-                    }
+            ScrollViewReader { proxy in
+                ScrollView {
+                    VStack(spacing: 14) {
                     
             // Morning Focus (Today) - Primary in Day Phase
-            MorningFocusCard(
-                title: "Morning Focus (Today)",
-                icon: "sun.max.fill"
-            ) {
-                        MorningFocusSection(entry: $entry)
-                            .onChange(of: entry.myWhy) { _, _ in scheduleAutoSave() }
-                            .onChange(of: entry.challenge) { _, _ in scheduleAutoSave() }
-                            .onChange(of: entry.challengeOther) { _, _ in scheduleAutoSave() }
-                            .onChange(of: entry.chosenSwap) { _, _ in scheduleAutoSave() }
-                            .onChange(of: entry.commitFrom) { _, _ in scheduleAutoSave() }
-                            .onChange(of: entry.commitTo) { _, _ in scheduleAutoSave() }
-                    }
+            if entry.morningFlowCompletedToday && !shouldResetMorningFlow {
+                // Show summary card when morning flow is completed
+                MorningSummaryDisplayCard(entry: entry, onRestart: {
+                    shouldResetMorningFlow = true
+                })
+            } else {
+                SectionCard(
+                    title: "Morning Focus (Today)",
+                    icon: "sun.max.fill",
+                    accent: .blue,
+                    collapsed: $morningFocusCollapsed
+                ) {
+                            CareFirstMorningFocusSection(entry: $entry)
+                                .onChange(of: entry.whyThisMatters) { _, _ in scheduleAutoSave() }
+                                .onChange(of: entry.identityStatement) { _, _ in scheduleAutoSave() }
+                                .onChange(of: entry.todaysFocus) { _, _ in scheduleAutoSave() }
+                                .onChange(of: entry.stressResponse) { _, _ in scheduleAutoSave() }
+                                .onChange(of: entry.morningFlowCompletedToday) { _, isCompleted in
+                                    if isCompleted {
+                                        shouldResetMorningFlow = false
+                                    }
+                                }
+                        }
+            }
                     
                     // End-of-Day Check-In - Primary in Evening Phase
                     SectionCard(
                         title: "End-of-Day Check-In",
                         icon: "clock.fill",
                         accent: .teal,
-                        collapsed: $endOfDayExpanded,
+                        collapsed: $endOfDayCollapsed,
                         dimmed: timeManager.isDayPhase
                     ) {
-                        EndOfDaySection(
+                        CareFirstEndOfDaySection(
                             entry: $entry,
-                            onCelebrationTrigger: { _, _ in }
+                            onCelebrationTrigger: { _, _ in },
+                            scrollProxy: proxy
                         )
-                            .onChange(of: entry.followedSwap) { _, _ in hasUnsavedChanges = true }
-                            .onChange(of: entry.feelAboutIt) { _, _ in hasUnsavedChanges = true }
-                            .onChange(of: entry.whatGotInTheWay) { _, _ in hasUnsavedChanges = true }
+                            .onChange(of: entry.didCareAction) { _, _ in hasUnsavedChanges = true }
+                            .onChange(of: entry.whatHelpedCalm) { _, _ in hasUnsavedChanges = true }
+                            .onChange(of: entry.comfortEatingMoment) { _, _ in hasUnsavedChanges = true }
+                            .onChange(of: entry.smallWinsForTomorrow) { _, _ in hasUnsavedChanges = true }
                     }
                     
-                    // Prep Tonight (for Tomorrow) - Evening Phase only
-                    if timeManager.isEveningPhase {
-                        SectionCard(
-                            title: "Prep Tonight (for Tomorrow)",
-                            icon: "moon.stars.fill",
-                            accent: .teal,
-                            collapsed: $prepTonightExpanded,
-                            dimmed: false
-                        ) {
-                            PrepTonightSection(entry: $tomorrowEntry, todayEntry: $entry)
-                                .onChange(of: tomorrowEntry.stickyNotes) { _, _ in hasUnsavedChanges = true }
-                                .onChange(of: tomorrowEntry.preppedProduce) { _, _ in hasUnsavedChanges = true }
-                                .onChange(of: tomorrowEntry.waterReady) { _, _ in hasUnsavedChanges = true }
-                                .onChange(of: tomorrowEntry.breakfastPrepped) { _, _ in hasUnsavedChanges = true }
-                                .onChange(of: tomorrowEntry.nightOther) { _, _ in hasUnsavedChanges = true }
-                        }
-                    }
                     
                     // Success Flow Buttons
                     HStack(spacing: 12) {
@@ -129,16 +112,16 @@ struct TodayView: View {
                 .padding(.horizontal)
                 .padding(.top, 20)
             }
+            }
             .navigationTitle("Today")
-            .onAppear { 
+            .onAppear {
                 loadOrCreateToday()
-                loadOrCreateTomorrow()
                 setDefaultExpansionStates()
+                checkMorningCompletionToday()
             }
             .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
                 // Refresh data when app becomes active to show current day's data
                 loadOrCreateToday()
-                loadOrCreateTomorrow()
                 setDefaultExpansionStates()
             }
 
@@ -150,9 +133,23 @@ struct TodayView: View {
             }
             .overlay(
                 CelebrationOverlay(
-                    isPresented: $showingCelebration,
-                    title: celebrationTitle,
-                    subtitle: celebrationSubtitle
+                    isPresented: $celebrationManager.showingTinyCelebration,
+                    title: "",
+                    subtitle: celebrationManager.celebrationMessage
+                )
+            )
+            .overlay(
+                CelebrationOverlay(
+                    isPresented: $celebrationManager.showingMediumCelebration,
+                    title: "",
+                    subtitle: celebrationManager.celebrationMessage
+                )
+            )
+            .overlay(
+                CelebrationOverlay(
+                    isPresented: $celebrationManager.showingBigCelebration,
+                    title: "",
+                    subtitle: celebrationManager.celebrationMessage
                 )
             )
             .scrollDismissesKeyboard(.immediately)
@@ -169,30 +166,24 @@ struct TodayView: View {
         } else {
             entry = DailyEntry()
             entry.date = startOfDay
+            
+            // Carry over yesterday's whatElseCouldHelp as today's stressResponse
+            if let yesterdayEntry = getYesterdayEntry(), 
+               let whatElseCouldHelp = yesterdayEntry.whatElseCouldHelp,
+               !whatElseCouldHelp.isEmpty {
+                entry.stressResponse = whatElseCouldHelp
+            }
+            
             context.insert(entry)
             try? context.save()
         }
     }
     
-    private func loadOrCreateTomorrow() {
-        let startOfTomorrow = timeManager.tomorrowDate
-        if let existing = entries.first(where: { Calendar.current.isDate($0.date, inSameDayAs: startOfTomorrow) }) {
-            tomorrowEntry = existing
-        } else {
-            tomorrowEntry = DailyEntry()
-            tomorrowEntry.date = startOfTomorrow
-            
-            // Inherit custom prep items from today's entry
-            if !entry.safeCustomPrepItems.isEmpty {
-                tomorrowEntry.customPrepItems = entry.customPrepItems
-                // Reset completion status for tomorrow
-                tomorrowEntry.completedCustomPrepItems = []
-            }
-            
-            context.insert(tomorrowEntry)
-            try? context.save()
-        }
+    private func getYesterdayEntry() -> DailyEntry? {
+        let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: timeManager.todayDate) ?? timeManager.todayDate
+        return entries.first(where: { Calendar.current.isDate($0.date, inSameDayAs: yesterday) })
     }
+    
     
 
     
@@ -203,13 +194,11 @@ struct TodayView: View {
     
     private func setDefaultExpansionStates() {
         if timeManager.isDayPhase {
-            morningFocusExpanded = true
-            endOfDayExpanded = false
-            lastNightPrepExpanded = false
+            morningFocusCollapsed = false  // Expanded during day
+            endOfDayCollapsed = true       // Collapsed during day
         } else {
-            morningFocusExpanded = false
-            endOfDayExpanded = true
-            prepTonightExpanded = true
+            morningFocusCollapsed = true   // Collapsed during evening
+            endOfDayCollapsed = false      // Expanded during evening
         }
     }
     
@@ -244,13 +233,144 @@ struct TodayView: View {
         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
     }
     
-    private func triggerCelebration(title: String, subtitle: String) {
-        celebrationTitle = title
-        celebrationSubtitle = subtitle
-        showingCelebration = true
+    private func checkMorningCompletionToday() {
+        let today = Calendar.current.startOfDay(for: Date())
+        let savedDate = UserDefaults.standard.object(forKey: "morningCompletedDate") as? Date
+        
+        if let savedDate = savedDate, Calendar.current.isDate(savedDate, inSameDayAs: today) {
+            hasCompletedMorningToday = true
+        } else {
+            hasCompletedMorningToday = false
+        }
     }
+    
 }
 
+// MARK: - Morning Summary Display Card
+
+struct MorningSummaryDisplayCard: View {
+    let entry: DailyEntry
+    let onRestart: () -> Void
+    @Environment(\.colorScheme) private var colorScheme
+    @State private var showingRestartConfirmation = false
+    
+    var body: some View {
+        VStack(spacing: 0) {
+            // Header
+            HStack(spacing: 12) {
+                Image(systemName: "sun.max.fill")
+                    .font(.title3)
+                    .foregroundStyle(colorScheme == .dark ? .white : .black)
+                    .accessibilityHidden(true)
+                
+                Text("Morning Focus (Today)")
+                    .font(.headline)
+                    .fontWeight(.semibold)
+                    .multilineTextAlignment(.leading)
+                    .foregroundStyle(colorScheme == .dark ? .white : .black)
+                
+                Spacer()
+                
+                // Show checkmark when completed
+                Image(systemName: "checkmark.circle.fill")
+                    .font(.title3)
+                    .foregroundColor(.green)
+                    .accessibilityLabel("Completed")
+            }
+            .padding(.horizontal, 14).padding(.vertical, 6)
+            .background(
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .fill(Color.morningFocusBackground)
+            )
+            .clipShape(.rect(cornerRadius: 16, style: .continuous))
+
+            // Summary content
+            VStack(alignment: .leading, spacing: 16) {
+                // Header
+                VStack(spacing: 8) {
+                    Text("You're ready to win the day")
+                        .font(.headline)
+                        .fontWeight(.semibold)
+                        .multilineTextAlignment(.center)
+                    
+                    HStack {
+                        Image(systemName: "sparkles")
+                            .foregroundColor(.blue)
+                        Text("Your Plan")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                        Spacer()
+                    }
+                }
+                
+                // Summary content in blue cards
+                VStack(spacing: 12) {
+                    // Why This Matters
+                    if !entry.whyThisMatters.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                        SummaryItem(
+                            label: "Why This Matters",
+                            text: entry.whyThisMatters,
+                            color: .blue
+                        )
+                    }
+                    
+                    // Identity Statement
+                    if let identity = entry.identityStatement, !identity.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                        SummaryItem(
+                            label: "I Am Someone Who...",
+                            text: identity,
+                            color: .blue
+                        )
+                    }
+                    
+                    // Today's Focus
+                    if !entry.todaysFocus.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                        SummaryItem(
+                            label: "Today's Focus",
+                            text: entry.todaysFocus,
+                            color: .blue
+                        )
+                    }
+                    
+                    // Stress Response
+                    if !entry.stressResponse.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                        SummaryItem(
+                            label: "Stress Response",
+                            text: entry.stressResponse,
+                            color: .blue
+                        )
+                    }
+                }
+                
+                // Action buttons
+                HStack(spacing: 12) {
+                    Button("Restart") {
+                        showingRestartConfirmation = true
+                    }
+                    .buttonStyle(.bordered)
+                    .foregroundColor(.blue)
+                    
+                    Spacer()
+                }
+            }
+            .padding(14)
+            .padding(.top, 0) // Reduce top padding to connect with header
+        }
+        .background(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .fill(Color.morningFocusBackground)
+        )
+        .clipShape(.rect(cornerRadius: 16, style: .continuous))
+        .confirmationDialog("Restart Morning Flow", isPresented: $showingRestartConfirmation) {
+            Button("Restart", role: .destructive) {
+                onRestart()
+            }
+            Button("Cancel", role: .cancel) { }
+        } message: {
+            Text("This will reset your morning flow so you can go through it again. Your current answers will be pre-filled.")
+        }
+    }
+}
 
 
 #Preview {

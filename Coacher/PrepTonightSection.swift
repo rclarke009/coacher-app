@@ -23,7 +23,7 @@ struct PrepTonightSection: View {
         VStack(alignment: .leading, spacing: 16) {
             // Header with title and info button
             HStack {
-                Text("Night Prep (5 minutes)")
+                Text("Night Prep")
                     .font(.title3)
                     .bold()
                 
@@ -91,10 +91,6 @@ struct PrepTonightSection: View {
             // Custom prep items
             if !entry.safeCustomPrepItems.isEmpty {
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("Custom Items")
-                        .font(.subheadline)
-                        .fontWeight(.medium)
-                        .foregroundStyle(.secondary)
                     
                     ForEach(entry.safeCustomPrepItems, id: \.self) { item in
                         HStack {

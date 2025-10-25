@@ -35,10 +35,11 @@ struct HistoryView: View {
     @Query(sort: \AudioRecording.date, order: .reverse) private var audioRecordings: [AudioRecording]
     @Query(sort: \SuccessNote.date, order: .reverse) private var successNotes: [SuccessNote]
     @Query(sort: \CravingNote.date, order: .reverse) private var cravingNotes: [CravingNote]
+    @State private var isLoading = false
+    @State private var refreshTimer: Timer?
+    @State private var cachedTimelineItems: [TimelineItem] = []
     
     var body: some View {
-        let _ = print("🔍 DEBUG: HistoryView - ModelContext: \(context)")
-        let _ = print("🔍 DEBUG: HistoryView - Found \(entries.count) daily entries")
         NavigationView {
             ScrollView {
                 VStack(spacing: 24) {
@@ -52,17 +53,35 @@ struct HistoryView: View {
                     
                     // Combined Timeline (Entries + Audio Recordings)
                     LazyVStack(spacing: 12) {
-                        let combinedItems = createCombinedTimeline()
-                        ForEach(combinedItems, id: \.id) { item in
-                            switch item {
-                            case .entry(let entry):
-                                EntryRowView(entry: entry)
-                            case .audioRecording(let recording):
-                                AudioRecordingRow(recording: recording)
-                            case .successNote(let note):
-                                SuccessNoteRow(note: note)
-                            case .cravingNote(let note):
-                                CravingNoteRow(note: note)
+                        if cachedTimelineItems.isEmpty && !isLoading {
+                            // Empty state
+                            VStack(spacing: 16) {
+                                Image(systemName: "clock")
+                                    .font(.system(size: 60))
+                                    .foregroundStyle(.secondary)
+                                
+                                Text("No History Yet")
+                                    .font(.title2)
+                                    .bold()
+                                
+                                Text("Your daily entries and success moments will appear here")
+                                    .font(.body)
+                                    .foregroundStyle(.secondary)
+                                    .multilineTextAlignment(.center)
+                            }
+                            .padding(.vertical, 40)
+                        } else {
+                            ForEach(cachedTimelineItems, id: \.id) { item in
+                                switch item {
+                                case .entry(let entry):
+                                    EntryRowView(entry: entry)
+                                case .audioRecording(let recording):
+                                    AudioRecordingRow(recording: recording)
+                                case .successNote(let note):
+                                    SuccessNoteRow(note: note)
+                                case .cravingNote(let note):
+                                    CravingNoteRow(note: note)
+                                }
                             }
                         }
                     }
@@ -71,10 +90,39 @@ struct HistoryView: View {
                 .padding(.vertical)
             }
             .navigationTitle("History")
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Debug") {
+                        debugData()
+                    }
+                    .font(.caption)
+                }
+            }
             .background(
                 Color.appBackground
                     .ignoresSafeArea(.all)
             )
+            .onAppear {
+                isLoading = true
+                updateTimelineCache()
+                // Add a small delay to prevent race conditions
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    isLoading = false
+                }
+            }
+            .refreshable {
+                // Force refresh of SwiftData queries
+                isLoading = true
+                updateTimelineCache()
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    isLoading = false
+                }
+            }
+            .onDisappear {
+                // Clean up timer when view disappears
+                refreshTimer?.invalidate()
+                refreshTimer = nil
+            }
         }
     }
     
@@ -102,7 +150,7 @@ struct HistoryView: View {
         }
         
         // Sort by date (most recent first)
-        return items.sorted { first, second in
+        let sortedItems = items.sorted { first, second in
             let firstDate: Date
             let secondDate: Date
             
@@ -130,15 +178,49 @@ struct HistoryView: View {
             
             return firstDate > secondDate
         }
+        
+        return sortedItems
+    }
+    
+    private func updateTimelineCache() {
+        cachedTimelineItems = createCombinedTimeline()
+    }
+    
+    private func debugData() {
+        print("🔍 DEBUG: Manual data query test")
+        
+        // Try to manually query all data types
+        do {
+            let descriptor = FetchDescriptor<DailyEntry>(sortBy: [SortDescriptor(\.date, order: .reverse)])
+            let allEntries = try context.fetch(descriptor)
+            print("🔍 DEBUG: Manual DailyEntry fetch: \(allEntries.count) entries")
+            
+            let successDescriptor = FetchDescriptor<SuccessNote>(sortBy: [SortDescriptor(\.date, order: .reverse)])
+            let allSuccessNotes = try context.fetch(successDescriptor)
+            print("🔍 DEBUG: Manual SuccessNote fetch: \(allSuccessNotes.count) notes")
+            
+            let cravingDescriptor = FetchDescriptor<CravingNote>(sortBy: [SortDescriptor(\.date, order: .reverse)])
+            let allCravingNotes = try context.fetch(cravingDescriptor)
+            print("🔍 DEBUG: Manual CravingNote fetch: \(allCravingNotes.count) notes")
+            
+            let audioDescriptor = FetchDescriptor<AudioRecording>(sortBy: [SortDescriptor(\.date, order: .reverse)])
+            let allAudioRecordings = try context.fetch(audioDescriptor)
+            print("🔍 DEBUG: Manual AudioRecording fetch: \(allAudioRecordings.count) recordings")
+            
+        } catch {
+            print("❌ DEBUG: Error in manual fetch: \(error)")
+        }
     }
 }
 
 struct EntryRowView: View {
     let entry: DailyEntry
+    @Environment(\.colorScheme) private var colorScheme
     
     var body: some View {
         NavigationLink(destination: EntryDetailView(entry: entry)) {
-            VStack(alignment: .leading, spacing: 8) {
+            VStack(alignment: .leading, spacing: 12) {
+                // Header with date and completion status
                 HStack {
                     Text(entry.date, style: .date)
                         .font(.headline)
@@ -152,23 +234,20 @@ struct EntryRowView: View {
                 }
                 
                 if entry.hasAnyAction {
-                    HStack {
-                        if entry.hasAnyNightPrep {
-                            Label("Night Prep", systemImage: "moon.fill")
-                                .font(.caption)
-                                .foregroundStyle(.blue)
-                        }
-                        
+                    VStack(alignment: .leading, spacing: 12) {
+                        // Morning Focus Summary
                         if entry.hasAnyMorningFocus {
-                            Label("Morning Focus", systemImage: "sun.max.fill")
-                                .font(.caption)
-                                .foregroundStyle(.orange)
+                            MorningSummaryCard(entry: entry)
                         }
                         
+                        // End of Day Summary
                         if entry.hasAnyEndOfDay {
-                            Label("End of Day", systemImage: "checkmark.circle.fill")
-                                .font(.caption)
-                                .foregroundStyle(.green)
+                            EndOfDaySummaryCard(entry: entry)
+                        }
+                        
+                        // Night Prep Summary
+                        if entry.hasAnyNightPrep {
+                            NightPrepSummaryCard(entry: entry)
                         }
                     }
                 } else {
@@ -187,6 +266,205 @@ struct EntryRowView: View {
     }
 }
 
+// MARK: - Summary Card Components
+
+struct MorningSummaryCard: View {
+    let entry: DailyEntry
+    @Environment(\.colorScheme) private var colorScheme
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Image(systemName: "sun.max.fill")
+                    .foregroundStyle(.orange)
+                    .font(.caption)
+                Text("Morning Focus")
+                    .font(.caption)
+                    .fontWeight(.medium)
+                    .foregroundStyle(.orange)
+                Spacer()
+            }
+            
+            VStack(alignment: .leading, spacing: 6) {
+                if !entry.whyThisMatters.isEmpty {
+                    SummaryItem(
+                        label: "Why this matters:",
+                        text: entry.whyThisMatters,
+                        color: .orange
+                    )
+                }
+                
+                if let identity = entry.identityStatement, !identity.isEmpty {
+                    SummaryItem(
+                        label: "Identity:",
+                        text: identity,
+                        color: .orange
+                    )
+                }
+                
+                if !entry.todaysFocus.isEmpty {
+                    SummaryItem(
+                        label: "Today's focus:",
+                        text: entry.todaysFocus,
+                        color: .orange
+                    )
+                }
+                
+                if !entry.stressResponse.isEmpty {
+                    SummaryItem(
+                        label: "Stress response:",
+                        text: entry.stressResponse,
+                        color: .orange
+                    )
+                }
+            }
+        }
+        .padding(.vertical, 8)
+        .padding(.horizontal, 12)
+        .background(
+            RoundedRectangle(cornerRadius: 8)
+                .fill(Color.orange.opacity(0.1))
+        )
+    }
+}
+
+struct EndOfDaySummaryCard: View {
+    let entry: DailyEntry
+    @Environment(\.colorScheme) private var colorScheme
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Image(systemName: "checkmark.circle.fill")
+                    .foregroundStyle(.green)
+                    .font(.caption)
+                Text("End of Day")
+                    .font(.caption)
+                    .fontWeight(.medium)
+                    .foregroundStyle(.green)
+                Spacer()
+                
+                if let didCare = entry.didCareAction {
+                    Text(didCare ? "✓ Followed plan" : "• Noted challenge")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                }
+            }
+            
+            VStack(alignment: .leading, spacing: 6) {
+                if !entry.whatHelpedCalm.isEmpty {
+                    SummaryItem(
+                        label: "What helped:",
+                        text: entry.whatHelpedCalm,
+                        color: .green
+                    )
+                }
+                
+                if let comfortMoment = entry.comfortEatingMoment, !comfortMoment.isEmpty {
+                    SummaryItem(
+                        label: "Comfort eating moment:",
+                        text: comfortMoment,
+                        color: .green
+                    )
+                }
+                
+                if !entry.smallWinsForTomorrow.isEmpty {
+                    SummaryItem(
+                        label: "Tomorrow's prep:",
+                        text: entry.smallWinsForTomorrow,
+                        color: .green
+                    )
+                }
+            }
+        }
+        .padding(.vertical, 8)
+        .padding(.horizontal, 12)
+        .background(
+            RoundedRectangle(cornerRadius: 8)
+                .fill(Color.green.opacity(0.1))
+        )
+    }
+}
+
+struct NightPrepSummaryCard: View {
+    let entry: DailyEntry
+    @Environment(\.colorScheme) private var colorScheme
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Image(systemName: "moon.fill")
+                    .foregroundStyle(.blue)
+                    .font(.caption)
+                Text("Night Prep")
+                    .font(.caption)
+                    .fontWeight(.medium)
+                    .foregroundStyle(.blue)
+                Spacer()
+            }
+            
+            VStack(alignment: .leading, spacing: 6) {
+                let prepItems = getPrepItems()
+                if !prepItems.isEmpty {
+                    SummaryItem(
+                        label: "Prepared:",
+                        text: prepItems.joined(separator: ", "),
+                        color: .blue
+                    )
+                }
+                
+                if !entry.nightOther.isEmpty {
+                    SummaryItem(
+                        label: "Other:",
+                        text: entry.nightOther,
+                        color: .blue
+                    )
+                }
+            }
+        }
+        .padding(.vertical, 8)
+        .padding(.horizontal, 12)
+        .background(
+            RoundedRectangle(cornerRadius: 8)
+                .fill(Color.blue.opacity(0.1))
+        )
+    }
+    
+    private func getPrepItems() -> [String] {
+        var items: [String] = []
+        
+        if entry.stickyNotes { items.append("sticky notes") }
+        if entry.preppedProduce { items.append("produce") }
+        if entry.waterReady { items.append("water") }
+        if entry.breakfastPrepped { items.append("breakfast") }
+        
+        return items
+    }
+}
+
+struct SummaryItem: View {
+    let label: String
+    let text: String
+    let color: Color
+    @Environment(\.colorScheme) private var colorScheme
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(label)
+                .font(.caption2)
+                .fontWeight(.medium)
+                .foregroundStyle(.secondary)
+            
+            Text(text)
+                .font(.headline)
+                .fontWeight(.regular)
+                .foregroundStyle(.primary)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+}
+
 
 
 struct EntryDetailView: View {
@@ -197,11 +475,12 @@ struct EntryDetailView: View {
             VStack(spacing: 20) {
                 NightPrepSection(entry: .constant(entry))
                 Divider()
-                MorningFocusSection(entry: .constant(entry))
+                CareFirstMorningFocusSection(entry: .constant(entry))
                 Divider()
-                EndOfDaySection(
+                CareFirstEndOfDaySection(
                     entry: .constant(entry),
-                    onCelebrationTrigger: { _, _ in }
+                    onCelebrationTrigger: { _, _ in },
+                    scrollProxy: nil
                 )
             }
             .padding()
@@ -301,7 +580,7 @@ struct SuccessNoteRow: View {
                     .padding(.leading, 32)
             }
             
-            if note.keptAudio && note.audioURL != nil {
+            if note.keptAudio && note.audioURL != nil && note.text.isEmpty {
                 HStack {
                     Image(systemName: "play.circle.fill")
                         .foregroundColor(.blue)
@@ -350,7 +629,7 @@ struct CravingNoteRow: View {
                     .padding(.leading, 32)
             }
             
-            if note.keptAudio && note.audioURL != nil {
+            if note.keptAudio && note.audioURL != nil && note.text.isEmpty {
                 HStack {
                     Image(systemName: "play.circle.fill")
                         .foregroundColor(.blue)
@@ -371,5 +650,5 @@ struct CravingNoteRow: View {
 
 #Preview {
     HistoryView()
-        .modelContainer(for: [DailyEntry.self, Achievement.self, LLMMessage.self, AudioRecording.self, SuccessNote.self, CravingNote.self], inMemory: true)
+        .modelContainer(for: [DailyEntry.self, Achievement.self, LLMMessage.self, AudioRecording.self, SuccessNote.self, CravingNote.self, EmotionalTakeoverNote.self, HabitHelperNote.self], inMemory: true)
 }

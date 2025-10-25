@@ -17,7 +17,7 @@ struct ContentView: View {
     
     var body: some View {
         TabView(selection: $selectedTab) {
-            TimelineScreen()
+            TodayView()
                 .tabItem { Label("Today", systemImage: "calendar") }
                 .tag(0)
             CoachView()
@@ -35,10 +35,10 @@ struct ContentView: View {
         .onAppear {
             updateTabBarAppearance()
         }
-        .onChange(of: selectedTab) { _ in
+        .onChange(of: selectedTab) { _, _ in
             updateTabBarAppearance()
         }
-        .onChange(of: colorScheme) { _ in
+        .onChange(of: colorScheme) { _, _ in
             updateTabBarAppearance()
         }
         .onReceive(notificationHandler.$shouldShowTab) { tabIndex in

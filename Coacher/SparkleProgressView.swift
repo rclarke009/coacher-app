@@ -78,7 +78,7 @@ struct SparkleProgressView: View {
         .onDisappear {
             stopAnimations()
         }
-        .onChange(of: isLoading) { newValue in
+        .onChange(of: isLoading) { _, newValue in
             if newValue {
                 startProgressAnimation()
                 startSparkleAnimation()
@@ -87,7 +87,7 @@ struct SparkleProgressView: View {
                 completeProgress()
             }
         }
-        .onChange(of: progressValue) { newValue in
+        .onChange(of: progressValue) { _, newValue in
             withAnimation(.easeInOut(duration: 0.5)) {
                 progress = newValue
             }

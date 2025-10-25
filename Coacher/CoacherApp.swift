@@ -28,7 +28,7 @@ struct CoacherApp: App {
                     startBackgroundModelLoading()
                 }
         }
-        .modelContainer(for: [DailyEntry.self, Achievement.self, LLMMessage.self, CravingNote.self, SuccessNote.self, EveningPrepItem.self, UserSettings.self, AudioRecording.self])
+        .modelContainer(for: [DailyEntry.self, Achievement.self, LLMMessage.self, CravingNote.self, SuccessNote.self, EveningPrepItem.self, UserSettings.self, AudioRecording.self, EmotionalTakeoverNote.self, HabitHelperNote.self])
     }
     
     private func setupNotifications() {

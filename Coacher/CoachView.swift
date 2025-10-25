@@ -14,6 +14,7 @@ struct CoachView: View {
     @State private var userMessage = ""
     @State private var showConversationHistory = false
     @State private var showOnlineAIConfirmation = false
+    @State private var showComingSoon = true // Show coming soon overlay
     
     var body: some View {
         GeometryReader { geometry in
@@ -84,7 +85,7 @@ struct CoachView: View {
                         
                         // Removed floating scroll button - no automatic scrolling
                     }
-                    .onChange(of: hybridManager.chatHistory.count) { _ in
+                    .onChange(of: hybridManager.chatHistory.count) { _, _ in
                         // Auto-scroll to show the latest message when new messages are added
                         if let lastMessage = hybridManager.chatHistory.last {
                             withAnimation(.easeInOut(duration: 0.5)) {
@@ -261,7 +262,52 @@ struct CoachView: View {
                     .padding(.top, geometry.safeAreaInsets.top + 60)
                     Spacer()
                 }
+                }
             }
+            
+            // Coming Soon Overlay
+            if showComingSoon {
+                Color.black.opacity(0.3)
+                    .ignoresSafeArea()
+                    .onTapGesture {
+                        showComingSoon = false
+                    }
+                
+                VStack(spacing: 20) {
+                    Image(systemName: "brain.head.profile")
+                        .font(.system(size: 60))
+                        .foregroundColor(.blue)
+                    
+                    Text("AI Coach")
+                        .font(.largeTitle)
+                        .fontWeight(.bold)
+                        .foregroundColor(.primary)
+                    
+                    Text("Coming Soon")
+                        .font(.title2)
+                        .fontWeight(.medium)
+                        .foregroundColor(.secondary)
+                    
+                    Text("Your AI coach is being prepared to help you on your wellness journey. Stay tuned!")
+                        .font(.body)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 40)
+                    
+                    Button("Got it") {
+                        showComingSoon = false
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(.blue)
+                    .padding(.top, 10)
+                }
+                .padding(40)
+                .background(
+                    RoundedRectangle(cornerRadius: 20)
+                        .fill(colorScheme == .dark ? Color(.secondarySystemBackground) : Color.white)
+                        .shadow(color: .black.opacity(0.1), radius: 10, x: 0, y: 5)
+                )
+                .padding(.horizontal, 20)
             }
         }
         .sheet(isPresented: $showConversationHistory) {
@@ -276,7 +322,7 @@ struct CoachView: View {
             // Model loading is now handled globally in CoacherApp
             // No need to load here as it's already started in background
         }
-        .onChange(of: hybridManager.isUsingCloudAI) { _ in
+        .onChange(of: hybridManager.isUsingCloudAI) { _, _ in
             Task {
                 await hybridManager.updateAIMode()
             }

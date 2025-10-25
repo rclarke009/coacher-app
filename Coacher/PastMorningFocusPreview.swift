@@ -28,14 +28,14 @@ struct PastMorningFocusPreview: View {
             
             // Read-only form structure
             VStack(alignment: .leading, spacing: 12) {
-                Text("Morning Focus (10 minutes)")
+                Text("Morning Focus")
                     .font(.subheadline)
                     .bold()
                     .foregroundStyle(.secondary)
                 
                 // Step 1 - My Why
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Step 1 – My Why (2 minutes)")
+                    Text("Step 1 – My Why")
                         .font(.caption)
                         .bold()
                         .foregroundStyle(.secondary)
@@ -51,7 +51,7 @@ struct PastMorningFocusPreview: View {
                 
                 // Step 2 - Identify a Challenge
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Step 2 – Identify a Challenge (3 minutes)")
+                    Text("Step 2 – Identify a Challenge")
                         .font(.caption)
                         .bold()
                         .foregroundStyle(.secondary)
@@ -67,7 +67,7 @@ struct PastMorningFocusPreview: View {
                 
                 // Step 3 - Choose My Swap
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Step 3 – Choose My Swap (3 minutes)")
+                    Text("Step 3 – Choose My Swap")
                         .font(.caption)
                         .bold()
                         .foregroundStyle(.secondary)
@@ -83,7 +83,7 @@ struct PastMorningFocusPreview: View {
                 
                 // Step 4 - Commit
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Step 4 – Commit (2 minutes)")
+                    Text("Step 4 – Commit")
                         .font(.caption)
                         .bold()
                         .foregroundStyle(.secondary)

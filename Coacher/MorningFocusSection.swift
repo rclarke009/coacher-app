@@ -31,7 +31,7 @@ struct MorningFocusSection: View {
                             .fontWeight(.bold)
                             .foregroundColor(.white)
                     }
-                    Text("My Why (2 minutes)")
+                    Text("My Why")
                         .font(.headline)
                         .fontWeight(.semibold)
                     Spacer()
@@ -101,7 +101,7 @@ struct MorningFocusSection: View {
                             .fontWeight(.bold)
                             .foregroundColor(.white)
                     }
-                    Text("Focus on a Challenge (3 minutes)")
+                    Text("Focus on a Challenge")
                         .font(.headline)
                         .fontWeight(.semibold)
                 }
@@ -179,7 +179,7 @@ struct MorningFocusSection: View {
                             .fontWeight(.bold)
                             .foregroundColor(.white)
                     }
-                    Text("My Better Choice (3 minutes)")
+                    Text("My Better Choice")
                         .font(.headline)
                         .fontWeight(.semibold)
                 }
@@ -238,6 +238,9 @@ HStack(spacing: 16) {
             }
             
             
+        }
+        .onTapGesture {
+            hideKeyboard()
         }
         .onAppear {
             // Load saved challenge if current entry doesn't have one selected
@@ -323,6 +326,10 @@ HStack(spacing: 16) {
             // No previous update recorded, so no nudge needed yet
             showWhyNudge = false
         }
+    }
+    
+    private func hideKeyboard() {
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
     }
 }
 
