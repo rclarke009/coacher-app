@@ -202,12 +202,18 @@ struct CareFirstMorningFocusSection: View {
                         Text("Your why:")
                             .font(.headline)
                         
-                        Text(entry.whyThisMatters)
-                            .padding()
-                            .background(
-                                RoundedRectangle(cornerRadius: 8)
-                                    .fill(Color(.secondarySystemBackground))
-                            )
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("I want to")
+                                .font(.body)
+                                .foregroundColor(.secondary)
+                            Text(entry.whyThisMatters)
+                                .font(.body)
+                        }
+                        .padding()
+                        .background(
+                            RoundedRectangle(cornerRadius: 8)
+                                .fill(Color(.secondarySystemBackground))
+                        )
                         
                         Text("How does this feel today? Tap to edit if needed.")
                             .font(.caption)
@@ -965,10 +971,15 @@ struct CareFirstMorningFocusSection: View {
                                 .font(.subheadline)
                                 .fontWeight(.semibold)
                         }
-                        Text(entry.whyThisMatters)
-                            .font(.body)
-                            .foregroundColor(.primary)
-                            .frame(maxWidth: .infinity, alignment: .leading)
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("I want to")
+                                .font(.body)
+                                .foregroundColor(.secondary)
+                            Text(entry.whyThisMatters)
+                                .font(.body)
+                                .foregroundColor(.primary)
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
                     }
                     .padding(.vertical, 12)
                     .padding(.horizontal, 16)
@@ -1127,10 +1138,15 @@ struct CareFirstMorningFocusSection: View {
                                 .font(.subheadline)
                                 .fontWeight(.semibold)
                         }
-                        Text(entry.whyThisMatters)
-                            .font(.body)
-                            .foregroundColor(.primary)
-                            .frame(maxWidth: .infinity, alignment: .leading)
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("I want to")
+                                .font(.body)
+                                .foregroundColor(.secondary)
+                            Text(entry.whyThisMatters)
+                                .font(.body)
+                                .foregroundColor(.primary)
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
                     }
                     .padding(.vertical, 12)
                     .padding(.horizontal, 16)

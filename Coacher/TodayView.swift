@@ -261,7 +261,6 @@ struct MorningSummaryDisplayCard: View {
     let entry: DailyEntry
     let onRestart: () -> Void
     @Environment(\.colorScheme) private var colorScheme
-    @State private var showingRestartConfirmation = false
     
     var body: some View {
         VStack(spacing: 0) {
@@ -296,70 +295,146 @@ struct MorningSummaryDisplayCard: View {
             // Summary content
             VStack(alignment: .leading, spacing: 16) {
                 // Header
-                VStack(spacing: 8) {
-                    Text("You're ready to win the day")
-                        .font(.headline)
-                        .fontWeight(.semibold)
-                        .multilineTextAlignment(.center)
-                    
-                    HStack {
-                        Image(systemName: "sparkles")
-                            .foregroundColor(.blue)
-                        Text("Your Plan")
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                        Spacer()
-                    }
-                }
+                Text("You're ready to win the day")
+                    .font(.headline)
+                    .fontWeight(.semibold)
+                    .multilineTextAlignment(.center)
+                    .frame(maxWidth: .infinity)
                 
-                // Summary content in blue cards
-                VStack(spacing: 12) {
+                // Full plan summary as clean list
+                VStack(spacing: 0) {
                     // Why This Matters
                     if !entry.whyThisMatters.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                        SummaryItem(
-                            label: "Why This Matters",
-                            text: entry.whyThisMatters,
-                            color: .blue
-                        )
+                        VStack(alignment: .leading, spacing: 8) {
+                            HStack(spacing: 8) {
+                                Image(systemName: "target")
+                                    .foregroundColor(.blue)
+                                    .font(.system(size: 16))
+                                Text("Why This Matters")
+                                    .font(.subheadline)
+                                    .fontWeight(.semibold)
+                            }
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("I want to")
+                                    .font(.body)
+                                    .foregroundColor(.secondary)
+                                Text(entry.whyThisMatters)
+                                    .font(.body)
+                                    .foregroundColor(.primary)
+                            }
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                        }
+                        .padding(.vertical, 12)
+                        .padding(.horizontal, 16)
+                    }
+                    
+                    // Divider
+                    if !entry.whyThisMatters.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && 
+                       (entry.identityStatement?.isEmpty == false || !entry.todaysFocus.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || !entry.stressResponse.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty) {
+                        Divider()
+                            .padding(.horizontal, 16)
                     }
                     
                     // Identity Statement
                     if let identity = entry.identityStatement, !identity.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                        SummaryItem(
-                            label: "I Am Someone Who...",
-                            text: identity,
-                            color: .blue
-                        )
+                        VStack(alignment: .leading, spacing: 8) {
+                            HStack(spacing: 8) {
+                                Image(systemName: "person.fill")
+                                    .foregroundColor(.blue)
+                                    .font(.system(size: 16))
+                                Text("I Am Someone Who...")
+                                    .font(.subheadline)
+                                    .fontWeight(.semibold)
+                            }
+                            Text(identity)
+                                .font(.body)
+                                .foregroundColor(.primary)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                        }
+                        .padding(.vertical, 12)
+                        .padding(.horizontal, 16)
+                    }
+                    
+                    // Divider
+                    if let identity = entry.identityStatement, !identity.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && 
+                       (!entry.todaysFocus.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || !entry.stressResponse.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty) {
+                        Divider()
+                            .padding(.horizontal, 16)
                     }
                     
                     // Today's Focus
                     if !entry.todaysFocus.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                        SummaryItem(
-                            label: "Today's Focus",
-                            text: entry.todaysFocus,
-                            color: .blue
-                        )
+                        VStack(alignment: .leading, spacing: 8) {
+                            HStack(spacing: 8) {
+                                Image(systemName: "sun.max.fill")
+                                    .foregroundColor(.blue)
+                                    .font(.system(size: 16))
+                                Text("Today's Focus")
+                                    .font(.subheadline)
+                                    .fontWeight(.semibold)
+                            }
+                            Text(entry.todaysFocus)
+                                .font(.body)
+                                .foregroundColor(.primary)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                        }
+                        .padding(.vertical, 12)
+                        .padding(.horizontal, 16)
+                    }
+                    
+                    // Divider
+                    if !entry.todaysFocus.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && 
+                       !entry.stressResponse.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                        Divider()
+                            .padding(.horizontal, 16)
                     }
                     
                     // Stress Response
                     if !entry.stressResponse.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                        SummaryItem(
-                            label: "Stress Response",
-                            text: entry.stressResponse,
-                            color: .blue
-                        )
+                        VStack(alignment: .leading, spacing: 8) {
+                            HStack(spacing: 8) {
+                                Image(systemName: "heart.fill")
+                                    .foregroundColor(.blue)
+                                    .font(.system(size: 16))
+                                Text("If Stressed")
+                                    .font(.subheadline)
+                                    .fontWeight(.semibold)
+                            }
+                            Text(entry.stressResponse)
+                                .font(.body)
+                                .foregroundColor(.primary)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                        }
+                        .padding(.vertical, 12)
+                        .padding(.horizontal, 16)
                     }
                 }
+                .background(
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(Color(.systemGray6))
+                )
                 
-                // Action buttons
-                HStack(spacing: 12) {
-                    Button("Restart") {
-                        showingRestartConfirmation = true
+                // Restart button (immediate action, no confirmation)
+                Button(action: {
+                    onRestart()
+                }) {
+                    HStack(spacing: 8) {
+                        Image(systemName: "arrow.clockwise")
+                            .font(.system(size: 16, weight: .medium))
+                        Text("Restart Morning Focus")
+                            .font(.system(size: 16, weight: .medium))
                     }
-                    .buttonStyle(.bordered)
                     .foregroundColor(.blue)
-                    
-                    Spacer()
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 12)
+                    .background(
+                        RoundedRectangle(cornerRadius: 25)
+                            .fill(Color.blue.opacity(0.1))
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 25)
+                            .strokeBorder(Color.blue.opacity(0.3), lineWidth: 1)
+                    )
                 }
             }
             .padding(14)
@@ -369,14 +444,6 @@ struct MorningSummaryDisplayCard: View {
                 .fill(Color.morningFocusBackground)
         )
         .clipShape(.rect(cornerRadius: 16, style: .continuous))
-        .confirmationDialog("Restart Morning Flow", isPresented: $showingRestartConfirmation) {
-            Button("Restart", role: .destructive) {
-                onRestart()
-            }
-            Button("Cancel", role: .cancel) { }
-        } message: {
-            Text("This will reset your morning flow so you can go through it again. Your current answers will be pre-filled.")
-        }
     }
 }
 
