@@ -132,15 +132,6 @@ struct CareFirstMorningFocusSection: View {
                 isInitialLoad = false
             }
         }
-        .onChange(of: entry.identityStatement) { _, _ in
-            checkForCelebration()
-        }
-        .onChange(of: entry.todaysFocus) { _, _ in
-            checkForCelebration()
-        }
-        .onChange(of: entry.stressResponse) { _, _ in
-            checkForCelebration()
-        }
         .onDisappear {
             // Clean up video observer when view disappears
             if let observer = videoObserver {
@@ -941,11 +932,11 @@ struct CareFirstMorningFocusSection: View {
         }
     }
     private var completionStep: some View {
-        VStack(spacing: 30) {
-            // Big checkmark animation
-            VStack(spacing: 20) {
+        VStack(spacing: 24) {
+            // Header with checkmark
+            VStack(spacing: 12) {
                 Image(systemName: "checkmark.circle.fill")
-                    .font(.system(size: 80))
+                    .font(.system(size: 40))
                     .foregroundStyle(.green)
                     .scaleEffect(1.0)
                     .animation(.spring(response: 0.6, dampingFraction: 0.8), value: currentStep)
@@ -955,39 +946,143 @@ struct CareFirstMorningFocusSection: View {
                     .fontWeight(.bold)
                     .multilineTextAlignment(.center)
                 
-                Text("You're ready to win the day.")
-                    .font(.headline)
-                    .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.center)
-            }
-            
-            // Encouragement line
-            VStack(spacing: 12) {
-                Text(encouragementMessage)
+                Text("You're ready to win the day")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
-                    .italic()
-                    .padding(.horizontal)
             }
             
-            // Show their chosen focus for reinforcement
-            if !entry.todaysFocus.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                VStack(spacing: 8) {
-                    Text("Your focus for today:")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                    
-                    Text(entry.todaysFocus)
-                        .font(.body)
-                        .fontWeight(.medium)
-                        .multilineTextAlignment(.center)
-                        .padding()
-                        .background(
-                            RoundedRectangle(cornerRadius: 12)
-                                .fill(Color.helpButtonBlue.opacity(0.1))
-                        )
+            // Full plan summary as clean list
+            VStack(spacing: 0) {
+                // Why This Matters
+                if !entry.whyThisMatters.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                    VStack(alignment: .leading, spacing: 8) {
+                        HStack(spacing: 8) {
+                            Image(systemName: "target")
+                                .foregroundColor(.blue)
+                                .font(.system(size: 16))
+                            Text("Why This Matters")
+                                .font(.subheadline)
+                                .fontWeight(.semibold)
+                        }
+                        Text(entry.whyThisMatters)
+                            .font(.body)
+                            .foregroundColor(.primary)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                    .padding(.vertical, 12)
+                    .padding(.horizontal, 16)
                 }
+                
+                // Divider
+                if !entry.whyThisMatters.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && 
+                   (entry.identityStatement?.isEmpty == false || !entry.todaysFocus.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || !entry.stressResponse.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty) {
+                    Divider()
+                        .padding(.horizontal, 16)
+                }
+                
+                // Identity Statement
+                if let identity = entry.identityStatement, !identity.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                    VStack(alignment: .leading, spacing: 8) {
+                        HStack(spacing: 8) {
+                            Image(systemName: "person.fill")
+                                .foregroundColor(.blue)
+                                .font(.system(size: 16))
+                            Text("I Am Someone Who...")
+                                .font(.subheadline)
+                                .fontWeight(.semibold)
+                        }
+                        Text(identity)
+                            .font(.body)
+                            .foregroundColor(.primary)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                    .padding(.vertical, 12)
+                    .padding(.horizontal, 16)
+                }
+                
+                // Divider
+                if let identity = entry.identityStatement, !identity.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && 
+                   (!entry.todaysFocus.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || !entry.stressResponse.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty) {
+                    Divider()
+                        .padding(.horizontal, 16)
+                }
+                
+                // Today's Focus
+                if !entry.todaysFocus.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                    VStack(alignment: .leading, spacing: 8) {
+                        HStack(spacing: 8) {
+                            Image(systemName: "sun.max.fill")
+                                .foregroundColor(.blue)
+                                .font(.system(size: 16))
+                            Text("Today's Focus")
+                                .font(.subheadline)
+                                .fontWeight(.semibold)
+                        }
+                        Text(entry.todaysFocus)
+                            .font(.body)
+                            .foregroundColor(.primary)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                    .padding(.vertical, 12)
+                    .padding(.horizontal, 16)
+                }
+                
+                // Divider
+                if !entry.todaysFocus.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && 
+                   !entry.stressResponse.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                    Divider()
+                        .padding(.horizontal, 16)
+                }
+                
+                // Stress Response
+                if !entry.stressResponse.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                    VStack(alignment: .leading, spacing: 8) {
+                        HStack(spacing: 8) {
+                            Image(systemName: "heart.fill")
+                                .foregroundColor(.blue)
+                                .font(.system(size: 16))
+                            Text("If Stressed")
+                                .font(.subheadline)
+                                .fontWeight(.semibold)
+                        }
+                        Text(entry.stressResponse)
+                            .font(.body)
+                            .foregroundColor(.primary)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                    .padding(.vertical, 12)
+                    .padding(.horizontal, 16)
+                }
+            }
+            .background(
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(Color(.systemGray6))
+            )
+            
+            // Restart button
+            Button(action: {
+                withAnimation(.easeInOut(duration: 0.3)) {
+                    currentStep = 0
+                }
+            }) {
+                HStack(spacing: 8) {
+                    Image(systemName: "arrow.clockwise")
+                        .font(.system(size: 16, weight: .medium))
+                    Text("Restart Morning Focus")
+                        .font(.system(size: 16, weight: .medium))
+                }
+                .foregroundColor(.blue)
+                .padding(.horizontal, 20)
+                .padding(.vertical, 12)
+                .background(
+                    RoundedRectangle(cornerRadius: 25)
+                        .fill(Color.blue.opacity(0.1))
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 25)
+                        .strokeBorder(Color.blue.opacity(0.3), lineWidth: 1)
+                )
             }
             
             Spacer()
@@ -1004,11 +1099,11 @@ struct CareFirstMorningFocusSection: View {
         VStack(spacing: 24) {
             // Header
             VStack(spacing: 12) {
-                Image(systemName: "sparkles")
+                Image(systemName: "checkmark.circle.fill")
                     .font(.system(size: 40))
-                    .foregroundStyle(.blue)
+                    .foregroundStyle(.green)
                 
-                Text("Your Plan")
+                Text("Morning Focus Complete")
                     .font(.title2)
                     .fontWeight(.bold)
                     .multilineTextAlignment(.center)
@@ -1019,28 +1114,33 @@ struct CareFirstMorningFocusSection: View {
                     .multilineTextAlignment(.center)
             }
             
-            // Summary content in blue card
-            VStack(spacing: 20) {
+            // Full plan summary as clean list
+            VStack(spacing: 0) {
                 // Why This Matters
                 if !entry.whyThisMatters.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                     VStack(alignment: .leading, spacing: 8) {
                         HStack(spacing: 8) {
                             Image(systemName: "target")
                                 .foregroundColor(.blue)
+                                .font(.system(size: 16))
                             Text("Why This Matters")
-                                .font(.headline)
+                                .font(.subheadline)
                                 .fontWeight(.semibold)
                         }
                         Text(entry.whyThisMatters)
-                            .font(.headline)
+                            .font(.body)
                             .foregroundColor(.primary)
+                            .frame(maxWidth: .infinity, alignment: .leading)
                     }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding()
-                    .background(
-                        RoundedRectangle(cornerRadius: 12)
-                            .fill(Color.blue.opacity(0.1))
-                    )
+                    .padding(.vertical, 12)
+                    .padding(.horizontal, 16)
+                }
+                
+                // Divider
+                if !entry.whyThisMatters.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && 
+                   (entry.identityStatement?.isEmpty == false || !entry.todaysFocus.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || !entry.stressResponse.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty) {
+                    Divider()
+                        .padding(.horizontal, 16)
                 }
                 
                 // Identity Statement
@@ -1049,86 +1149,103 @@ struct CareFirstMorningFocusSection: View {
                         HStack(spacing: 8) {
                             Image(systemName: "person.fill")
                                 .foregroundColor(.blue)
+                                .font(.system(size: 16))
                             Text("I Am Someone Who...")
-                                .font(.headline)
+                                .font(.subheadline)
                                 .fontWeight(.semibold)
                         }
                         Text(identity)
-                            .font(.headline)
+                            .font(.body)
                             .foregroundColor(.primary)
+                            .frame(maxWidth: .infinity, alignment: .leading)
                     }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding()
-                    .background(
-                        RoundedRectangle(cornerRadius: 12)
-                            .fill(Color.blue.opacity(0.1))
-                    )
+                    .padding(.vertical, 12)
+                    .padding(.horizontal, 16)
+                }
+                
+                // Divider
+                if let identity = entry.identityStatement, !identity.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && 
+                   (!entry.todaysFocus.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || !entry.stressResponse.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty) {
+                    Divider()
+                        .padding(.horizontal, 16)
                 }
                 
                 // Today's Focus
                 if !entry.todaysFocus.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                     VStack(alignment: .leading, spacing: 8) {
                         HStack(spacing: 8) {
-                            Image(systemName: "list.bullet")
+                            Image(systemName: "sun.max.fill")
                                 .foregroundColor(.blue)
+                                .font(.system(size: 16))
                             Text("Today's Focus")
-                                .font(.headline)
+                                .font(.subheadline)
                                 .fontWeight(.semibold)
                         }
                         Text(entry.todaysFocus)
-                            .font(.headline)
+                            .font(.body)
                             .foregroundColor(.primary)
+                            .frame(maxWidth: .infinity, alignment: .leading)
                     }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding()
-                    .background(
-                        RoundedRectangle(cornerRadius: 12)
-                            .fill(Color.blue.opacity(0.1))
-                    )
+                    .padding(.vertical, 12)
+                    .padding(.horizontal, 16)
+                }
+                
+                // Divider
+                if !entry.todaysFocus.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && 
+                   !entry.stressResponse.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                    Divider()
+                        .padding(.horizontal, 16)
                 }
                 
                 // Stress Response
                 if !entry.stressResponse.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                     VStack(alignment: .leading, spacing: 8) {
                         HStack(spacing: 8) {
-                            Image(systemName: "shield.fill")
+                            Image(systemName: "heart.fill")
                                 .foregroundColor(.blue)
-                            Text("Stress Response")
-                                .font(.headline)
+                                .font(.system(size: 16))
+                            Text("If Stressed")
+                                .font(.subheadline)
                                 .fontWeight(.semibold)
                         }
                         Text(entry.stressResponse)
-                            .font(.headline)
+                            .font(.body)
                             .foregroundColor(.primary)
+                            .frame(maxWidth: .infinity, alignment: .leading)
                     }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding()
-                    .background(
-                        RoundedRectangle(cornerRadius: 12)
-                            .fill(Color.blue.opacity(0.1))
-                    )
+                    .padding(.vertical, 12)
+                    .padding(.horizontal, 16)
                 }
             }
+            .background(
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(Color(.systemGray6))
+            )
             
-            // Action buttons
-            HStack(spacing: 16) {
-                Button("Restart") {
-                    // Go back to step 0 with current answers pre-filled
-                    withAnimation(.easeInOut(duration: 0.3)) {
-                        currentStep = 0
-                    }
+            // Restart button (immediate action, no confirmation)
+            Button(action: {
+                withAnimation(.easeInOut(duration: 0.3)) {
+                    currentStep = 0
                 }
-                .buttonStyle(.bordered)
+            }) {
+                HStack(spacing: 8) {
+                    Image(systemName: "arrow.clockwise")
+                        .font(.system(size: 16, weight: .medium))
+                    Text("Restart Morning Focus")
+                        .font(.system(size: 16, weight: .medium))
+                }
                 .foregroundColor(.blue)
-                
-                Button("Done") {
-                    // Complete the morning flow
-                    completeMorningFlow()
-                }
-                .buttonStyle(.borderedProminent)
-                .tint(.blue)
+                .padding(.horizontal, 20)
+                .padding(.vertical, 12)
+                .background(
+                    RoundedRectangle(cornerRadius: 25)
+                        .fill(Color.blue.opacity(0.1))
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 25)
+                        .strokeBorder(Color.blue.opacity(0.3), lineWidth: 1)
+                )
             }
-            .padding(.top, 8)
             
             Spacer()
         }

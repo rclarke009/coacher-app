@@ -47,16 +47,6 @@ struct ContentView: View {
                 notificationHandler.shouldShowTab = 0 // Reset
             }
         }
-        .overlay(
-            // Status bar cover - tiny strip to hide distracting system elements
-            VStack {
-                Rectangle()
-                    .fill(Color.appBackground)
-                    .frame(height: 70) // Covers status bar area and row above Today
-                    .ignoresSafeArea(.all, edges: .top)
-                Spacer()
-            }
-        )
         .fullScreenCover(isPresented: $showOnboarding) {
             OnboardingView(isPresented: $showOnboarding)
         }

@@ -90,14 +90,6 @@ struct HistoryView: View {
                 .padding(.vertical)
             }
             .navigationTitle("History")
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Debug") {
-                        debugData()
-                    }
-                    .font(.caption)
-                }
-            }
             .background(
                 Color.appBackground
                     .ignoresSafeArea(.all)

@@ -83,7 +83,7 @@ struct DayBucket: View {
                 }
                 
                 MorningFocusCard(
-                    title: "Morning Focus (Today)",
+                    title: "Morning Focus",
                     icon: "sun.max.fill",
                     isCompleted: hasCompletedMorningToday
                 ) {

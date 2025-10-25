@@ -33,7 +33,7 @@ struct TodayView: View {
                 ScrollView {
                     VStack(spacing: 14) {
                     
-            // Morning Focus (Today) - Primary in Day Phase
+            // Morning Focus - Primary in Day Phase
             if entry.morningFlowCompletedToday && !shouldResetMorningFlow {
                 // Show summary card when morning flow is completed
                 MorningSummaryDisplayCard(entry: entry, onRestart: {
@@ -110,11 +110,20 @@ struct TodayView: View {
                     .padding(.top)
                 }
                 .padding(.horizontal)
-                .padding(.top, 20)
+                .padding(.top, 2)
             }
             }
-            .navigationTitle("Today")
+            //.navigationTitle("Good \(timeManager.greeting), \(UserDefaults.standard.string(forKey: "userName") ?? "friend")")
+            .navigationTitle("Good \(timeManager.greeting)")
+
+            //.navigationBarTitleDisplayMode(.inline)
             .onAppear {
+                // Reset navigation bar appearance to default
+                let appearance = UINavigationBarAppearance()
+                appearance.configureWithDefaultBackground()
+                UINavigationBar.appearance().standardAppearance = appearance
+                UINavigationBar.appearance().scrollEdgeAppearance = appearance
+                
                 loadOrCreateToday()
                 setDefaultExpansionStates()
                 checkMorningCompletionToday()
@@ -263,7 +272,7 @@ struct MorningSummaryDisplayCard: View {
                     .foregroundStyle(colorScheme == .dark ? .white : .black)
                     .accessibilityHidden(true)
                 
-                Text("Morning Focus (Today)")
+                Text("Morning Focus")
                     .font(.headline)
                     .fontWeight(.semibold)
                     .multilineTextAlignment(.leading)
@@ -354,7 +363,6 @@ struct MorningSummaryDisplayCard: View {
                 }
             }
             .padding(14)
-            .padding(.top, 0) // Reduce top padding to connect with header
         }
         .background(
             RoundedRectangle(cornerRadius: 16, style: .continuous)

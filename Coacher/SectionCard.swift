@@ -78,7 +78,6 @@ struct SectionCard<Content: View>: View {
                     content
                 }
                 .padding(14) // Add padding back for all accents
-                .padding(.top, 0) // Reduce top padding to connect with header
             }
         }
         .background(
@@ -174,7 +173,7 @@ enum SectionAccent: CaseIterable {
     VStack(spacing: 20) {
         // Active section (blue)
         SectionCard(
-            title: "Morning Focus (Today)",
+            title: "Morning Focus",
             icon: "sun.max.fill",
             accent: .blue,
             collapsed: .constant(false),
@@ -277,7 +276,6 @@ struct MorningFocusCard<Content: View>: View {
                 content
             }
             .padding(14)
-            .padding(.top, 0) // Reduce top padding to connect with header
         }
         .background(
             RoundedRectangle(cornerRadius: 16, style: .continuous)

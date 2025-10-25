@@ -48,4 +48,17 @@ class TimeManager: ObservableObject {
     var lastNightDate: Date {
         Calendar.current.date(byAdding: .day, value: -1, to: todayDate) ?? todayDate
     }
+    
+    // Get appropriate greeting based on time of day
+    var greeting: String {
+        let hour = Calendar.current.component(.hour, from: Date())
+        switch hour {
+        case 5..<12:
+            return "morning"
+        case 12..<18:
+            return "afternoon"
+        default:
+            return "evening"
+        }
+    }
 }
