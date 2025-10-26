@@ -8,6 +8,7 @@
 import SwiftUI
 import SwiftData
 import AVKit
+import WidgetKit
 
 enum BreathingPhase {
     case inhale
@@ -805,6 +806,17 @@ struct CareFirstMorningFocusSection: View {
         // Mark morning routine as completed today
         hasCompletedMorningToday = true
         UserDefaults.standard.set(Date(), forKey: "morningCompletedDate")
+        
+        // Write widget data to UserDefaults for real-time widget updates
+        let userDefaults = UserDefaults(suiteName: "group.com.coacher.shared") ?? UserDefaults.standard
+        userDefaults.set(Date(), forKey: "morningCompletedDate")
+        userDefaults.set(entry.whyThisMatters, forKey: "morningWhy")
+        userDefaults.set(entry.identityStatement ?? "", forKey: "morningIdentity")
+        userDefaults.set(entry.todaysFocus, forKey: "morningFocus")
+        userDefaults.set(entry.stressResponse, forKey: "morningStressResponse")
+        
+        // Reload widget to show updated data
+        WidgetCenter.shared.reloadAllTimelines()
         
         // Trigger celebration
         celebrationManager.triggerCelebration(for: .morningFlowCompleted)

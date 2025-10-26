@@ -9,16 +9,23 @@ import SwiftUI
 import SwiftData
 import UserNotifications
 
+enum DeepLinkDestination {
+    case needHelp
+    case success
+    case morningFocus
+}
+
 @main
 struct CoacherApp: App {
     @StateObject private var celebrationManager = CelebrationManager()
     @StateObject private var reminderManager = ReminderManager.shared
     @StateObject private var notificationHandler = NotificationHandler.shared
     @StateObject private var hybridManager = HybridLLMManager()
+    @State private var deepLinkDestination: DeepLinkDestination?
     
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            ContentView(deepLinkDestination: $deepLinkDestination)
                 .environmentObject(celebrationManager)
                 .environmentObject(reminderManager)
                 .environmentObject(notificationHandler)
@@ -27,8 +34,30 @@ struct CoacherApp: App {
                     setupNotifications()
                     startBackgroundModelLoading()
                 }
+                .onOpenURL { url in
+                    handleDeepLink(url)
+                }
         }
-        .modelContainer(for: [DailyEntry.self, Achievement.self, LLMMessage.self, CravingNote.self, SuccessNote.self, EveningPrepItem.self, UserSettings.self, AudioRecording.self, EmotionalTakeoverNote.self, HabitHelperNote.self])
+//        .modelContainer(for: [DailyEntry.self, Achievement.self, LLMMessage.self, CravingNote.self, SuccessNote.self, EveningPrepItem.self, UserSettings.self, AudioRecording.self, EmotionalTakeoverNote.self, HabitHelperNote.self])
+        .modelContainer(for: [DailyEntry.self, Achievement.self, LLMMessage.self, CravingNote.self, SuccessNote.self, EveningPrepItem.self, UserSettings.self, AudioRecording.self, EmotionalTakeoverNote.self, HabitHelperNote.self], inMemory: false)
+    }
+    
+    private func handleDeepLink(_ url: URL) {
+        switch url.scheme {
+        case "coacher":
+            switch url.host {
+            case "needhelp":
+                deepLinkDestination = .needHelp
+            case "success":
+                deepLinkDestination = .success
+            case "morningfocus":
+                deepLinkDestination = .morningFocus
+            default:
+                break
+            }
+        default:
+            break
+        }
     }
     
     private func setupNotifications() {

@@ -13,7 +13,10 @@ struct ContentView: View {
     @EnvironmentObject private var hybridManager: HybridLLMManager
     @State private var selectedTab = 0
     @State private var showOnboarding = !UserDefaults.standard.bool(forKey: "hasCompletedOnboarding")
+    @State private var showNeedHelp = false
+    @State private var showSuccessCapture = false
     @Environment(\.colorScheme) private var colorScheme
+    @Binding var deepLinkDestination: DeepLinkDestination?
     
     var body: some View {
         TabView(selection: $selectedTab) {
@@ -50,6 +53,27 @@ struct ContentView: View {
         .fullScreenCover(isPresented: $showOnboarding) {
             OnboardingView(isPresented: $showOnboarding)
         }
+        .sheet(isPresented: $showNeedHelp) {
+            NeedHelpView()
+        }
+        .sheet(isPresented: $showSuccessCapture) {
+            SuccessCaptureView()
+        }
+        .onChange(of: deepLinkDestination) { _, destination in
+            switch destination {
+            case .needHelp:
+                showNeedHelp = true
+                deepLinkDestination = nil
+            case .success:
+                showSuccessCapture = true
+                deepLinkDestination = nil
+            case .morningFocus:
+                selectedTab = 0 // Switch to Today tab
+                deepLinkDestination = nil
+            case .none:
+                break
+            }
+        }
     }
     
     private func updateTabBarAppearance() {
@@ -82,6 +106,6 @@ struct ContentView: View {
 }
 
 #Preview {
-    ContentView()
+    ContentView(deepLinkDestination: .constant(nil))
         .modelContainer(for: [DailyEntry.self, Achievement.self, LLMMessage.self, CravingNote.self, EveningPrepItem.self, UserSettings.self, AudioRecording.self], inMemory: true)
 }

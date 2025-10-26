@@ -25,12 +25,22 @@
 		A92391742E6CF1CA00BB7B8E /* hub-cli in Frameworks */ = {isa = PBXBuildFile; productRef = A92391732E6CF1CA00BB7B8E /* hub-cli */; };
 		A98275FF2E65EE3B006F3DA5 /* MarkdownUI in Frameworks */ = {isa = PBXBuildFile; productRef = A9ACE9002E6530A800BB3ADD /* MarkdownUI */; };
 		A98276E52E693076006F3DA5 /* night prep additional.txt in Resources */ = {isa = PBXBuildFile; fileRef = A98276E42E693076006F3DA5 /* night prep additional.txt */; };
+		A989BB782EAE54870031A5F7 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A989BB502EADB1EA0031A5F7 /* WidgetKit.framework */; };
+		A989BB792EAE54870031A5F7 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A989BB522EADB1EA0031A5F7 /* SwiftUI.framework */; };
+		A989BB8A2EAE54880031A5F7 /* CoacherWidget2Extension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = A989BB772EAE54870031A5F7 /* CoacherWidget2Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		A99BF8EB2E91D29100CE8411 /* requirement tweaks.md in Resources */ = {isa = PBXBuildFile; fileRef = A99BF8EA2E91D27C00CE8411 /* requirement tweaks.md */; };
 		A99BFB092EA488C300CE8411 /* emotion pattern feature.md in Resources */ = {isa = PBXBuildFile; fileRef = A99BFB082EA488A900CE8411 /* emotion pattern feature.md */; };
 		A99BFB0B2EA48A5000CE8411 /* habit fix.md in Resources */ = {isa = PBXBuildFile; fileRef = A99BFB0A2EA48A5000CE8411 /* habit fix.md */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		A989BB882EAE54880031A5F7 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A9ACE3A62E63EB0A00BB3ADD /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = A989BB762EAE54870031A5F7;
+			remoteInfo = CoacherWidget2Extension;
+		};
 		A9ACE3C12E63EB0B00BB3ADD /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = A9ACE3A62E63EB0A00BB3ADD /* Project object */;
@@ -48,6 +58,17 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		A989BB8F2EAE54880031A5F7 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				A989BB8A2EAE54880031A5F7 /* CoacherWidget2Extension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		A99BFAFB2EA47B9E00CE8411 /* Embed Watch Content */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -62,6 +83,12 @@
 
 /* Begin PBXFileReference section */
 		A98276E42E693076006F3DA5 /* night prep additional.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "night prep additional.txt"; sourceTree = "<group>"; };
+		A989BB502EADB1EA0031A5F7 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		A989BB522EADB1EA0031A5F7 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		A989BB662EADB2310031A5F7 /* CoacherWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CoacherWidgetExtension.entitlements; sourceTree = "<group>"; };
+		A989BB672EADB2500031A5F7 /* Lighter-Tomorrow-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "Lighter-Tomorrow-Info.plist"; sourceTree = "<group>"; };
+		A989BB772EAE54870031A5F7 /* CoacherWidget2Extension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = CoacherWidget2Extension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		A989BB922EAE55F00031A5F7 /* CoacherWidget2Extension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CoacherWidget2Extension.entitlements; sourceTree = "<group>"; };
 		A99BF8EA2E91D27C00CE8411 /* requirement tweaks.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "requirement tweaks.md"; sourceTree = "<group>"; };
 		A99BFB082EA488A900CE8411 /* emotion pattern feature.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "emotion pattern feature.md"; sourceTree = "<group>"; };
 		A99BFB0A2EA48A5000CE8411 /* habit fix.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "habit fix.md"; sourceTree = "<group>"; };
@@ -70,9 +97,57 @@
 		A9ACE3CA2E63EB0B00BB3ADD /* Lighter TomorrowUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Lighter TomorrowUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		A989BB8B2EAE54880031A5F7 /* Exceptions for "CoacherWidget2" folder in "CoacherWidget2Extension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = A989BB762EAE54870031A5F7 /* CoacherWidget2Extension */;
+		};
+		A989BB942EAE56370031A5F7 /* Exceptions for "Coacher" folder in "CoacherWidget2Extension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Achievement.swift,
+				AudioRecording.swift,
+				"Color+Extensions.swift",
+				CravingNote.swift,
+				DailyEntry.swift,
+				EmotionalTakeoverNote.swift,
+				EveningPrepItem.swift,
+				HabitHelperNote.swift,
+				LLMMessage.swift,
+				SuccessNote.swift,
+				UserSettings.swift,
+			);
+			target = A989BB762EAE54870031A5F7 /* CoacherWidget2Extension */;
+		};
+		A989BB982EAE56DF0031A5F7 /* Exceptions for "CoacherWidget2" folder in "Lighter Tomorrow" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				CoacherTimelineProvider.swift,
+				WidgetEntry.swift,
+				WidgetViews.swift,
+			);
+			target = A9ACE3AD2E63EB0A00BB3ADD /* Lighter Tomorrow */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		A989BB7A2EAE54870031A5F7 /* CoacherWidget2 */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				A989BB982EAE56DF0031A5F7 /* Exceptions for "CoacherWidget2" folder in "Lighter Tomorrow" target */,
+				A989BB8B2EAE54880031A5F7 /* Exceptions for "CoacherWidget2" folder in "CoacherWidget2Extension" target */,
+			);
+			path = CoacherWidget2;
+			sourceTree = "<group>";
+		};
 		A9ACE3B02E63EB0A00BB3ADD /* Coacher */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				A989BB942EAE56370031A5F7 /* Exceptions for "Coacher" folder in "CoacherWidget2Extension" target */,
+			);
 			path = Coacher;
 			sourceTree = "<group>";
 		};
@@ -89,6 +164,15 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		A989BB742EAE54870031A5F7 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A989BB792EAE54870031A5F7 /* SwiftUI.framework in Frameworks */,
+				A989BB782EAE54870031A5F7 /* WidgetKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		A9ACE3AB2E63EB0A00BB3ADD /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -130,12 +214,26 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		A989BB4F2EADB1EA0031A5F7 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				A989BB502EADB1EA0031A5F7 /* WidgetKit.framework */,
+				A989BB522EADB1EA0031A5F7 /* SwiftUI.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		A9ACE3A52E63EB0A00BB3ADD = {
 			isa = PBXGroup;
 			children = (
+				A989BB922EAE55F00031A5F7 /* CoacherWidget2Extension.entitlements */,
+				A989BB672EADB2500031A5F7 /* Lighter-Tomorrow-Info.plist */,
+				A989BB662EADB2310031A5F7 /* CoacherWidgetExtension.entitlements */,
 				A9ACE3B02E63EB0A00BB3ADD /* Coacher */,
 				A9ACE3C32E63EB0B00BB3ADD /* CoacherTests */,
 				A9ACE3CD2E63EB0B00BB3ADD /* CoacherUITests */,
+				A989BB7A2EAE54870031A5F7 /* CoacherWidget2 */,
+				A989BB4F2EADB1EA0031A5F7 /* Frameworks */,
 				A9ACE3AF2E63EB0A00BB3ADD /* Products */,
 				A98276E42E693076006F3DA5 /* night prep additional.txt */,
 				A99BF8EA2E91D27C00CE8411 /* requirement tweaks.md */,
@@ -150,6 +248,7 @@
 				A9ACE3AE2E63EB0A00BB3ADD /* Lighter Tomorrow.app */,
 				A9ACE3C02E63EB0B00BB3ADD /* Lighter TomorrowTests.xctest */,
 				A9ACE3CA2E63EB0B00BB3ADD /* Lighter TomorrowUITests.xctest */,
+				A989BB772EAE54870031A5F7 /* CoacherWidget2Extension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -157,6 +256,28 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		A989BB762EAE54870031A5F7 /* CoacherWidget2Extension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A989BB8C2EAE54880031A5F7 /* Build configuration list for PBXNativeTarget "CoacherWidget2Extension" */;
+			buildPhases = (
+				A989BB732EAE54870031A5F7 /* Sources */,
+				A989BB742EAE54870031A5F7 /* Frameworks */,
+				A989BB752EAE54870031A5F7 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				A989BB7A2EAE54870031A5F7 /* CoacherWidget2 */,
+			);
+			name = CoacherWidget2Extension;
+			packageProductDependencies = (
+			);
+			productName = CoacherWidget2Extension;
+			productReference = A989BB772EAE54870031A5F7 /* CoacherWidget2Extension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		A9ACE3AD2E63EB0A00BB3ADD /* Lighter Tomorrow */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = A9ACE3D42E63EB0B00BB3ADD /* Build configuration list for PBXNativeTarget "Lighter Tomorrow" */;
@@ -165,10 +286,12 @@
 				A9ACE3AB2E63EB0A00BB3ADD /* Frameworks */,
 				A9ACE3AC2E63EB0A00BB3ADD /* Resources */,
 				A99BFAFB2EA47B9E00CE8411 /* Embed Watch Content */,
+				A989BB8F2EAE54880031A5F7 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				A989BB892EAE54880031A5F7 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				A9ACE3B02E63EB0A00BB3ADD /* Coacher */,
@@ -253,6 +376,9 @@
 				LastSwiftUpdateCheck = 1640;
 				LastUpgradeCheck = 1640;
 				TargetAttributes = {
+					A989BB762EAE54870031A5F7 = {
+						CreatedOnToolsVersion = 16.4;
+					};
 					A9ACE3AD2E63EB0A00BB3ADD = {
 						CreatedOnToolsVersion = 16.4;
 					};
@@ -290,11 +416,19 @@
 				A9ACE3AD2E63EB0A00BB3ADD /* Lighter Tomorrow */,
 				A9ACE3BF2E63EB0B00BB3ADD /* Lighter TomorrowTests */,
 				A9ACE3C92E63EB0B00BB3ADD /* Lighter TomorrowUITests */,
+				A989BB762EAE54870031A5F7 /* CoacherWidget2Extension */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		A989BB752EAE54870031A5F7 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		A9ACE3AC2E63EB0A00BB3ADD /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -323,6 +457,13 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		A989BB732EAE54870031A5F7 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		A9ACE3AA2E63EB0A00BB3ADD /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -347,6 +488,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		A989BB892EAE54880031A5F7 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = A989BB762EAE54870031A5F7 /* CoacherWidget2Extension */;
+			targetProxy = A989BB882EAE54880031A5F7 /* PBXContainerItemProxy */;
+		};
 		A9ACE3C22E63EB0B00BB3ADD /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = A9ACE3AD2E63EB0A00BB3ADD /* Lighter Tomorrow */;
@@ -360,6 +506,64 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		A989BB8D2EAE54880031A5F7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = CoacherWidget2Extension.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = Q3CS4DPG9Y;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = CoacherWidget2/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = CoacherWidget2;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.RestRiseGrow.LighterTomorrow.CoacherWidget2;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		A989BB8E2EAE54880031A5F7 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = CoacherWidget2Extension.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = Q3CS4DPG9Y;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = CoacherWidget2/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = CoacherWidget2;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.RestRiseGrow.LighterTomorrow.CoacherWidget2;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 		A9ACE3D22E63EB0B00BB3ADD /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -489,10 +693,11 @@
 				CODE_SIGN_ENTITLEMENTS = Coacher/Coacher.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 6;
 				DEVELOPMENT_TEAM = Q3CS4DPG9Y;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Lighter-Tomorrow-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = Lighter;
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Lighter Tomorrow needs access to your microphone to record voice notes for quick reflections and coaching sessions.";
 				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Lighter Tomorrow uses speech recognition to transcribe your voice notes, helping you capture thoughts quickly and accurately.";
@@ -524,10 +729,11 @@
 				CODE_SIGN_ENTITLEMENTS = Coacher/Coacher.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 6;
 				DEVELOPMENT_TEAM = Q3CS4DPG9Y;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Lighter-Tomorrow-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = Lighter;
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Lighter Tomorrow needs access to your microphone to record voice notes for quick reflections and coaching sessions.";
 				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Lighter Tomorrow uses speech recognition to transcribe your voice notes, helping you capture thoughts quickly and accurately.";
@@ -626,6 +832,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		A989BB8C2EAE54880031A5F7 /* Build configuration list for PBXNativeTarget "CoacherWidget2Extension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A989BB8D2EAE54880031A5F7 /* Debug */,
+				A989BB8E2EAE54880031A5F7 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		A9ACE3A92E63EB0A00BB3ADD /* Build configuration list for PBXProject "Lighter Tomorrow" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

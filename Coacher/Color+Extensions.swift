@@ -19,7 +19,21 @@ extension Color {
     
     // MARK: - App Background Colors (Dynamic)
     static let appBackground = Color(UIColor { traitCollection in
-        traitCollection.userInterfaceStyle == .dark ? UIColor.black : UIColor(red: 0.9, green: 0.95, blue: 1.0, alpha: 1.0)
+        traitCollection.userInterfaceStyle == .dark ? UIColor.systemGray6 : UIColor(red: 0.9, green: 0.95, blue: 1.0, alpha: 1.0)
+    })
+    
+    // MARK: - Widget Background Colors (Dynamic)
+    static let widgetBackground = Color(UIColor { traitCollection in
+        traitCollection.userInterfaceStyle == .dark ? UIColor.systemGray5 : UIColor(red: 0.9, green: 0.95, blue: 1.0, alpha: 1.0)
+    })
+    
+    // MARK: - Widget Text Colors (Dynamic)
+    static let widgetText = Color(UIColor { traitCollection in
+        traitCollection.userInterfaceStyle == .dark ? UIColor.white : UIColor.label
+    })
+    
+    static let widgetSecondaryText = Color(UIColor { traitCollection in
+        traitCollection.userInterfaceStyle == .dark ? UIColor.lightGray : UIColor.secondaryLabel
     })
     
     // MARK: - Card Background Colors (Dynamic)

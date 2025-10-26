@@ -8,6 +8,7 @@
 import SwiftUI
 import SwiftData
 import AVFoundation
+import WidgetKit
 import Speech
 
 struct SuccessCaptureView: View {
@@ -178,6 +179,14 @@ struct SuccessCaptureView: View {
             
             do {
                 try self.context.save()
+                
+                // Update widget data for real-time widget updates
+                let userDefaults = UserDefaults(suiteName: "group.com.coacher.shared") ?? UserDefaults.standard
+                let currentCount = userDefaults.integer(forKey: "successNotesToday")
+                userDefaults.set(currentCount + 1, forKey: "successNotesToday")
+                
+                // Reload widget to show updated success count
+                WidgetCenter.shared.reloadAllTimelines()
                 
                 // Trigger celebration
                 if self.celebrationManager.shouldCelebrate() {

@@ -34,7 +34,7 @@ struct TodayView: View {
                     VStack(spacing: 14) {
                     
             // Morning Focus - Primary in Day Phase
-            if entry.morningFlowCompletedToday && !shouldResetMorningFlow {
+            if hasCompletedMorningToday && !shouldResetMorningFlow {
                 // Show summary card when morning flow is completed
                 MorningSummaryDisplayCard(entry: entry, onRestart: {
                     shouldResetMorningFlow = true
@@ -51,11 +51,6 @@ struct TodayView: View {
                                 .onChange(of: entry.identityStatement) { _, _ in scheduleAutoSave() }
                                 .onChange(of: entry.todaysFocus) { _, _ in scheduleAutoSave() }
                                 .onChange(of: entry.stressResponse) { _, _ in scheduleAutoSave() }
-                                .onChange(of: entry.morningFlowCompletedToday) { _, isCompleted in
-                                    if isCompleted {
-                                        shouldResetMorningFlow = false
-                                    }
-                                }
                         }
             }
                     
@@ -190,6 +185,9 @@ struct TodayView: View {
             context.insert(entry)
             try? context.save()
         }
+        
+        // Reset widget data for new day
+        resetWidgetDataForNewDay()
     }
     
     private func getYesterdayEntry() -> DailyEntry? {
@@ -254,6 +252,18 @@ struct TodayView: View {
             hasCompletedMorningToday = true
         } else {
             hasCompletedMorningToday = false
+        }
+    }
+    
+    private func resetWidgetDataForNewDay() {
+        let userDefaults = UserDefaults(suiteName: "group.com.coacher.shared") ?? UserDefaults.standard
+        let today = Calendar.current.startOfDay(for: Date())
+        let lastResetDate = userDefaults.object(forKey: "widgetDataLastResetDate") as? Date ?? Date.distantPast
+        
+        // Only reset if it's a new day
+        if !Calendar.current.isDate(lastResetDate, inSameDayAs: today) {
+            userDefaults.set(0, forKey: "successNotesToday")
+            userDefaults.set(today, forKey: "widgetDataLastResetDate")
         }
     }
     
