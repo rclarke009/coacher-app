@@ -7,6 +7,7 @@
 
 import SwiftUI
 import AVFoundation
+import AVKit
 
 struct EmotionalTakeoverFlow: View {
     let onComplete: (EmotionalTakeoverNote) -> Void
@@ -17,7 +18,7 @@ struct EmotionalTakeoverFlow: View {
     @State private var bodySensation = ""
     @State private var partNeed = ""
     @State private var nextTimePlan = ""
-    @State private var neutralThings = ["", "", ""]
+    @State private var comfortableThings = ["", "", ""]
     @State private var audioPlayer: AVAudioPlayer?
     
     enum EmotionalStep: Int, CaseIterable {
@@ -46,7 +47,7 @@ struct EmotionalTakeoverFlow: View {
                         currentStep = .pendulate
                     }
                 case .pendulate:
-                    PendulateStep(neutralThings: $neutralThings) {
+                    PendulateStep(comfortableThings: $comfortableThings) {
                         currentStep = .soothePart
                     }
                 case .soothePart:
@@ -134,6 +135,7 @@ struct NoticeBodyStep: View {
     @State private var selectedPrompt = ""
     @State private var customText = ""
     @State private var showingTextCapture = false
+    @Environment(\.colorScheme) private var colorScheme
     
     private let bodyPrompts = [
         "stomach tightness",
@@ -167,7 +169,7 @@ struct NoticeBodyStep: View {
                         RoundedRectangle(cornerRadius: 20)
                             .fill(selectedPrompt == prompt ? Color.blue : Color.gray.opacity(0.2))
                     )
-                    .foregroundColor(selectedPrompt == prompt ? .white : .primary)
+                    .foregroundColor(buttonTextColor(for: prompt))
                     .font(.subheadline)
                 }
             }
@@ -182,6 +184,7 @@ struct NoticeBodyStep: View {
                 Button("Add custom description") {
                     showingTextCapture = true
                 }
+                .foregroundColor(colorScheme == .dark ? .white : .blue)
                 .buttonStyle(.bordered)
                 .frame(maxWidth: .infinity)
             }
@@ -212,13 +215,21 @@ struct NoticeBodyStep: View {
             CustomBodySensationView(bodySensation: $bodySensation)
         }
     }
+    
+    private func buttonTextColor(for prompt: String) -> Color {
+        if selectedPrompt == prompt {
+            return .white
+        } else {
+            return colorScheme == .dark ? .white : .primary
+        }
+    }
 }
 
 struct CompleteStressCycleStep: View {
     let onNext: () -> Void
     
-    @State private var showingAudio = false
-    @State private var audioPlayer: AVAudioPlayer?
+    @State private var showingBreathingGuide = false
+    @Environment(\.colorScheme) private var colorScheme
     
     var body: some View {
         VStack(spacing: 24) {
@@ -231,51 +242,68 @@ struct CompleteStressCycleStep: View {
                 .bold()
                 .multilineTextAlignment(.center)
             
-            Text("Let your body do what it wants safely—sigh, shake, stretch, cry, or press feet down.")
-                .font(.body)
+            Text("Try the Voo breath technique: Find a comfortable position, take a deep breath in, then exhale with a deep 'voo' sound from your belly. Feel the vibration and repeat for a few minutes. If you need a quiet option, follow the same pattern silently. Use either guide to help with timing your breaths")
+                .font(.subheadline)
+                .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
-                .foregroundStyle(.secondary)
+                .lineLimit(nil)
+                .fixedSize(horizontal: false, vertical: true)
                 .padding(.horizontal)
             
-            VStack(spacing: 16) {
-                Button("Play Voo Breath Audio") {
-                    playVooBreath()
+            Text("After breathing, try shaking your hands, tensing-and-releasing your fists or shoulders, or doing some gentle movement to help release any remaining tension.")
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
+                .lineLimit(nil)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.horizontal)
+            
+            // Breathing button (styled like the working version)
+            Button(action: { showingBreathingGuide = true }) {
+                HStack {
+                    Image(systemName: "lungs.fill")
+                        .foregroundStyle(colorScheme == .dark ? .white : .blue)
+                    Text("Click here to do 3 calming breaths")
+                        .font(.body)
+                        .foregroundStyle(.blue)
+                        .multilineTextAlignment(.leading)
+                        .lineLimit(nil)
+                        .fixedSize(horizontal: false, vertical: true)
+                    Spacer()
+                    Image(systemName: "arrow.right.circle.fill")
+                        .foregroundStyle(.blue)
                 }
-                .buttonStyle(.borderedProminent)
-                .tint(.green)
-                
-                Button("Done") {
-                    onNext()
-                }
-                .buttonStyle(.bordered)
             }
+            .buttonStyle(.plain)
+            .padding(.vertical, 8)
+            .padding(.horizontal, 12)
+            .background(
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(Color.blue.opacity(0.1))
+            )
+            .padding(.horizontal)
+            
+            Button("Done") {
+                onNext()
+            }
+            .buttonStyle(.bordered)
+            .foregroundColor(colorScheme == .dark ? .white : .blue)
             .padding(.top)
         }
         .padding()
-        .onAppear {
-            setupAudio()
+        .sheet(isPresented: $showingBreathingGuide) {
+            MiniCoachBreathingView()
         }
     }
     
-    private func setupAudio() {
-        // TODO: Add actual audio file when provided
-        // For now, just show the button but don't play anything
-    }
-    
-    private func playVooBreath() {
-        // TODO: Implement audio playback when file is provided
-        // For now, just continue after a brief delay
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-            onNext()
-        }
-    }
 }
 
 struct PendulateStep: View {
-    @Binding var neutralThings: [String]
+    @Binding var comfortableThings: [String]
     let onNext: () -> Void
     
     @State private var timerCompleted = false
+    @Environment(\.colorScheme) private var colorScheme
     
     var body: some View {
         VStack(spacing: 24) {
@@ -284,7 +312,7 @@ struct PendulateStep: View {
                 .bold()
                 .multilineTextAlignment(.center)
             
-            Text("Feel it for 5-10 seconds, then look around and name 3 neutral things.")
+            Text("Feel it for 5-10 seconds, then look around and name 3 pleasant things.")
                 .font(.body)
                 .multilineTextAlignment(.center)
                 .foregroundStyle(.secondary)
@@ -300,20 +328,30 @@ struct PendulateStep: View {
             
             if timerCompleted {
                 VStack(alignment: .leading, spacing: 16) {
-                    Text("Now look around and name 3 neutral things you see:")
+                    Text("Now look around and name 3 pleasant things you see:")
                         .font(.headline)
                         .padding(.top)
+                        .lineLimit(nil)
+                        .fixedSize(horizontal: false, vertical: true)
                     
                     ForEach(0..<3, id: \.self) { index in
-                        TextField("Thing \(index + 1)", text: $neutralThings[index])
-                            .textFieldStyle(.roundedBorder)
+                        ZStack(alignment: .leading) {
+                            if comfortableThings[index].isEmpty {
+                                Text("Thing \(index + 1)")
+                                    .foregroundColor(colorScheme == .dark ? .white : .secondary)
+                                    .padding(.horizontal, 8)
+                            }
+                            TextField("", text: $comfortableThings[index])
+                                .textFieldStyle(.roundedBorder)
+                                .foregroundColor(colorScheme == .dark ? .white : .primary)
+                        }
                     }
                 }
                 .padding(.horizontal)
                 
                 Button("Continue", action: onNext)
                     .buttonStyle(.borderedProminent)
-                    .disabled(neutralThings.allSatisfy { $0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty })
+                    .disabled(comfortableThings.allSatisfy { $0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty })
                     .padding(.top)
             }
         }
@@ -350,6 +388,8 @@ struct SoothePartStep: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .italic()
+                    .lineLimit(nil)
+                    .fixedSize(horizontal: false, vertical: true)
                 
                 TextField("What did this part need?", text: $partNeed, axis: .vertical)
                     .textFieldStyle(.roundedBorder)
@@ -390,7 +430,7 @@ struct RehearsePlanStep: View {
                 Text("Your plan:")
                     .font(.headline)
                 
-                TextField("What could my adult self try first?", text: $nextTimePlan, axis: .vertical)
+                TextField("Try taking 3 deep breaths first, then...", text: $nextTimePlan, axis: .vertical)
                     .textFieldStyle(.roundedBorder)
                     .lineLimit(4...8)
             }
@@ -408,6 +448,7 @@ struct RehearsePlanStep: View {
 struct CustomBodySensationView: View {
     @Binding var bodySensation: String
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.colorScheme) private var colorScheme
     @State private var textInput = ""
     
     var body: some View {
@@ -419,6 +460,7 @@ struct CustomBodySensationView: View {
                     .multilineTextAlignment(.center)
                 
                 TextEditor(text: $textInput)
+                    .foregroundColor(colorScheme == .dark ? .white : .primary)
                     .padding()
                     .background(
                         RoundedRectangle(cornerRadius: 8)
@@ -433,6 +475,7 @@ struct CustomBodySensationView: View {
                     dismiss()
                 }
                 .buttonStyle(.borderedProminent)
+                .tint(colorScheme == .dark ? .gray : .blue)
                 .disabled(textInput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
             }
             .padding()
@@ -441,6 +484,7 @@ struct CustomBodySensationView: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Cancel") { dismiss() }
+                        .foregroundColor(colorScheme == .dark ? .white : .blue)
                 }
             }
         }
@@ -452,3 +496,5 @@ struct CustomBodySensationView: View {
         print("Completed: \(note)")
     }
 }
+
+

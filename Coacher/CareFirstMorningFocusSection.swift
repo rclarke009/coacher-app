@@ -305,14 +305,14 @@ struct CareFirstMorningFocusSection: View {
                                 Text("Deep Breath In")
                                     .font(.title2)
                                     .fontWeight(.medium)
-                                    .foregroundColor(.primary)
+                                    .foregroundColor(colorScheme == .dark ? .white : .primary)
                                     .transition(.opacity.combined(with: .scale))
                                     .animation(.easeInOut(duration: 0.3), value: showInhaleText)
                             } else if breathingPhase == .exhale {
                                 Text("Voo Sound Out")
                                     .font(.title2)
                                     .fontWeight(.medium)
-                                    .foregroundColor(.primary)
+                                    .foregroundColor(colorScheme == .dark ? .white : .primary)
                                     .transition(.opacity.combined(with: .scale))
                                     .animation(.easeInOut(duration: 0.3), value: breathingPhase)
                             }
@@ -977,7 +977,7 @@ struct CareFirstMorningFocusSection: View {
                                 .foregroundColor(.secondary)
                             Text(entry.whyThisMatters)
                                 .font(.body)
-                                .foregroundColor(.primary)
+                                .foregroundColor(colorScheme == .dark ? .white : .primary)
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
                     }
@@ -1005,7 +1005,7 @@ struct CareFirstMorningFocusSection: View {
                         }
                         Text(identity)
                             .font(.body)
-                            .foregroundColor(.primary)
+                            .foregroundColor(colorScheme == .dark ? .white : .primary)
                             .frame(maxWidth: .infinity, alignment: .leading)
                     }
                     .padding(.vertical, 12)
@@ -1032,7 +1032,7 @@ struct CareFirstMorningFocusSection: View {
                         }
                         Text(entry.todaysFocus)
                             .font(.body)
-                            .foregroundColor(.primary)
+                            .foregroundColor(colorScheme == .dark ? .white : .primary)
                             .frame(maxWidth: .infinity, alignment: .leading)
                     }
                     .padding(.vertical, 12)
@@ -1059,7 +1059,7 @@ struct CareFirstMorningFocusSection: View {
                         }
                         Text(entry.stressResponse)
                             .font(.body)
-                            .foregroundColor(.primary)
+                            .foregroundColor(colorScheme == .dark ? .white : .primary)
                             .frame(maxWidth: .infinity, alignment: .leading)
                     }
                     .padding(.vertical, 12)
@@ -1144,7 +1144,7 @@ struct CareFirstMorningFocusSection: View {
                                 .foregroundColor(.secondary)
                             Text(entry.whyThisMatters)
                                 .font(.body)
-                                .foregroundColor(.primary)
+                                .foregroundColor(colorScheme == .dark ? .white : .primary)
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
                     }
@@ -1172,7 +1172,7 @@ struct CareFirstMorningFocusSection: View {
                         }
                         Text(identity)
                             .font(.body)
-                            .foregroundColor(.primary)
+                            .foregroundColor(colorScheme == .dark ? .white : .primary)
                             .frame(maxWidth: .infinity, alignment: .leading)
                     }
                     .padding(.vertical, 12)
@@ -1199,7 +1199,7 @@ struct CareFirstMorningFocusSection: View {
                         }
                         Text(entry.todaysFocus)
                             .font(.body)
-                            .foregroundColor(.primary)
+                            .foregroundColor(colorScheme == .dark ? .white : .primary)
                             .frame(maxWidth: .infinity, alignment: .leading)
                     }
                     .padding(.vertical, 12)
@@ -1226,7 +1226,7 @@ struct CareFirstMorningFocusSection: View {
                         }
                         Text(entry.stressResponse)
                             .font(.body)
-                            .foregroundColor(.primary)
+                            .foregroundColor(colorScheme == .dark ? .white : .primary)
                             .frame(maxWidth: .infinity, alignment: .leading)
                     }
                     .padding(.vertical, 12)

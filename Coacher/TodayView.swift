@@ -112,6 +112,10 @@ struct TodayView: View {
                 .padding(.horizontal)
                 .padding(.top, 2)
             }
+            .background(
+                Color.appBackground
+                    .ignoresSafeArea(.all)
+            )
             }
             //.navigationTitle("Good \(timeManager.greeting), \(UserDefaults.standard.string(forKey: "userName") ?? "friend")")
             .navigationTitle("Good \(timeManager.greeting)")
@@ -131,7 +135,7 @@ struct TodayView: View {
             .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
                 // Refresh data when app becomes active to show current day's data
                 loadOrCreateToday()
-                setDefaultExpansionStates()
+                // Don't reset expansion states - only reset on actual app launch
             }
 
             .sheet(isPresented: $showingNeedHelp) {
@@ -320,7 +324,7 @@ struct MorningSummaryDisplayCard: View {
                                     .foregroundColor(.secondary)
                                 Text(entry.whyThisMatters)
                                     .font(.body)
-                                    .foregroundColor(.primary)
+                                    .foregroundColor(colorScheme == .dark ? .white : .primary)
                             }
                             .frame(maxWidth: .infinity, alignment: .leading)
                         }
@@ -348,7 +352,7 @@ struct MorningSummaryDisplayCard: View {
                             }
                             Text(identity)
                                 .font(.body)
-                                .foregroundColor(.primary)
+                                .foregroundColor(colorScheme == .dark ? .white : .primary)
                                 .frame(maxWidth: .infinity, alignment: .leading)
                         }
                         .padding(.vertical, 12)
@@ -375,7 +379,7 @@ struct MorningSummaryDisplayCard: View {
                             }
                             Text(entry.todaysFocus)
                                 .font(.body)
-                                .foregroundColor(.primary)
+                                .foregroundColor(colorScheme == .dark ? .white : .primary)
                                 .frame(maxWidth: .infinity, alignment: .leading)
                         }
                         .padding(.vertical, 12)
@@ -402,7 +406,7 @@ struct MorningSummaryDisplayCard: View {
                             }
                             Text(entry.stressResponse)
                                 .font(.body)
-                                .foregroundColor(.primary)
+                                .foregroundColor(colorScheme == .dark ? .white : .primary)
                                 .frame(maxWidth: .infinity, alignment: .leading)
                         }
                         .padding(.vertical, 12)

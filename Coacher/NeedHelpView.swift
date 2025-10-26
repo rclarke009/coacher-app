@@ -28,10 +28,12 @@ struct NeedHelpView: View {
                     .font(.largeTitle)
                     .bold()
                 
-                Text("What's happening right now? Choose the category that best describes your situation.")
+                Text("What's happening right now?\nChoose the category that best describes your situation.")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
+                    .lineLimit(nil)
+                    .fixedSize(horizontal: false, vertical: true)
                     .padding(.horizontal)
             }
             .padding(.top)

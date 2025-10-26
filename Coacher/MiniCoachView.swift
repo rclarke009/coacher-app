@@ -37,6 +37,10 @@ struct MiniCoachView: View {
         case introduction = 0, action = 1, capture = 2, save = 3
     }
     
+    private var buttonTextColor: Color {
+        colorScheme == .dark ? .white : .blue
+    }
+    
     var body: some View {
         NavigationView {
             VStack(spacing: 20) {
@@ -385,6 +389,11 @@ struct CaptureStep: View {
     let onNext: () -> Void
     
     @State private var showingTextCapture = false
+    @Environment(\.colorScheme) private var colorScheme
+    
+    private var buttonTextColor: Color {
+        colorScheme == .dark ? .white : .blue
+    }
     
     var body: some View {
         VStack(spacing: 24) {
@@ -482,6 +491,7 @@ struct CaptureStep: View {
                         showingTextEditor = true
                     }
                     .buttonStyle(.bordered)
+                    .foregroundColor(buttonTextColor)
                     
                     Button("Continue", action: onNext)
                         .buttonStyle(.borderedProminent)
@@ -894,6 +904,7 @@ struct MiniCoachBreathingView: View {
                     Button("Done") {
                         dismiss()
                     }
+                    .foregroundColor(colorScheme == .dark ? .white : .blue)
                 }
             }
         }

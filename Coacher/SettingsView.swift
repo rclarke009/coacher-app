@@ -24,6 +24,7 @@ struct SettingsView: View {
     @AppStorage("morningFocusReminder") private var morningFocusReminder = true
     @State private var nightPrepTime: Date = Date()
     @State private var morningFocusTime: Date = Date()
+    @State private var showAdvancedAISettings = false
     
     var body: some View {
         NavigationView {
@@ -148,44 +149,65 @@ struct SettingsView: View {
                     .accessibilityHint("Restart the app introduction and setup process")
                 }
                 
-                Section("AI Configuration") {
-                    HStack {
-                        Text("OpenAI API Key")
-                        Spacer()
-                        TextField("sk-...", text: Binding(
-                            get: { KeychainManager.shared.getOpenAIKey() ?? "" },
-                            set: { 
-                                if $0.isEmpty {
-                                    _ = KeychainManager.shared.deleteOpenAIKey()
-                                } else {
-                                    _ = KeychainManager.shared.storeOpenAIKey($0)
+                Section {
+                    Button(action: {
+                        showAdvancedAISettings.toggle()
+                    }) {
+                        HStack {
+                            Text("Advanced AI Settings")
+                                .foregroundColor(colorScheme == .dark ? .white : .primary)
+                            Spacer()
+                            Image(systemName: showAdvancedAISettings ? "chevron.down" : "chevron.right")
+                                .foregroundColor(.secondary)
+                                .font(.caption)
+                        }
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                    
+                    if showAdvancedAISettings {
+                        VStack(alignment: .leading, spacing: 12) {
+                            HStack {
+                                Text("OpenAI API Key")
+                                Spacer()
+                                TextField("sk-...", text: Binding(
+                                    get: { KeychainManager.shared.getOpenAIKey() ?? "" },
+                                    set: { 
+                                        if $0.isEmpty {
+                                            _ = KeychainManager.shared.deleteOpenAIKey()
+                                        } else {
+                                            _ = KeychainManager.shared.storeOpenAIKey($0)
+                                        }
+                                    }
+                                ))
+                                .multilineTextAlignment(.trailing)
+                                .foregroundColor(colorScheme == .dark ? .white : .secondary)
+                                .background(colorScheme == .dark ? Color.darkTextInputBackground : Color.clear)
+                                .accessibilityLabel("OpenAI API Key")
+                                .accessibilityHint("Enter your OpenAI API key for enhanced AI features")
+                            }
+                            
+                            if useCloudAI {
+                                HStack {
+                                    Image(systemName: "checkmark.circle.fill")
+                                        .foregroundColor(.green)
+                                    Text("Online AI enabled")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                }
+                            } else {
+                                HStack {
+                                    Image(systemName: "info.circle")
+                                        .foregroundColor(.blue)
+                                    Text("Add API key to enable online AI features")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
                                 }
                             }
-                        ))
-                        .multilineTextAlignment(.trailing)
-                        .foregroundColor(colorScheme == .dark ? .white : .secondary)
-                        .background(colorScheme == .dark ? Color.darkTextInputBackground : Color.clear)
-                        .accessibilityLabel("OpenAI API Key")
-                        .accessibilityHint("Enter your OpenAI API key for enhanced AI features")
-                    }
-                    
-                    if useCloudAI {
-                        HStack {
-                            Image(systemName: "checkmark.circle.fill")
-                                .foregroundColor(.green)
-                            Text("Online AI enabled")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
                         }
-                    } else {
-                        HStack {
-                            Image(systemName: "info.circle")
-                                .foregroundColor(.blue)
-                            Text("Add API key to enable online AI features")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                        }
+                        .padding(.vertical, 4)
                     }
+                } header: {
+                    Text("AI Configuration")
                 }
                 
                 Section("Gamification") {

@@ -194,7 +194,7 @@ struct CareFirstEndOfDaySection: View {
                     Text("Did your care action help you today?")
                         .font(.headline)
                         .fontWeight(.bold)
-                        .foregroundColor(.primary)
+                        .foregroundColor(colorScheme == .dark ? .white : .primary)
                     
                     // Display today's care action plan
                     if !entry.todaysFocus.isEmpty || !entry.stressResponse.isEmpty {
@@ -206,14 +206,14 @@ struct CareFirstEndOfDaySection: View {
                             if !entry.todaysFocus.isEmpty {
                                 Text("\"\(entry.todaysFocus)\"")
                                     .font(.subheadline)
-                                    .foregroundColor(.primary)
+                                    .foregroundColor(colorScheme == .dark ? .white : .primary)
                                     .italic()
                             }
                             
                             if !entry.stressResponse.isEmpty {
                                 Text("\"\(entry.stressResponse)\"")
                                     .font(.subheadline)
-                                    .foregroundColor(.primary)
+                                    .foregroundColor(colorScheme == .dark ? .white : .primary)
                                     .italic()
                             }
                         }
@@ -416,7 +416,7 @@ struct CareFirstEndOfDaySection: View {
                             
                             Text("Today's plan: \"\(entry.todaysFocus)\"")
                                 .font(.caption)
-                                .foregroundColor(.primary)
+                                .foregroundColor(colorScheme == .dark ? .white : .primary)
                                 .lineLimit(2)
                             
                             Spacer()
@@ -430,7 +430,7 @@ struct CareFirstEndOfDaySection: View {
                                 
                                 Text("If stressed: \"\(entry.stressResponse)\"")
                                     .font(.caption)
-                                    .foregroundColor(.primary)
+                                    .foregroundColor(colorScheme == .dark ? .white : .primary)
                                     .lineLimit(2)
                                 
                                 Spacer()
@@ -622,7 +622,16 @@ struct CareFirstEndOfDaySection: View {
                     // Custom item
                     HStack(spacing: 12) {
                         Button(action: {
-                            customItemChecked.toggle()
+                            // Only allow checking if there's text, always allow unchecking
+                            if customItemChecked {
+                                // Unchecking - always allowed
+                                customItemChecked = false
+                            } else {
+                                // Checking - only if there's text
+                                if !customItem.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                                    customItemChecked = true
+                                }
+                            }
                         }) {
                             Image(systemName: customItemChecked ? "checkmark.square.fill" : "square")
                                 .foregroundColor(customItemChecked ? .helpButtonBlue : .secondary)

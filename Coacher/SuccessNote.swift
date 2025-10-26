@@ -47,7 +47,7 @@ enum SuccessType: String, Codable, CaseIterable, Identifiable {
     
     var description: String {
         switch self {
-        case .choice: return "made a healthier choice"
+        case .choice: return "Made a healthier choice"
         case .prep: return "Prepared something that set you up for success"
         case .habit: return "Stuck to a good habit or routine"
         case .other: return "Any other win or positive moment"

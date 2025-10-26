@@ -4,6 +4,7 @@ struct MilestoneCelebrationOverlay: View {
     @Binding var isPresented: Bool
     let streakCount: Int
     let message: String
+    @Environment(\.colorScheme) private var colorScheme
     
     @State private var cardScale: CGFloat = 0.8
     @State private var cardOpacity: Double = 0.0
@@ -59,11 +60,16 @@ struct MilestoneCelebrationOverlay: View {
                         
                         // Milestone message
                         VStack(spacing: 12) {
-                            Text("🎉 Milestone Achieved! 🎉")
+                            VStack(spacing: 8) {
+                            Text("Milestone Achieved!")
                                 .font(.title2)
                                 .fontWeight(.bold)
-                                .foregroundColor(.primary)
-                                .multilineTextAlignment(.center)
+                                .foregroundColor(colorScheme == .dark ? .white : .primary)
+                                    .multilineTextAlignment(.center)
+                                
+                                Text("🎉  🎉  🎉")
+                                    .font(.title3)
+                            }
                             
                             Text(message)
                                 .font(.body)

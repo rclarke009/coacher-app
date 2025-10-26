@@ -293,6 +293,7 @@ struct SuccessTextCaptureView: View {
                         dismiss()
                     }
                     .disabled(text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                    .foregroundColor(colorScheme == .dark ? .white : .blue)
                 }
             }
             .scrollDismissesKeyboard(.immediately)
@@ -372,12 +373,14 @@ struct SuccessAudioCaptureView: View {
                             showingTextEditor = true
                         }
                         .buttonStyle(.bordered)
+                        .tint(colorScheme == .dark ? .white : .blue)
                         
                         Button("Save Success") {
                             onSave(savedAudioURL, true, transcribedText)
                             dismiss()
                         }
                         .buttonStyle(.borderedProminent)
+                        .tint(colorScheme == .dark ? .white : .blue)
                     }
                 }
                 
