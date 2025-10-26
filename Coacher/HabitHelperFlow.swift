@@ -101,6 +101,7 @@ struct IdentifyPatternStep: View {
     let onNext: () -> Void
     
     @State private var selectedPattern = ""
+    @Environment(\.colorScheme) private var colorScheme
     
     private let commonPatterns = [
         "Just finished work",
@@ -145,7 +146,7 @@ struct IdentifyPatternStep: View {
                             RoundedRectangle(cornerRadius: 20)
                                 .fill(selectedPattern == patternOption ? Color.blue : Color.gray.opacity(0.2))
                         )
-                        .foregroundColor(selectedPattern == patternOption ? .white : .primary)
+                        .foregroundColor(selectedPattern == patternOption ? .white : (colorScheme == .dark ? .white : .primary))
                         .font(.subheadline)
                     }
                 }
@@ -156,6 +157,7 @@ struct IdentifyPatternStep: View {
                     showingCustomInput = true
                 }
                 .buttonStyle(.bordered)
+                .foregroundColor(colorScheme == .dark ? .white : .primary)
                 .frame(maxWidth: .infinity)
                 
                 // Display selected pattern
@@ -312,7 +314,7 @@ struct TryExperimentStep: View {
                 .bold()
                 .multilineTextAlignment(.center)
             
-            Text("See if the craving fades. Awareness weakens the loop.")
+            Text("See if the craving fades. Awareness weakens the loop. Choose an activity like those below.")
                 .font(.body)
                 .multilineTextAlignment(.center)
                 .foregroundStyle(.secondary)
@@ -438,6 +440,9 @@ struct RewireStep: View {
     @Binding var rewire: String
     let onNext: () -> Void
     
+    @Environment(\.colorScheme) private var colorScheme
+    @FocusState private var isTextFieldFocused: Bool
+    
     var body: some View {
         VStack(spacing: 24) {
             Image(systemName: "arrow.triangle.2.circlepath")
@@ -449,19 +454,39 @@ struct RewireStep: View {
                 .bold()
                 .multilineTextAlignment(.center)
             
-            Text("Next time this cue shows up, what would feel rewarding instead of food?")
+            Text("Next time this cue shows up, what would feel rewarding instead?")
                 .font(.body)
                 .multilineTextAlignment(.center)
                 .foregroundStyle(.secondary)
                 .padding(.horizontal)
             
             VStack(alignment: .leading, spacing: 8) {
-                Text("Your new reward:")
+                Text("What would feel rewarding instead of food?")
                     .font(.headline)
+                    .foregroundColor(colorScheme == .dark ? .white : .primary)
                 
-                TextField("What would feel rewarding instead of food?", text: $rewire, axis: .vertical)
-                    .textFieldStyle(.roundedBorder)
-                    .lineLimit(3...6)
+                ZStack(alignment: .topLeading) {
+                    TextEditor(text: $rewire)
+                        .foregroundColor(colorScheme == .dark ? .white : .primary)
+                        .frame(minHeight: 80)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                        )
+                        .background(Color(.systemBackground))
+                        .focused($isTextFieldFocused)
+                        .onTapGesture {
+                            isTextFieldFocused = true
+                        }
+                    
+                    if rewire.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && !isTextFieldFocused {
+                        Text("Try taking a walk, calling a friend, or doing 5 minutes of deep breathing...")
+                            .foregroundColor(colorScheme == .dark ? .white : .secondary)
+                            .padding(.horizontal, 4)
+                            .padding(.vertical, 8)
+                            .allowsHitTesting(false)
+                    }
+                }
             }
             .padding(.horizontal)
             

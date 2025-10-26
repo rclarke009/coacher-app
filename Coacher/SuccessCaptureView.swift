@@ -379,8 +379,12 @@ struct SuccessAudioCaptureView: View {
                             onSave(savedAudioURL, true, transcribedText)
                             dismiss()
                         }
-                        .buttonStyle(.borderedProminent)
-                        .tint(colorScheme == .dark ? .white : .blue)
+                        .padding()
+                        .background(
+                            RoundedRectangle(cornerRadius: 8)
+                                .fill(colorScheme == .dark ? Color.blue : Color.blue)
+                        )
+                        .foregroundColor(.white)
                     }
                 }
                 

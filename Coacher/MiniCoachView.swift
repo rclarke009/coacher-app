@@ -748,12 +748,14 @@ struct TextEditorView: View {
                     Button("Reset") {
                         text = originalText
                     }
+                    .foregroundColor(colorScheme == .dark ? .white : .blue)
                 }
                 
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") {
                         dismiss()
                     }
+                    .foregroundColor(colorScheme == .dark ? .white : .blue)
                 }
             }
         }
